@@ -83,7 +83,7 @@ Tminus1/
 │   │   └── index.ts
 │   │
 │   ├── constants/
-│   │   ├── colors.ts
+│   │   ├── colors.ts             #Done!!!!yes!!!
 │   │   ├── fonts.ts
 │   │   └── routes.ts
 │   │
