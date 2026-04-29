@@ -2,7 +2,7 @@ import Onboarding1 from "@/assets/icons/onboarding/onboarding1.svg";
 import Onboarding2 from "@/assets/icons/onboarding/onboarding2.svg";
 import Onboarding3 from "@/assets/icons/onboarding/onboarding3.svg";
 
-interface Slide {
+export interface Slide {
   id: number;
   title: string;
   description: string;
