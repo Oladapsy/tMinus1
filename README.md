@@ -84,7 +84,7 @@ Tminus1/
 │   │
 │   ├── constants/
 │   │   ├── colors.ts             #Done!!!!yes!!!
-│   │   ├── fonts.ts
+│   │   ├── fonts.ts.              #Done!!!!yes!!!
 │   │   └── routes.ts
 │   │
 │   └── utils/
@@ -92,9 +92,9 @@ Tminus1/
 │       └── storage.ts            # AsyncStorage helpers
 │
 ├── assets/
-│   ├── images/
-│   ├── icons/
-│   └── fonts/
+│   ├── images/               #Done!!!!yes!!!
+│   ├── icons/                #Done!!!!yes!!!
+│   └── fonts/                #Done!!!!yes!!!
 │
 ├── app.json
 ├── babel.config.js
