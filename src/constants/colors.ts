@@ -9,4 +9,5 @@ export const Colors = {
   mediumGray: "#C1C7CD",
   yellow: "#D5BB5E",
   gray: "#B4B9C7",
+  dark: "#252E35",
 };
