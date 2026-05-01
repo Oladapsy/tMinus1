@@ -12,6 +12,8 @@ import { Colors } from "@/src/constants/colors";
 import Title from "@/src/components/common/Title";
 import Paragraph from "@/src/components/common/Paragraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
+// linear gradient
+import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 
@@ -68,6 +70,14 @@ export default function OnboardingScreen() {
         source={require("@/assets/images/onboarding/OnboardingBg.png")}
         resizeMode="cover"
         style={StyleSheet.absoluteFillObject}
+      />
+
+      {/* Linear gradient at center */}
+      <LinearGradient
+        colors={["rgba(27,35,42,0)", "rgba(27,35,42,1)"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={styles.centerGradient}
       />
 
       {/* CONTENT */}
@@ -149,5 +159,13 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     backgroundColor: Colors.secondary,
+  },
+  centerGradient: {
+    position: "absolute",
+    top: "40%", // adjust to move the gradient up/down
+    left: 0,
+    right: 0,
+    height: 144, // exact height from your SVG
+    zIndex: 10,
   },
 });
