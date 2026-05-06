@@ -37,6 +37,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   text: {
-    fontFamily: FontFamily.medium,
+    fontFamily: FontFamily.regular,
   },
 });

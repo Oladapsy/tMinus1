@@ -11,7 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export default function SuccessScreen() {
   const onSubmit = () => {
-    router.push("/");
+    router.push("/(tabs)/home");
   };
   return (
     <MySafeAreaView style={styles.container}>

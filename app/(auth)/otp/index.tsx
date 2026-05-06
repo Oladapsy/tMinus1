@@ -8,8 +8,11 @@ import Title from "@/src/components/common/Title";
 import Paragraph from "@/src/components/common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import OTPInput from "@/src/components/auth/OTPInput";
+import ResendTimer from "@/src/components/auth/ResendTimer";
 
 export default function OtpScreen() {
+  const phoneNumber = "+1 234 567 8900"; // This would come from route params later
   const onSubmit = () => {
     router.push("/(auth)/success");
   };
@@ -36,13 +39,35 @@ export default function OtpScreen() {
         />
       </View>
 
+      {/* The phone number for route parameter */}
+      <View>
+        <Paragraph
+          text={phoneNumber}
+          textAlign="left"
+          size={14}
+          color={Colors.green}
+        />
+      </View>
 
-      <PrimaryButton
-        text="Continue"
-        onPress={onSubmit}
-        Bgcolor={Colors.green}
-        textColor={Colors.darkText}
-      />
+      <View style={styles.inputWrapper}>
+        <OTPInput
+          length={4}
+          onComplete={(code) => console.log("OTP entered:", code)}
+        />
+      </View>
+
+      {/* Countdown + resend */}
+
+      <ResendTimer seconds={30} onResend={() => console.log("Resend tapped")} />
+
+      <View style={styles.buttonWrapper}>
+        <PrimaryButton
+          text="Continue"
+          onPress={onSubmit}
+          Bgcolor={Colors.green}
+          textColor={Colors.darkText}
+        />
+      </View>
     </MySafeAreaView>
   );
 }
@@ -61,7 +86,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   inputWrapper: {
-    marginTop: 47,
+    alignItems: "center",
+    justifyContent: "center",
   },
   inputHeader: {
     marginBottom: 12,
@@ -75,5 +101,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 56,
     height: 54,
+  },
+  buttonWrapper: {
+    marginTop: 55,
   },
 });

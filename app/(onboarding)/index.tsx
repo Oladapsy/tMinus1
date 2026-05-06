@@ -14,6 +14,7 @@ import Paragraph from "@/src/components/common/Paragraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 // linear gradient
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -39,6 +40,7 @@ export default function OnboardingScreen() {
     } else {
       // final action
       console.log("Go to auth");
+      router.push("/(auth)/signin");
     }
   };
 
@@ -104,7 +106,7 @@ export default function OnboardingScreen() {
       </View>
 
       <View style={styles.nextBtn}>
-        <PrimaryButton onPress={handleNext} text={"Next"} />
+        <PrimaryButton onPress={handleNext} text={"Next"} alignText="center"/>
       </View>
     </MySafeAreaView>
   );
@@ -139,9 +141,7 @@ const styles = StyleSheet.create({
   nextBtn: {
     position: "absolute",
     bottom: 100,
-    left: 20,
-    right: 20,
-    alignItems: "center",
+    alignSelf: "center",
     width: 180,
   },
   //   paginated dot
