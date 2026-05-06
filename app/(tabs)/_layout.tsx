@@ -5,15 +5,90 @@ import MarketsIcon from "@/assets/icons/tabs/market.svg";
 import TradesIcon from "@/assets/icons/tabs/trades.svg";
 import ActivityIcon from "@/assets/icons/tabs/activity.svg";
 import WalletsIcon from "@/assets/icons/tabs/wallet.svg";
+import { Colors } from "@/src/constants/colors";
+import { FontFamily } from "@/src/constants/fonts";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
-      <Tabs.Screen name="home" options={{ title: "Home", tabBarIcon: () => <HomeIcon /> }} />
-      <Tabs.Screen name="markets" options={{ title: "Markets", tabBarIcon: () => <MarketsIcon /> }} />
-      <Tabs.Screen name="trades" options={{ title: "Trades", tabBarIcon: () => <TradesIcon /> }} />
-      <Tabs.Screen name="activity" options={{ title: "Activity", tabBarIcon: () => <ActivityIcon /> }} />
-      <Tabs.Screen name="wallets" options={{ title: "Wallets", tabBarIcon: () => <WalletsIcon /> }} />
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: Colors.mediumGray,
+        tabBarInactiveTintColor: Colors.secondary,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontFamily: FontFamily.regular,
+          fontWeight: 400,
+          marginTop: 0,
+        },
+        tabBarStyle: {
+          height: 76,
+          backgroundColor: Colors.primary,
+          paddingTop: 10,
+          marginHorizontal: 24,
+          borderRadius: 20,
+          marginBottom: 24,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="home"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ focused }) => (
+            <HomeIcon color={focused ? Colors.green : Colors.secondary} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="markets"
+        options={{
+          title: "Markets",
+          tabBarIcon: ({ focused }) => (
+            <MarketsIcon
+              width={24}
+              height={24}
+              color={focused ? Colors.green : Colors.secondary}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="trades"
+        options={{
+          title: "Trades",
+          tabBarIcon: ({ focused }) => (
+            <TradesIcon
+              width={24}
+              height={24}
+              color={focused ? Colors.green : Colors.secondary}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="activity"
+        options={{
+          title: "Activity",
+          tabBarIcon: ({ focused }) => (
+            <ActivityIcon
+              width={24}
+              height={24}
+              color={focused ? Colors.green : Colors.secondary}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="wallets"
+        options={{
+          title: "Wallets",
+          tabBarIcon: ({ focused }) => (
+            <WalletsIcon color={focused ? Colors.green : Colors.secondary} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
