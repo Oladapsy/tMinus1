@@ -10,4 +10,5 @@ export const Colors = {
   yellow: "#D5BB5E",
   gray: "#B4B9C7",
   dark: "#252E35",
+  tabDark: "#161C22",
 };

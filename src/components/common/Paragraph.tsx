@@ -7,24 +7,27 @@ interface ParagraphProps {
   text: string;
   color?: string;
   size?: number;
+  textAlign?: "left" | "center" | "right";
 }
 
 export default function Paragraph({
   text,
   color = Colors.secondary,
   size = 16,
+  textAlign = "center",
 }: ParagraphProps) {
   return (
     <View style={styles.container}>
-      <Text style={[styles.text, { color, fontSize: size }]}>{text}</Text>
+      <Text style={[styles.text, { color, fontSize: size, textAlign }]}>{text}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+
+  },
   text: {
-    textAlign: "center",
     fontFamily: FontFamily.medium,
     lineHeight: 24,
   },

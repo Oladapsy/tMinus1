@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     alignItems: "center",
+    width: 180,
   },
   //   paginated dot
   dotsContainer: {

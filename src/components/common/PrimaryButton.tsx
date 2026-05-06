@@ -9,6 +9,7 @@ interface PrimaryButtonProps {
   onPress?: () => void;
   Bgcolor?: string;
   fontSize?: number;
+  alignText?: "left" | "center" | "right";
 }
 export default function PrimaryButton({
   text,
@@ -16,10 +17,11 @@ export default function PrimaryButton({
   onPress,
   Bgcolor = Colors.green,
   fontSize = 18,
+  alignText,
 }: PrimaryButtonProps) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.button, { backgroundColor: Bgcolor }]}>
-      <Text style={[styles.text, { color: textColor, fontSize }]}>
+      <Text style={[styles.text, { color: textColor, fontSize, textAlign: alignText }]}>
         {text}
       </Text>
     </TouchableOpacity>
@@ -30,7 +32,7 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 16,
     height: 54,
-    width: 180,
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
   },

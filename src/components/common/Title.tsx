@@ -6,12 +6,15 @@ interface TitleProps {
   text: string;
   color?: string;
   size?: number;
+  fontFamily?: string;
+  textAlign?: "left" | "center" | "right";
+  lineHeight?: number;
 }
 
-export default function Title({ text, color="white", size=24 }: TitleProps) {
+export default function Title({ text, color="white", size=24, fontFamily=FontFamily.medium, textAlign, lineHeight }: TitleProps) {
   return (
     <View style={styles.container}>
-      <Text style={[styles.text, { color, fontSize: size }]}>{text}</Text>
+      <Text style={[styles.text, { color, fontSize: size, fontFamily, textAlign, lineHeight }]}>{text}</Text>
     </View>
   );
 }
@@ -19,6 +22,6 @@ export default function Title({ text, color="white", size=24 }: TitleProps) {
 const styles = StyleSheet.create({
   container: {},
   text: {
-    fontFamily: FontFamily.medium,
+    
   },
 });
