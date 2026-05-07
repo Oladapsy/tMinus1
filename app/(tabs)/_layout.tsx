@@ -24,11 +24,16 @@ export default function TabLayout() {
         },
         tabBarStyle: {
           height: 76,
-          backgroundColor: Colors.primary,
+          backgroundColor: Colors.primary, // tab bar itself
           paddingTop: 10,
           marginHorizontal: 24,
           borderRadius: 20,
           marginBottom: 24,
+          position: "absolute",
+          // bottom: 0,
+          // left: 0,
+          // right: 0,
+          // borderTopWidth: 0,
         },
       }}
     >
