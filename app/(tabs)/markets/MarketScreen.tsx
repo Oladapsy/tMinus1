@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import React from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
@@ -10,6 +10,9 @@ import { router } from "expo-router";
 import ProfileHeader from "@/src/components/market/MarketHeader";
 import Avatar from "@/assets/images/market/avatar.png";
 import { LinearGradient } from "expo-linear-gradient";
+import CommonActions from "@/src/components/market/CommonActions";
+import TradeActions from "@/src/components/market/TradeActions";
+import FinanceActions from "@/src/components/market/FinanceActions";
 
 export default function MarketScreen() {
   return (
@@ -53,9 +56,25 @@ export default function MarketScreen() {
       />
 
       {/* Remaining content  */}
-      <View>
-        
-      </View>
+      <ScrollView
+        style={Style.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={Style.scrollContent}
+      >
+        <View>
+          <View style={Style.actions}>
+            <CommonActions />
+          </View>
+
+          <View style={Style.actions2}>
+            <TradeActions />
+          </View>
+
+          <View style={Style.actions2}>
+            <FinanceActions />
+          </View>
+        </View>
+      </ScrollView>
     </MySafeAreaView>
   );
 }
@@ -84,5 +103,17 @@ const Style = StyleSheet.create({
     right: 0,
     height: 175,
     zIndex: -1,
+  },
+  actions: {
+    marginTop: 50,
+  },
+  actions2: {
+    marginTop: 30,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100, // space for floating tab bar
   },
 });

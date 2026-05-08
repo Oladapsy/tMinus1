@@ -42,6 +42,7 @@ export default function IconGrid({
   }, []);
 
   // needed to know when we get to the last row
+  // 
   const totalRows = rows.length;
 
   return (
@@ -54,7 +55,7 @@ export default function IconGrid({
             showTitleDivider && styles.titleWithDivider,
           ]}
         >
-          <Paragraph text={title} color={Colors.mediumGray} size={18} />
+          <Paragraph text={title} color={Colors.mediumGray} size={18} textAlign="left" />
         </View>
       )}
 
@@ -131,11 +132,11 @@ const styles = StyleSheet.create({
   wrapper: {},
   titleWrapper: {
     paddingBottom: 12,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   titleWithDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "white",
+    borderBottomColor: "#FFFFFF10",
   },
   row: {
     flexDirection: "row",

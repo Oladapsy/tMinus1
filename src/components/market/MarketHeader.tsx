@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 43,
     height: 43,
-    borderRadius: 28,
+    borderRadius: 100,
   },
   infoWrapper: {
     flex: 1,
