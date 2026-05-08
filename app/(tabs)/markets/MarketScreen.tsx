@@ -53,7 +53,9 @@ export default function MarketScreen() {
       />
 
       {/* Remaining content  */}
-      <View></View>
+      <View>
+        
+      </View>
     </MySafeAreaView>
   );
 }
