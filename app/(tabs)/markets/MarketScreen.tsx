@@ -7,11 +7,21 @@ import { FontFamily } from "@/src/constants/fonts";
 import Back from "@/assets/icons/main/backward.svg";
 import More from "@/assets/icons/main/More.svg";
 import { router } from "expo-router";
+import ProfileHeader from "@/src/components/market/MarketHeader";
+import Avatar from "@/assets/images/market/avatar.png";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function MarketScreen() {
   return (
     <MySafeAreaView style={Style.container}>
       {/* Head -> Icon and text */}
+      <LinearGradient
+        colors={["#1B232A00", "rgba(94, 213, 168, 0.1)"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={Style.gradient}
+      />
+
       <View style={Style.headWrapper}>
         <IconAndText
           icon={<Back color={Colors.secondary} />}
@@ -33,7 +43,17 @@ export default function MarketScreen() {
       </View>
 
       {/* profile copy and rest */}
-      
+
+      <ProfileHeader
+        avatar={Avatar}
+        username="User 1234"
+        userId="1234567890"
+        onCopy={() => console.log("Copied")}
+        onEdit={() => console.log("Edit Profile")}
+      />
+
+      {/* Remaining content  */}
+      <View></View>
     </MySafeAreaView>
   );
 }
@@ -53,5 +73,14 @@ const Style = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontFamily: FontFamily.bold,
+  },
+  //gradient
+  gradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 175,
+    zIndex: -1,
   },
 });

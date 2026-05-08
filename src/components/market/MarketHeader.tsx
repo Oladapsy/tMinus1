@@ -3,6 +3,8 @@ import React from "react";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import Copy from "@/assets/icons/home/copy.svg";
+import Title from "../common/Title";
+import Paragraph from "../common/Paragraph";
 
 interface ProfileHeaderProps {
   avatar: any; // image source
@@ -26,12 +28,12 @@ export default function ProfileHeader({
 
       {/* Username + ID */}
       <View style={styles.infoWrapper}>
-        <Text style={styles.username}>{username}</Text>
+        <Title text={username} size={18} fontFamily={FontFamily.bold} />
 
         <View style={styles.idRow}>
-          <Text style={styles.userId}>ID: {userId}</Text>
+          <Paragraph text={`ID: ${userId}`} size={14}/>
           <TouchableOpacity onPress={onCopy}>
-            <Copy width={16} height={16} color={Colors.secondary} />
+            <Copy width={9} height={11} color={Colors.secondary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -48,22 +50,17 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 20,
   },
   avatar: {
-    width: 56,
-    height: 56,
+    width: 43,
+    height: 43,
     borderRadius: 28,
   },
   infoWrapper: {
     flex: 1,
-    marginLeft: 12,
-  },
-  username: {
-    fontSize: 18,
-    fontFamily: FontFamily.bold,
-    color: 'white',
+    marginLeft: 11,
   },
   idRow: {
     flexDirection: "row",
@@ -71,20 +68,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
     gap: 6,
   },
-  userId: {
-    fontSize: 14,
-    color: Colors.secondary,
-    fontFamily: FontFamily.regular,
-  },
   editBtn: {
     backgroundColor: Colors.green,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 16,
   },
   editText: {
-    color: 'white',
-    fontFamily: FontFamily.bold,
+    color: Colors.primary,
+    fontFamily: FontFamily.regular,
     fontSize: 14,
   },
 });
