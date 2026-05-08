@@ -39,12 +39,12 @@ export default function IconAndText({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    gap: 6,
+    gap: 0,
   },
   label: {
-    color: Colors.gray,
+    color: Colors.mediumGray,
     fontFamily: FontFamily.regular,
-    fontSize: 11,
+    fontSize: 12,
     textAlign: "center",
   },
 });

@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import ArrowRight from "@/assets/icons/main/foward.svg";
 import { Colors } from "@/src/constants/colors";

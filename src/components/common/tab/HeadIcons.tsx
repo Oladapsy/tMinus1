@@ -62,9 +62,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderBottomWidth: 1.5,
     borderColor: Colors.tabDark,
-    paddingBottom: 18,
+    paddingBottom: 10,
     paddingHorizontal: 24,
-    paddingTop: 5,
     
     // iOS Shadow Props
     shadowColor: Colors.tabDark,
