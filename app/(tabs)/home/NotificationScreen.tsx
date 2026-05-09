@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, FlatList } from "react-native";
 import React from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import HeadIcons from "@/src/components/common/tab/HeadIcons";
@@ -7,6 +7,8 @@ import Title from "@/src/components/common/Title";
 import { FontFamily } from "@/src/constants/fonts";
 import IconAndText from "@/src/components/common/tab/IconAndText";
 import Filter from "@/assets/icons/notification/Filter.svg";
+import NotificationCards from "@/src/components/notification/NotificationCards";
+import { NOTIFICATION_DATA } from "@/src/data/notification";
 
 export default function NotificationScreen() {
   return (
@@ -26,6 +28,17 @@ export default function NotificationScreen() {
         />
 
         <IconAndText icon={<Filter />} />
+      </View>
+
+      {/* Notification */}
+      <View>
+        <FlatList
+        data={NOTIFICATION_DATA}
+        
+
+        
+        />
+
       </View>
     </MySafeAreaView>
   );
