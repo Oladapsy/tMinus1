@@ -12,6 +12,6 @@ export const Colors = {
   dark: "#252E35",
   tabDark: "#161C22",
   tabLight: "#E3E8ED",
-  tabLight2: "#E3E8ED80"
-  
+  tabLight2: "#E3E8ED80",
+  thinWhite: "#FFFFFF10",
 };

@@ -6,6 +6,7 @@ import SearchIcon from "@/assets/icons/main/search.svg";
 import ScannerIcon from "@/assets/icons/main/scanner.svg";
 import NotificationIcon from "@/assets/icons/main/notification.svg";
 import { Colors } from "@/src/constants/colors";
+import { router } from "expo-router";
 
 export default function HeadIcons() {
   const handleSearchPress = () => {
@@ -18,6 +19,7 @@ export default function HeadIcons() {
 
   const handleNotificationPress = () => {
     console.log("Notification icon pressed");
+    router.push("/(tabs)/home/NotificationScreen")
   };
 
   return (
