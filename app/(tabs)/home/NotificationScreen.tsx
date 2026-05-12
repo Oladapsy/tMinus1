@@ -9,6 +9,7 @@ import IconAndText from "@/src/components/common/tab/IconAndText";
 import Filter from "@/assets/icons/notification/Filter.svg";
 import NotificationCards from "@/src/components/notification/NotificationCards";
 import { NOTIFICATION_DATA } from "@/src/data/notification";
+import Paragraph from "@/src/components/common/Paragraph";
 
 export default function NotificationScreen() {
   return (
@@ -19,26 +20,37 @@ export default function NotificationScreen() {
       </View>
 
       {/* notification optional text and filter icon that filters */}
-      <View style={Styles.titleFilter}>
-        <Title
-          text="Notifications"
-          color="white"
-          size={18}
-          fontFamily={FontFamily.bold}
-        />
+      <View style={Styles.notification}>
+        <View style={Styles.titleFilter}>
+          <Title
+            text="Notifications"
+            color="white"
+            size={18}
+            fontFamily={FontFamily.bold}
+          />
 
-        <IconAndText icon={<Filter />} />
-      </View>
+          <View style={Styles.filterAndText}>
+            <Paragraph text="Mark Read All" size={14}/>
+            <IconAndText icon={<Filter />} />
+          </View>
+        </View>
 
-      {/* Notification */}
-      <View>
-        <FlatList
-        data={NOTIFICATION_DATA}
-        
-
-        
-        />
-
+        {/* Notification */}
+          <FlatList
+            data={NOTIFICATION_DATA.data}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            renderItem={({ item }) => (
+              <NotificationCards
+                title={item.title}
+                body={item.body}
+                type={item.type}
+                createdAt={item.createdAt}
+                isRead={item.isRead}
+              />
+            )}
+          />
       </View>
     </MySafeAreaView>
   );
@@ -49,12 +61,18 @@ const Styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     flex: 1,
   },
+  notification: {
+    paddingHorizontal: 24,
+    flex: 1,
+  },
   titleFilter: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingBottom: 15,
     paddingTop: 20,
-    borderBottomColor: Colors.thinWhite,
-    borderWidth: StyleSheet.hairlineWidth,
   },
+  filterAndText: {
+    flexDirection: 'row',
+    gap: 10,
+  }
 });

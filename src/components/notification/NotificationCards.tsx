@@ -29,21 +29,34 @@ export default function NotificationCards({
     <View style={[Styles.container, !isRead && Styles.unread]}>
       {/* Title and icon */}
       <View style={Styles.textIconWrapper}>
-        <Paragraph text={title} color={Colors.mediumGray} size={14} />
+        <Paragraph
+          text={title}
+          color={Colors.mediumGray}
+          size={14}
+          textAlign="left"
+        />
         {/* Icon */}
         <View style={[Styles.icon, { backgroundColor: icons }]} />
       </View>
 
       <View>
-        <Paragraph text={body} size={14} />
-        <Paragraph text={new Date(createdAt).toLocaleString()} />
+        <Paragraph text={body} size={14} textAlign="left" />
+        <Paragraph
+          text={new Date(createdAt).toLocaleString()}
+          textAlign="left"
+          size={8}
+        />
       </View>
     </View>
   );
 }
 
 const Styles = StyleSheet.create({
-  container: {},
+  container: {
+    borderTopColor: Colors.thinWhite,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 10,
+  },
   unread: {},
   icon: {
     height: 13,
@@ -52,6 +65,7 @@ const Styles = StyleSheet.create({
   },
   textIconWrapper: {
     flexDirection: "row",
-    gap: 2,
+    gap: 6,
+    alignItems: "center",
   },
 });
