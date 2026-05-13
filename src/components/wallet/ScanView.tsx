@@ -6,6 +6,8 @@ import Paragraph from "../common/Paragraph";
 import PrimaryButton from "../common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import ScanIcon from "@/assets/icons/qr/qr-code1.svg";
+import BigCameraIcon from "@/assets/icons/qr/largeCamera1.svg";
+import { CameraView } from "expo-camera";
 
 interface Props {
   permission: any;
@@ -39,17 +41,41 @@ export default function ScanView({
         />
       </View>
 
-      {/* Placeholder for camera */}
-      <TouchableOpacity
-        style={styles.cameraPlaceholder}
-        onPress={onRequestPermission}
-      >
-        <Paragraph
-          text="Tap to start scanning"
-          size={14}
-          color={Colors.mediumGray}
-        />
-      </TouchableOpacity>
+      {!permission?.granted ? (
+        <TouchableOpacity
+          style={styles.permissionBox}
+          onPress={onRequestPermission}
+        >
+          <View style={styles.scanBox}>
+            <BigCameraIcon />
+            <Paragraph
+              text="Tap to allow camera access"
+              color={Colors.secondary}
+              size={14}
+            />
+            {/* Corners */}
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
+          </View>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.scanBox}>
+          <CameraView
+            style={StyleSheet.absoluteFillObject}
+            facing="back"
+            onBarcodeScanned={scanned ? undefined : onScanned}
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+          />
+
+          {/* Corners */}
+          <View style={[styles.corner, styles.topLeft]} />
+          <View style={[styles.corner, styles.topRight]} />
+          <View style={[styles.corner, styles.bottomLeft]} />
+          <View style={[styles.corner, styles.bottomRight]} />
+        </View>
+      )}
 
       {/* Buttons */}
       <View style={styles.button1}>
@@ -86,16 +112,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     marginBottom: 20,
   },
-  cameraPlaceholder: {
-    height: 260,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.thinWhite,
+  button1: {
+    marginVertical: 20,
+  },
+  permissionBox: {},
+  scanBox: {
+    height: 360,
+    borderRadius: 10,
+    backgroundColor: Colors.tertiary,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 40,
+    // position: "relative",
   },
-  button1: {
-    marginBottom: 20,
+  corner: {
+    width: 32,
+    height: 36,
+    borderColor: "white",
+    position: "absolute",
+  },
+
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderLeftWidth: 3,
+    borderTopWidth: 3,
+  },
+  topRight: {
+    top: 0,
+    right: 0,
+    borderRightWidth: 3,
+    borderTopWidth: 3,
+  },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderLeftWidth: 3,
+    borderBottomWidth: 3,
+  },
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderRightWidth: 3,
+    borderBottomWidth: 3,
   },
 });
