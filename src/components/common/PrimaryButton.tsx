@@ -10,6 +10,7 @@ interface PrimaryButtonProps {
   Bgcolor?: string;
   fontSize?: number;
   alignText?: "left" | "center" | "right";
+  icon?: React.ReactNode;
 }
 export default function PrimaryButton({
   text,
@@ -18,10 +19,20 @@ export default function PrimaryButton({
   Bgcolor = Colors.green,
   fontSize = 18,
   alignText,
+  icon,
 }: PrimaryButtonProps) {
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.button, { backgroundColor: Bgcolor }]}>
-      <Text style={[styles.text, { color: textColor, fontSize, textAlign: alignText }]}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.button, { backgroundColor: Bgcolor }]}
+    >
+      {icon}
+      <Text
+        style={[
+          styles.text,
+          { color: textColor, fontSize, textAlign: alignText },
+        ]}
+      >
         {text}
       </Text>
     </TouchableOpacity>
@@ -35,6 +46,8 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
   },
   text: {
     fontFamily: FontFamily.regular,

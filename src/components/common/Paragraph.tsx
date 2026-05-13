@@ -8,6 +8,7 @@ interface ParagraphProps {
   color?: string;
   size?: number;
   textAlign?: "left" | "center" | "right";
+  lineHeight?: number;
 }
 
 export default function Paragraph({
@@ -15,10 +16,11 @@ export default function Paragraph({
   color = Colors.secondary,
   size = 16,
   textAlign = "center",
+  lineHeight = 24,
 }: ParagraphProps) {
   return (
     <View style={styles.container}>
-      <Text style={[styles.text, { color, fontSize: size, textAlign }]}>{text}</Text>
+      <Text style={[styles.text, { color, fontSize: size, textAlign, lineHeight }]}>{text}</Text>
     </View>
   );
 }
@@ -29,6 +31,5 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: FontFamily.medium,
-    lineHeight: 24,
   },
 });
