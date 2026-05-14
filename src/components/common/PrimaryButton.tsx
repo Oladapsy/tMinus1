@@ -11,6 +11,7 @@ interface PrimaryButtonProps {
   fontSize?: number;
   alignText?: "left" | "center" | "right";
   icon?: React.ReactNode;
+  borderColor?: string;
 }
 export default function PrimaryButton({
   text,
@@ -20,11 +21,19 @@ export default function PrimaryButton({
   fontSize = 18,
   alignText,
   icon,
+  borderColor,
 }: PrimaryButtonProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.button, { backgroundColor: Bgcolor }]}
+      style={[
+        styles.button,
+        {
+          backgroundColor: Bgcolor,
+          borderWidth: borderColor ? 1 : 0,
+          borderColor: borderColor,
+        },
+      ]}
     >
       {icon}
       <Text

@@ -8,6 +8,7 @@ import { Colors } from "@/src/constants/colors";
 import ScanIcon from "@/assets/icons/qr/qr-code1.svg";
 import BigCameraIcon from "@/assets/icons/qr/largeCamera1.svg";
 import { CameraView } from "expo-camera";
+import { router } from "expo-router";
 
 interface Props {
   permission: any;
@@ -90,6 +91,7 @@ export default function ScanView({
         text="Cancel"
         Bgcolor={Colors.secondary}
         textColor="white"
+        onPress={() => router.back()}
       />
     </View>
   );
@@ -122,6 +124,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.tertiary,
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
     // position: "relative",
   },
   corner: {

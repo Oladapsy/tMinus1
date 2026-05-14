@@ -9,6 +9,7 @@ interface ParagraphProps {
   size?: number;
   textAlign?: "left" | "center" | "right";
   lineHeight?: number;
+  fontFamily?: string;
 }
 
 export default function Paragraph({
@@ -17,10 +18,11 @@ export default function Paragraph({
   size = 16,
   textAlign = "center",
   lineHeight = 24,
+  fontFamily = FontFamily.medium,
 }: ParagraphProps) {
   return (
     <View style={styles.container}>
-      <Text style={[styles.text, { color, fontSize: size, textAlign, lineHeight }]}>{text}</Text>
+      <Text style={[styles.text, { color, fontSize: size, textAlign, lineHeight, fontFamily }]}>{text}</Text>
     </View>
   );
 }
@@ -30,6 +32,6 @@ const styles = StyleSheet.create({
 
   },
   text: {
-    fontFamily: FontFamily.medium,
+    // fontFamily: FontFamily.medium,
   },
 });
