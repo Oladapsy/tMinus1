@@ -25,7 +25,7 @@ export default function HeadIcons() {
   return (
     <View style={styles.container}>
       <View>
-        <IconAndText icon={<ProfileIcon height={36} width={36} />} />
+        <IconAndText icon={<ProfileIcon height={36} width={36} onPress={() => router.push("/profile")} />} />
       </View>
       <View style={styles.otherAction}>
         <IconAndText

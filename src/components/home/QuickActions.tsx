@@ -12,6 +12,7 @@ import LaunchpadIcon from "@/assets/icons/home/launchPad.svg";
 import SavingsIcon from "@/assets/icons/home/savings.svg";
 import LiquidSwapIcon from "@/assets/icons/home/liquidSwap.svg";
 import MoreIcon from "@/assets/icons/home/more.svg";
+import { router } from "expo-router";
 
 const ACTIONS: IconGridItem[] = [
   {
@@ -52,7 +53,7 @@ const ACTIONS: IconGridItem[] = [
   {
     icon: <MoreIcon width={48} height={48} color={Colors.green} />,
     label: "More",
-    onPress: () => {},
+    onPress: () => {router.push("/home/Menu")},
   },
 ];
 

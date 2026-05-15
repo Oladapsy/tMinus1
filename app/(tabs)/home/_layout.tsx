@@ -4,7 +4,8 @@ export default function HomeLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="NotificationScreen"/>
+      <Stack.Screen name="NotificationScreen" />
+      <Stack.Screen name="MenuScreen" />
     </Stack>
   );
 }
