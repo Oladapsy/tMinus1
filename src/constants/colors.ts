@@ -14,4 +14,6 @@ export const Colors = {
   tabLight: "#E3E8ED",
   tabLight2: "#E3E8ED80",
   thinWhite: "#FFFFFF10",
+  thinGreen: "#5ED5A820",
+  thinRed: "#DD4B4B25",
 };
