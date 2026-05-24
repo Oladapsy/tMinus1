@@ -64,6 +64,7 @@ export const MyQRView = ({
               color={unit === "USD" ? Colors.green : Colors.secondary}
               fontFamily={unit === "USD" ? FontFamily.bold : FontFamily.medium}
               size={14}
+            
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setUnit("BTC")}>
