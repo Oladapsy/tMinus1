@@ -16,4 +16,5 @@ export const Colors = {
   thinWhite: "#FFFFFF10",
   thinGreen: "#5ED5A820",
   thinRed: "#DD4B4B25",
+  lightPrimary: "#1E272E"
 };

@@ -15,17 +15,26 @@ export default function HeadIcons() {
 
   const handleScannerPress = () => {
     console.log("Scanner icon pressed");
+    router.push("/(tabs)/wallets/WalletScreen")
   };
 
   const handleNotificationPress = () => {
     console.log("Notification icon pressed");
-    router.push("/(tabs)/home/NotificationScreen")
+    router.push("/(tabs)/home/NotificationScreen");
   };
 
   return (
     <View style={styles.container}>
       <View>
-        <IconAndText icon={<ProfileIcon height={36} width={36} onPress={() => router.push("/profile")} />} />
+        <IconAndText
+          icon={
+            <ProfileIcon
+              height={36}
+              width={36}
+              onPress={() => router.push("/profile")}
+            />
+          }
+        />
       </View>
       <View style={styles.otherAction}>
         <IconAndText
@@ -40,14 +49,19 @@ export default function HeadIcons() {
         />
         <IconAndText
           icon={
-            <ScannerIcon color={Colors.green} onPress={handleScannerPress} />
+            <ScannerIcon
+              // width={26}
+              // height={26}
+              color={Colors.green}
+              onPress={handleScannerPress}
+            />
           }
         />
         <IconAndText
           icon={
             <NotificationIcon
-              width={26}
-              height={26}
+              // width={26}
+              // height={26}
               color={Colors.green}
               onPress={handleNotificationPress}
             />
@@ -66,7 +80,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.tabDark,
     paddingBottom: 10,
     paddingHorizontal: 24,
-    
+
     // iOS Shadow Props
     shadowColor: Colors.tabDark,
     shadowOffset: { width: 0, height: 12 },

@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import React from "react";
 import HeadIcons from "@/src/components/common/tab/HeadIcons";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
@@ -21,24 +21,25 @@ const ActivityScreen = () => {
         {/*Deposit || Withdrawal || Buy-Order*/}
         <View style={Style.actionTop}>
           <ListItem
+            paddingVertical={10}
             icon={<DeopsitIcon />}
             label="Deposit"
             value=""
             onPress={() => {
               console.log("Pressed");
             }}
-            borderBottom={false}
           />
           <ListItem
+            paddingVertical={10}
             icon={<WithdrawlIcon />}
             label="Withdrawals"
             value=""
             onPress={() => {
               console.log("Pressed");
             }}
-            borderBottom={false}
           />
           <ListItem
+            paddingVertical={10}
             icon={<BuyOrderIcon />}
             label="Buy Order"
             value=""
@@ -52,22 +53,24 @@ const ActivityScreen = () => {
         {/* Activity List */}
         <Title text="Recent Activity" size={18} fontFamily={FontFamily.bold} />
 
-        <ActivityCard
-          pair="BTC/BUSD"
-          date="2021-08-02 04:39:26"
-          amount1="0.49975"
-          amount2="0.49975"
-          price="2652.00"
-          status="Filled"
-        />
-        <ActivityCard
-          pair="BTC/BUSD"
-          date="2021-08-02 04:39:26"
-          amount1="0.49975"
-          amount2="0.49975"
-          price="2652.00"
-          status="Cancelled"
-        />
+        <ScrollView>
+          <ActivityCard
+            pair="BTC/BUSD"
+            date="2021-08-02 04:39:26"
+            amount1="0.49975"
+            amount2="0.49975"
+            price="2652.00"
+            status="Filled"
+          />
+          <ActivityCard
+            pair="BTC/BUSD"
+            date="2021-08-02 04:39:26"
+            amount1="0.49975"
+            amount2="0.49975"
+            price="2652.00"
+            status="Cancelled"
+          />
+        </ScrollView>
       </View>
     </MySafeAreaView>
   );
@@ -87,8 +90,7 @@ const Style = StyleSheet.create({
     marginTop: 24,
     borderRadius: 12,
     padding: 10,
-    //
-    marginBottom: 60,
+    marginBottom: 30,
   },
 });
 

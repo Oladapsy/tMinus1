@@ -12,6 +12,8 @@ interface PrimaryButtonProps {
   alignText?: "left" | "center" | "right";
   icon?: React.ReactNode;
   borderColor?: string;
+  fullWidth?: boolean;
+  style?: object;
 }
 export default function PrimaryButton({
   text,
@@ -22,16 +24,20 @@ export default function PrimaryButton({
   alignText,
   icon,
   borderColor,
+  fullWidth = true,
+  style,
 }: PrimaryButtonProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[
         styles.button,
+        style,
         {
           backgroundColor: Bgcolor,
           borderWidth: borderColor ? 1 : 0,
           borderColor: borderColor,
+          width: fullWidth ? "100%" : undefined,
         },
       ]}
     >
@@ -52,7 +58,7 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 16,
     height: 54,
-    width: "100%",
+    // width: "100%",
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",

@@ -9,6 +9,8 @@ interface Props {
   value?: string;
   onPress: () => void;
   borderBottom?: boolean;
+  paddingVertical?: number;
+  // paddingBottom?: number;
 }
 
 export default function ListItem({
@@ -17,10 +19,15 @@ export default function ListItem({
   value,
   borderBottom = true,
   onPress,
+  paddingVertical = 18,
 }: Props) {
   return (
     <TouchableOpacity
-      style={[styles.row, borderBottom && styles.borderBottom]}
+      style={[
+        styles.row,
+        { paddingVertical },
+        borderBottom && styles.borderBottom,
+      ]}
       onPress={onPress}
     >
       <View style={styles.left}>
@@ -29,9 +36,7 @@ export default function ListItem({
       </View>
 
       <View style={styles.right}>
-        {value && (
-          <Paragraph text={value} size={14} color={Colors.secondary} />
-        )}
+        {value && <Paragraph text={value} size={14} color={Colors.secondary} />}
         <ArrowRight color={Colors.secondary} />
       </View>
     </TouchableOpacity>
@@ -41,7 +46,6 @@ export default function ListItem({
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    paddingVertical: 18,
     justifyContent: "space-between",
     alignItems: "center",
   },
