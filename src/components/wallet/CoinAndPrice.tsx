@@ -2,6 +2,7 @@ import { StyleSheet, View, Text } from "react-native";
 import React from "react";
 import { Colors } from "@/src/constants/colors";
 import Paragraph from "@/src/components/common/Paragraph";
+import { FontFamily } from "@/src/constants/fonts";
 
 type Props = {
   icon: React.ReactNode;
@@ -17,13 +18,13 @@ const CoinAndPrice = ({ icon, coin, coinCode, amount, usdValue }: Props) => {
       <View style={styles.left}>
         {icon}
         <View style={styles.coinInfo}>
-          <Paragraph text={coin} textAlign="right" />
-          <Paragraph text={coinCode} textAlign="right" />
+          <Paragraph text={coin} textAlign="left" color="white" size={14} fontFamily={FontFamily.bold}/>
+          <Paragraph text={coinCode} textAlign="left" size={14} />
         </View>
       </View>
       <View style={styles.right}>
-        <Paragraph text={amount} textAlign="right" />
-        <Paragraph text={`$${usdValue}`} textAlign="right" />
+          <Paragraph text={amount} textAlign="left" color="white" size={14} fontFamily={FontFamily.bold}/>
+        <Paragraph text={`$${usdValue}`} textAlign="right" size={14} />
       </View>
     </View>
   );
@@ -36,7 +37,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    backgroundColor: Colors.primary,
+    borderBottomColor: Colors.thinWhite,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 20,
   },
   left: {
     flexDirection: "row",

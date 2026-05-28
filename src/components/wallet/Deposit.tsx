@@ -10,15 +10,15 @@ const Deposit = () => {
         icon={<BitCoinIcon />}
         coin="BITCOIN"
         coinCode="BTC"
-        amount="678899"
-        usdValue="999999"
+        amount="32,697.05"
+        usdValue="$468,554.23"
       />
       <CoinAndPrice
         icon={<BitCoinIcon />}
         coin="BITCOIN"
         coinCode="BTC"
-        amount="989999"
-        usdValue="99909"
+        amount="32,697.05"
+        usdValue="$468,554.23"
       />
     </View>
   );
@@ -28,6 +28,5 @@ export default Deposit;
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 30,
     }
 });
