@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView } from "react-native";
+import { StyleSheet, View, ScrollView, FlatList } from "react-native";
 import React from "react";
 import HeadIcons from "@/src/components/common/tab/HeadIcons";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
@@ -10,6 +10,7 @@ import BuyOrderIcon from "@/assets/icons/activity/buyOrder.svg";
 import Title from "@/src/components/common/Title";
 import { FontFamily } from "@/src/constants/fonts";
 import ActivityCard from "@/src/components/activity/ActivityCard";
+import { activityData, ActivityItem } from "@/src/data/activityData";
 
 const ActivityScreen = () => {
   return (
@@ -52,26 +53,23 @@ const ActivityScreen = () => {
 
         {/* Activity List */}
         <Title text="Recent Activity" size={18} fontFamily={FontFamily.bold} />
-
-        <ScrollView>
-          <ActivityCard
-            pair="BTC/BUSD"
-            date="2021-08-02 04:39:26"
-            amount1="0.49975"
-            amount2="0.49975"
-            price="2652.00"
-            status="Filled"
-          />
-          <ActivityCard
-            pair="BTC/BUSD"
-            date="2021-08-02 04:39:26"
-            amount1="0.49975"
-            amount2="0.49975"
-            price="2652.00"
-            status="Cancelled"
-          />
-        </ScrollView>
       </View>
+      <FlatList<ActivityItem>
+        data={activityData}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <ActivityCard
+            pair={item.pair}
+            date={item.date}
+            amount1={item.amount1}
+            amount2={item.amount2}
+            price={item.price}
+            status={item.status}
+          />
+        )}
+        contentContainerStyle={Style.listContent}
+      />
     </MySafeAreaView>
   );
 };
@@ -83,6 +81,7 @@ const Style = StyleSheet.create({
   },
   main: {
     paddingHorizontal: 24,
+    marginBottom: 10,
   },
   actionTop: {
     backgroundColor: Colors.tertiary,
@@ -91,6 +90,10 @@ const Style = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     marginBottom: 30,
+  },
+  listContent: {
+    paddingBottom: 120,
+    paddingHorizontal: 24,
   },
 });
 

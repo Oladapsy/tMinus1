@@ -8,6 +8,7 @@ export const Colors = {
   lightGray: "#A7AFB7",
   mediumGray: "#C1C7CD",
   yellow: "#D5BB5E",
+  thinYellow: "#D5BB5E25",
   gray: "#B4B9C7",
   dark: "#252E35",
   tabDark: "#161C22",
