@@ -1,15 +1,25 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
 import HeadIcons from "@/src/components/common/tab/HeadIcons";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import SpotContent from "@/src/components/market/SpotContent";
+import Paragraph from "@/src/components/common/Paragraph";
+import PlusIcon from "@/assets/icons/market/add-circle.svg";
 
 const MarketScreen = () => {
   const [activeTab, setActiveTab] = useState<
     "Spot" | "Convert" | "Margin" | "Fiat"
   >("Spot");
+  const [favorites, setFavorites] = useState<string[]>([]); //
+
+  const handleAddFavorite = (coinCode: string) => {
+    if (!favorites.includes(coinCode)) {
+      setFavorites([...favorites, coinCode]);
+    }
+    console.log(favorites)
+  };
 
   return (
     <MySafeAreaView style={styles.container}>
@@ -38,7 +48,13 @@ const MarketScreen = () => {
         {activeTab === "Spot" && (
           <View>
             <SpotContent />
-            
+            <TouchableOpacity
+              style={styles.addFavoriteBtn}
+              onPress={() => handleAddFavorite("BTC")}
+            >
+              <PlusIcon />
+              <Paragraph text="Add Favorite" size={18} />
+            </TouchableOpacity>
           </View>
         )}
         {activeTab === "Convert" && (
@@ -81,5 +97,18 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 24,
+  },
+  addFavoriteBtn: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    height: 60,
+    marginTop: 16,
+    alignItems: "center",
+    borderRadius: 12,
+    backgroundColor: Colors.favBg,
+    borderWidth: 2,
+    borderColor: Colors.favBorder,
+    borderStyle: 'dashed',
   },
 });

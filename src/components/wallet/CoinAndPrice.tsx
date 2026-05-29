@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderBottomColor: Colors.thinWhite,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingVertical: 20,
+    paddingVertical: 15,
   },
   left: {
     flexDirection: "row",
