@@ -100,3 +100,37 @@ Tminus1/
 ├── babel.config.js
 ├── tsconfig.json
 └── package.json
+
+
+# for the trade screen here is the plan
+Trade Screen
+├── Header (avatar + icons)
+├── Tab bar (Convert, Spot, Margin, Fiat)
+├── Price + pair
+├── Candlestick chart
+├── Time intervals (1m, 5m, 15m...)
+├── Buy / Sell toggle bar
+├── Order Books table (main screen)
+└── Bottom Panel (slides up when Buy/Sell tapped)
+    ├── Limit / Market / Stop Limit tabs
+    ├── Price input
+    ├── Quantity input
+    ├── Percentage slider (25/50/75/100%)
+    ├── Total
+    └── Buy or Sell button
+
+
+// file structure
+app/(tabs)/trades/
+├── _layout.tsx
+└── index.tsx          ← everything lives here (panel state handles buy/sell)
+
+src/components/trades/
+├── TradeHeader.tsx
+├── TradeTabs.tsx        ← Convert, Spot, Margin, Fiat
+├── PriceDisplay.tsx
+├── CandlestickChart.tsx
+├── IntervalTabs.tsx     ← 1m 5m 15m 1d More
+├── BuySellToggle.tsx
+├── OrderBook.tsx
+└── TradePanel.tsx       ← the sliding bottom panel
