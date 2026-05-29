@@ -106,7 +106,7 @@ const MainWalletScreen = () => {
 
       {/* Content */}
       <View style={styles.body}>
-        {mode === "deposit" && <Deposit />}
+        {mode === "deposit" && <Deposit showBalance={showBalance} />}
 
         {mode === "withdrawl" && (
           <Paragraph
@@ -135,33 +135,28 @@ const styles = StyleSheet.create({
   },
   headerBg: {
     paddingTop: 70,
-    paddingBottom: 32,
+    paddingBottom: 24,
   },
   content: {
     paddingHorizontal: 24,
   },
-
   body: {
     flex: 1,
     paddingHorizontal: 24,
   },
-
   balance: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
-
   tab: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 8,
     marginTop: 54,
   },
-
   mainBalance: {
     marginTop: 2,
   },
-
   eyeIcon: {
     marginTop: 10,
   },

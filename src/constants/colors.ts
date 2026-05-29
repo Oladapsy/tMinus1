@@ -11,6 +11,7 @@ export const Colors = {
   gray: "#B4B9C7",
   dark: "#252E35",
   tabDark: "#161C22",
+  tabDarkLight: "#161C2280",
   tabLight: "#E3E8ED",
   tabLight2: "#E3E8ED80",
   thinWhite: "#FFFFFF10",

@@ -7,12 +7,12 @@ import { FontFamily } from "@/src/constants/fonts";
 import Back from "@/assets/icons/main/backward.svg";
 import More from "@/assets/icons/main/More.svg";
 import { router } from "expo-router";
-import ProfileHeader from "@/src/components/market/MarketHeader";
+import ProfileHeader from "@/src/components/more/MarketHeader";
 import Avatar from "@/assets/images/market/avatar.png";
 import { LinearGradient } from "expo-linear-gradient";
-import CommonActions from "@/src/components/market/CommonActions";
-import TradeActions from "@/src/components/market/TradeActions";
-import FinanceActions from "@/src/components/market/FinanceActions";
+import CommonActions from "@/src/components/more/CommonActions";
+import TradeActions from "@/src/components/more/TradeActions";
+import FinanceActions from "@/src/components/more/FinanceActions";
 
 export default function MenuScreen() {
   return (

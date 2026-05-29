@@ -1,119 +1,85 @@
-import { ScrollView, StyleSheet, View } from "react-native";
-import React from "react";
+import { StyleSheet, View } from "react-native";
+import React, { useState } from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
-import IconAndText from "@/src/components/common/tab/IconAndText";
-import { FontFamily } from "@/src/constants/fonts";
-import Back from "@/assets/icons/main/backward.svg";
-import More from "@/assets/icons/main/More.svg";
-import { router } from "expo-router";
-import ProfileHeader from "@/src/components/market/MarketHeader";
-import Avatar from "@/assets/images/market/avatar.png";
-import { LinearGradient } from "expo-linear-gradient";
-import CommonActions from "@/src/components/market/CommonActions";
-import TradeActions from "@/src/components/market/TradeActions";
-import FinanceActions from "@/src/components/market/FinanceActions";
+import HeadIcons from "@/src/components/common/tab/HeadIcons";
+import PrimaryButton from "@/src/components/common/PrimaryButton";
+import SpotContent from "@/src/components/market/SpotContent";
 
-export default function MarketScreen() {
+const MarketScreen = () => {
+  const [activeTab, setActiveTab] = useState<
+    "Spot" | "Convert" | "Margin" | "Fiat"
+  >("Spot");
+
   return (
-    <MySafeAreaView style={Style.container}>
-      {/* Head -> Icon and text */}
-      <LinearGradient
-        colors={["#1B232A00", "rgba(94, 213, 168, 0.1)"]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={Style.gradient}
-      />
+    <MySafeAreaView style={styles.container}>
+      <HeadIcons />
 
-      <View style={Style.headWrapper}>
-        <IconAndText
-          icon={<Back color={Colors.secondary} />}
-          label="Menu"
-          labelStyle={Style.headLabel}
-          onPress={() => {
-            router.back();
-          }}
-          containerStyle={{ flexDirection: "row", gap: 10 }}
-        />
-        {/* more */}
-        <IconAndText
-          icon={<More color={Colors.secondary} />}
-          labelStyle={Style.headLabel}
-          onPress={() => {
-            console.log("More pressed");
-          }}
-        />
+      {/* Tabs || Spot | Convert | Margin | Fiat */}
+      <View style={styles.topTabs}>
+        {["Convert", "Spot", "Margin", "Fiat"].map((tab) => (
+          <PrimaryButton
+            key={tab}
+            text={tab}
+            fullWidth={false}
+            style={{ flex: 1, height: 38 }}
+            fontSize={14}
+            Bgcolor={activeTab === tab ? Colors.primary : Colors.tabDark}
+            textColor={activeTab === tab ? Colors.mediumGray : Colors.secondary}
+            onPress={() =>
+              setActiveTab(tab as "Spot" | "Convert" | "Margin" | "Fiat")
+            }
+          />
+        ))}
       </View>
 
-      {/* profile copy and rest */}
-
-      <ProfileHeader
-        avatar={Avatar}
-        username="User 1234"
-        userId="1234567890"
-        onCopy={() => console.log("Copied")}
-        onEdit={() => console.log("Edit Profile")}
-      />
-
-      {/* Remaining content  */}
-      <ScrollView
-        style={Style.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={Style.scrollContent}
-      >
-        <View>
-          <View style={Style.actions}>
-            <CommonActions />
+      {/* Render content based on active tab */}
+      <View style={styles.body}>
+        {activeTab === "Spot" && (
+          <View>
+            <SpotContent />
+            
           </View>
-
-          <View style={Style.actions2}>
-            <TradeActions />
+        )}
+        {activeTab === "Convert" && (
+          <View>
+            <PrimaryButton text="Convert content..." />
           </View>
-
-          <View style={Style.actions2}>
-            <FinanceActions />
+        )}
+        {activeTab === "Margin" && (
+          <View>
+            <PrimaryButton text="Margin content..." />
           </View>
-        </View>
-      </ScrollView>
+        )}
+        {activeTab === "Fiat" && (
+          <View>
+            <PrimaryButton text="Fiat content..." />
+          </View>
+        )}
+      </View>
     </MySafeAreaView>
   );
-}
+};
 
-const Style = StyleSheet.create({
+export default MarketScreen;
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.primary,
-    paddingHorizontal: 24,
   },
-  headWrapper: {
+  topTabs: {
+    backgroundColor: Colors.tabDark,
+    height: 46,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    marginHorizontal: 24,
+    marginTop: 20,
+    marginBottom: 9,
+    borderRadius: 12,
+    padding: 4,
   },
-  headLabel: {
-    color: "white",
-    fontSize: 18,
-    fontFamily: FontFamily.bold,
-  },
-  //gradient
-  gradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 175,
-    zIndex: -1,
-  },
-  actions: {
-    marginTop: 50,
-  },
-  actions2: {
-    marginTop: 30,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 100, // space for floating tab bar
+  body: {
+    paddingHorizontal: 24,
   },
 });

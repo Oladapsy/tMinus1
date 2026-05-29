@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
 import { Colors } from "@/src/constants/colors";
 import Paragraph from "@/src/components/common/Paragraph";
@@ -10,9 +10,10 @@ type Props = {
   coinCode: string;
   amount: string;
   usdValue: string;
+  showBalance: boolean;
 };
 
-const CoinAndPrice = ({ icon, coin, coinCode, amount, usdValue }: Props) => {
+const CoinAndPrice = ({ icon, coin, coinCode, amount, usdValue, showBalance }: Props) => {
   return (
     <View style={styles.container}>
       <View style={styles.left}>
@@ -23,8 +24,8 @@ const CoinAndPrice = ({ icon, coin, coinCode, amount, usdValue }: Props) => {
         </View>
       </View>
       <View style={styles.right}>
-          <Paragraph text={amount} textAlign="left" color="white" size={14} fontFamily={FontFamily.bold}/>
-        <Paragraph text={`$${usdValue}`} textAlign="right" size={14} />
+          <Paragraph text={showBalance ? amount : "********"} textAlign="left" color="white" size={14} fontFamily={FontFamily.bold}/>
+        <Paragraph text={showBalance ? `$${usdValue}` : "********"} textAlign="right" size={14} />
       </View>
     </View>
   );
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   coinInfo: {
-    marginLeft: 8,
+    marginLeft: 13,
   },
   right: {
     alignItems: "flex-end",

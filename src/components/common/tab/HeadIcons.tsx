@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     borderBottomWidth: 1.5,
-    borderColor: Colors.tabDark,
+    borderBottomColor: Colors.tabDarkLight,
     paddingBottom: 10,
     paddingHorizontal: 24,
 

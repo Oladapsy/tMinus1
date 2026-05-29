@@ -1,26 +1,29 @@
-import { StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet} from "react-native";
 import React from "react";
 import CoinAndPrice from "./CoinAndPrice";
-import BitCoinIcon from "@/assets/icons/home/coin/btc.svg";
+import { walletData } from "@/src/data/walletData";
 
-const Deposit = () => {
+type Props = {
+  showBalance: boolean;
+};
+const Deposit = ({ showBalance }: Props) => {
   return (
-    <View style={styles.container}>
-      <CoinAndPrice
-        icon={<BitCoinIcon />}
-        coin="BITCOIN"
-        coinCode="BTC"
-        amount="32,697.05"
-        usdValue="$468,554.23"
-      />
-      <CoinAndPrice
-        icon={<BitCoinIcon />}
-        coin="BITCOIN"
-        coinCode="BTC"
-        amount="32,697.05"
-        usdValue="$468,554.23"
-      />
-    </View>
+    <FlatList
+      data={walletData}
+      keyExtractor={(item) => item.id}
+      showsVerticalScrollIndicator={false}
+      renderItem={({ item }) => (
+        <CoinAndPrice
+          icon={item.icon}
+          coin={item.coin}
+          coinCode={item.coinCode}
+          amount={item.amount}
+          usdValue={item.usdValue}
+          showBalance={showBalance}
+        />
+      )}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
@@ -28,5 +31,6 @@ export default Deposit;
 
 const styles = StyleSheet.create({
     container: {
+      paddingBottom: 40,
     }
 });
