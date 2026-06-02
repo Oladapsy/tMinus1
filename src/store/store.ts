@@ -1,13 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "@/src/app/authSlice";
+import authReducer from "@/src/store/authSlice";
 import { authApi } from "@/src/services/authApi";
 
 export const store = configureStore({
   reducer: {
-    // 1. Hook up our local UI/Client state slice drawer
+    // 1. Hook up my local UI/Client state slice drawer
     auth: authReducer,
 
-    // 2. Hook up our server API service slice drawer automatically
+    // 2. Hook up my server API service slice drawer automatically
     [authApi.reducerPath]: authApi.reducer,
   },
 
