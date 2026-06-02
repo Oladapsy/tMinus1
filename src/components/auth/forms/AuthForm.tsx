@@ -107,17 +107,19 @@ export default function AuthForm({
         router.replace("/(tabs)/home");
       }
     } catch (err: any) {
-    console.warn("Authentication rejected:", err);
-    
-    // Target the exact path your backend uses: err.data.error.message
-    if (err?.data?.error?.message) {
-      setBackendError(err.data.error.message); // This will set: "Login details or password is incorrect."
-    } else if (err?.data?.message) {
-      setBackendError(err.data.message);
-    } else {
-      setBackendError("An unexpected connection error occurred. Please try again.");
+      console.warn("Authentication rejected:", err);
+
+      // Target the exact path the backend uses: err.data.error.message
+      if (err?.data?.error?.message) {
+        setBackendError(err.data.error.message); // This will set: "Login details or password is incorrect."
+      } else if (err?.data?.message) {
+        setBackendError(err.data.message);
+      } else {
+        setBackendError(
+          "An unexpected connection error occurred. Please try again.",
+        );
+      }
     }
-  }
   };
 
   return (

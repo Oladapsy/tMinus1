@@ -28,7 +28,6 @@ export default function SignUpForm() {
         onToggleLink={() => router.push("/(auth)/signup-mobile")}
         showForgotPassword={false}
         buttonText="Sign up"
-        onSubmit={() => router.push("/(auth)/otp")}
       />
 
       <View style={styles.extraText}>
