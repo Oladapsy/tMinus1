@@ -3,16 +3,17 @@ import { StyleSheet, View, Text } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import Arrowback from "@/assets/icons/profile/kyc/kycBack.svg";
-import Title from "@/src/components//common/Title";
-import Paragraph from "@/src/components//common/Paragraph";
+import Title from "@/src/components/common/Title";
+import Paragraph from "@/src/components/common/Paragraph";
 import { useRouter } from "expo-router";
 import IconAndText from "@/src/components/common/tab/IconAndText";
 
 export type KycScreenIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-// interface KycHeaderProps {
-//   screenIndex: KycScreenIndex;
-// }
+// 1. Uncomment and activate your TypeScript props interface
+interface KycHeaderProps {
+  screenIndex: KycScreenIndex;
+}
 
 const STEPS_CONFIG = {
   0: {
@@ -62,8 +63,13 @@ const STEPS_CONFIG = {
   },
 };
 
-export default function KycHeader() {
+// 2. Accept the screenIndex prop here
+export default function KycHeader({ screenIndex }: KycHeaderProps) {
   const router = useRouter();
+
+  // Look up the active configuration details based on the passed index
+  const currentConfig = STEPS_CONFIG[screenIndex] || STEPS_CONFIG[0];
+  const currentStep = currentConfig.stepTracker;
 
   // Visual tracking configuration for the steps
   const trackBubbles = [
@@ -74,23 +80,25 @@ export default function KycHeader() {
 
   return (
     <View style={styles.container}>
-      {/* step 0 */}
+      {/* Top Header Region */}
       <View style={styles.header}>
         <View style={styles.icon}>
           <IconAndText icon={<Arrowback />} onPress={() => router.back()} />
         </View>
 
         <View>
+          {/* 3. Dynamically read the config title */}
           <Title
-            text="Verify to unlock limits"
+            text={currentConfig.title}
             color={Colors.newWhite}
             size={18}
             fontFamily={FontFamily.bold}
           />
 
           <View style={styles.paragraph}>
+            {/* 4. Dynamically read the config description */}
             <Paragraph
-              text="Complete identity verification from inside the app before high-value trading or withdrawals."
+              text={currentConfig.desc}
               textAlign="left"
               color={Colors.newSecondary}
               size={11}
@@ -100,73 +108,71 @@ export default function KycHeader() {
         </View>
       </View>
 
-      {/* indicator line */}
-      {/* indicator line */}
-      <View style={styles.stepperContainer}>
-        {trackBubbles.map((bubble, index) => {
-          // Temporary hardcoded step evaluation for visual testing
-          const currentStep = 1;
+      {/* 5. Conditional Stepper: Only displays when the wizard has officially begun (stepTracker > 0) */}
+      {currentStep >= 0 && (
+        <View style={styles.stepperContainer}>
+          {trackBubbles.map((bubble, index) => {
+            // 6. Use the dynamic step tracker state instead of a hardcoded value
+            const isCompleted = currentStep > bubble.id;
+            const isActive = currentStep === bubble.id;
 
-          const isCompleted = currentStep > bubble.id;
-          const isActive = currentStep === bubble.id;
-
-          return (
-            <React.Fragment key={bubble.id}>
-              {/* Individual Step Circle + Label */}
-              <View style={styles.stepWrapper}>
-                <View
-                  style={[
-                    styles.circle,
-                    isActive && styles.circleActive,
-                    isCompleted && styles.circleCompleted,
-                  ]}
-                >
-                  <Text
+            return (
+              <React.Fragment key={bubble.id}>
+                {/* Individual Step Circle + Label */}
+                <View style={styles.stepWrapper}>
+                  <View
                     style={[
-                      styles.circleText,
-                      isActive && styles.circleTextActive,
-                      isCompleted && styles.circleTextCompleted,
+                      styles.circle,
+                      isActive && styles.circleActive,
+                      isCompleted && styles.circleCompleted,
                     ]}
                   >
-                    {bubble.id}
+                    <Text
+                      style={[
+                        styles.circleText,
+                        isActive && styles.circleTextActive,
+                        isCompleted && styles.circleTextCompleted,
+                      ]}
+                    >
+                      {bubble.id}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.label,
+                      (isActive || isCompleted) && styles.labelActive,
+                    ]}
+                  >
+                    {bubble.label}
                   </Text>
                 </View>
-                <Text
-                  style={[
-                    styles.label,
-                    (isActive || isCompleted) && styles.labelActive,
-                  ]}
-                >
-                  {bubble.label}
-                </Text>
-              </View>
 
-              {/* Line Bridge connecting to the next bubble */}
-              {index < trackBubbles.length - 1 && (
-                <View
-                  style={[
-                    styles.line,
-                    currentStep > bubble.id && styles.lineCompleted,
-                  ]}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </View>
+                {/* Line Bridge connecting to the next bubble */}
+                {index < trackBubbles.length - 1 && (
+                  <View
+                    style={[
+                      styles.line,
+                      currentStep > bubble.id && styles.lineCompleted,
+                    ]}
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
 
+// ... styles stay exactly the same as your modified version!
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 20,
-  },
+  container: { marginTop: 20 },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    marginBottom: 11,
+    marginBottom: 15,
   },
   icon: {
     backgroundColor: Colors.newGrey,
@@ -175,21 +181,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
   },
-  paragraph: {
-    maxWidth: 250,
-    marginTop: 4,
-  },
-  // the lines and circle showing steps
+  paragraph: { maxWidth: 250, marginTop: 4 },
   stepperContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
   },
-  stepWrapper: {
-    alignItems: "center",
-    zIndex: 2, // Keeps circles layered perfectly above the lines
-  },
+  stepWrapper: { alignItems: "center", zIndex: 2 },
   circle: {
     width: 24,
     height: 24,
@@ -205,40 +204,28 @@ const styles = StyleSheet.create({
     borderColor: Colors.green,
     borderWidth: 2,
   },
-  circleCompleted: {
-    backgroundColor: Colors.green,
-    borderColor: Colors.green,
-  },
+  circleCompleted: { backgroundColor: Colors.green, borderColor: Colors.green },
   circleText: {
     fontSize: 11,
     fontFamily: FontFamily.bold,
     color: Colors.newSecondary,
   },
-  circleTextActive: {
-    color: Colors.newWhite,
-  },
-  circleTextCompleted: {
-    color: "#080C11",
-  },
+  circleTextActive: { color: Colors.newWhite },
+  circleTextCompleted: { color: "#080C11" },
   label: {
     fontSize: 10,
     fontFamily: FontFamily.regular,
     color: Colors.newSecondary,
     marginTop: 6,
   },
-  labelActive: {
-    color: Colors.newWhite,
-    fontFamily: FontFamily.bold,
-  },
+  labelActive: { color: Colors.newWhite, fontFamily: FontFamily.bold },
   line: {
     flex: 1,
     height: 2,
     backgroundColor: Colors.newTertiary,
-    marginTop: -16, // Pulls the connecting line up to look centered behind the circles
+    marginTop: -16,
     marginHorizontal: -10,
-    zIndex: 1, // Keeps the line layered behind the circle bubbles
+    zIndex: 1,
   },
-  lineCompleted: {
-    backgroundColor: Colors.green,
-  },
+  lineCompleted: { backgroundColor: Colors.green },
 });
