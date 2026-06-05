@@ -202,6 +202,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
             style={[
               styles.statusIndicator,
               frontUri ? styles.statusIndicatorFilled : null,
+              activeTab === "front" && styles.statusIndicatorFilled,
             ]}
           />
           <Text
@@ -223,6 +224,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
             style={[
               styles.statusIndicator,
               backUri ? styles.statusIndicatorFilled : null,
+              activeTab === "back" && styles.statusIndicatorFilled,
             ]}
           />
           <Text
@@ -247,6 +249,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
             style={[
               styles.statusIndicator,
               selfieUri ? styles.statusIndicatorFilled : null,
+              activeTab === "selfie" && styles.statusIndicatorFilled,
             ]}
           />
           <Text
@@ -270,7 +273,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
               style={[
                 styles.dropzoneBox,
                 currentTab.currentUri ? styles.dropzoneBoxUploaded : null,
-                errors.frontUri && activeTab === "front"
+                errors.frontUri && (activeTab === "front" || activeTab === "selfie")
                   ? styles.dropzoneBoxError
                   : null,
               ]}
@@ -338,34 +341,34 @@ const styles = StyleSheet.create({
   },
   tabCard: {
     flex: 1,
-    height: 104,
-    backgroundColor: "#11161D",
-    borderRadius: 16,
+    height: 112,
+    backgroundColor: Colors.newDark,
+    borderRadius: 14,
     padding: 16,
     justifyContent: "space-between",
     borderWidth: 1,
     borderColor: "transparent",
   },
   tabCardActive: {
-    backgroundColor: "#062319",
-    borderColor: "rgba(34, 197, 94, 0.2)",
+    backgroundColor: Colors.newGreen,
+    borderColor: Colors.green,
   },
   statusIndicator: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    width: 34,
+    height: 34,
+    borderRadius: 16,
+    backgroundColor: Colors.newGrey,
   },
   statusIndicatorFilled: {
-    backgroundColor: Colors.green || "#22C55E",
+    backgroundColor: Colors.green,
   },
   tabLabel: {
     fontSize: 12,
     fontFamily: FontFamily.medium,
-    color: "#64748B",
+    color: Colors.newSecondary,
   },
   tabLabelActive: {
-    color: Colors.newWhite || "white",
+    color: Colors.newWhite ,
   },
   dropzoneWrapper: {
     marginTop: 24,
@@ -373,32 +376,32 @@ const styles = StyleSheet.create({
   },
   dropzoneBox: {
     height: 190,
-    backgroundColor: "#161C24",
-    borderRadius: 20,
+    backgroundColor: Colors.newDark,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
   },
   dropzoneBoxUploaded: {
-    borderWidth: 1,
-    borderColor: "rgba(34, 197, 94, 0.4)",
+    borderWidth: 1.2,
+    borderColor: Colors.newGreen,
   },
   dropzoneBoxError: {
     borderWidth: 1.2,
-    borderColor: Colors.newRed || "#EF4444",
+    borderColor: Colors.newRed,
   },
   emptyPrompt: {
     alignItems: "center",
   },
   innerDotIndicator: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#0A281E",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.newGreen,
     marginBottom: 16,
   },
   dropzoneTitle: {
-    color: Colors.newWhite || "white",
+    color: Colors.newWhite,
     fontSize: 14,
     fontFamily: FontFamily.bold,
   },
@@ -428,7 +431,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
   },
   errorLabel: {
-    color: Colors.newRed || "#EF4444",
+    color: Colors.newRed,
     fontSize: 11,
     fontFamily: FontFamily.regular,
     marginTop: 6,
@@ -438,23 +441,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#11161D",
+    backgroundColor: Colors.newDark,
     height: 54,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingHorizontal: 16,
   },
   acceptedTextLeft: {
-    color: "#64748B",
+    color: Colors.newSecondary,
     fontSize: 13,
     fontFamily: FontFamily.regular,
   },
   acceptedTextRight: {
-    color: Colors.newWhite || "white",
+    color: Colors.newWhite,
     fontSize: 13,
     fontFamily: FontFamily.bold,
   },
   buttonContainer: {
-    marginTop: "auto",
     paddingBottom: 24,
+    marginTop: 124,
   },
 });
