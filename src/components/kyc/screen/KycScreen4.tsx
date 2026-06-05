@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Pressable, Image } from "react-native";
+import { StyleSheet, View, Text, Pressable, Image, Alert } from "react-native";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,15 +9,15 @@ import PrimaryButton from "../../common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
-// 1. Zod schema: frontUri is required (min 1), while backUri and thirdUri remain completely optional
+// 1. Zod schema: frontUri is required (min 1), while backUri and selfieUri remain optional
 const uploadSchema = z.object({
   frontUri: z.string().min(1, "The front image of your document is required"),
   backUri: z.string().optional(),
-  thirdUri: z.string().optional(),
+  selfieUri: z.string().optional(),
 });
 
 type UploadFormData = z.infer<typeof uploadSchema>;
-type TabType = "front" | "back" | "third";
+type TabType = "front" | "back" | "selfie";
 
 export default function KycScreen4({ onNext }: { onNext: () => void }) {
   // Track which card tab is highlighted at the top
@@ -34,33 +34,53 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
     defaultValues: {
       frontUri: "",
       backUri: "",
-      thirdUri: "",
+      selfieUri: "",
     },
   });
 
   // Watch the real-time upload state paths for image checkmarks & thumbnail loading
   const frontUri = watch("frontUri");
   const backUri = watch("backUri");
-  const thirdUri = watch("thirdUri");
+  const selfieUri = watch("selfieUri");
 
-  // Determine current context string labels based on user tab navigation
+  // Determine current context string labels and target fields based on user tab navigation
   const getCurrentTabDetails = () => {
     switch (activeTab) {
       case "front":
-        return { field: "frontUri" as const, label: "document front", currentUri: frontUri };
+        return {
+          field: "frontUri" as const,
+          label: "document front",
+          currentUri: frontUri,
+          mode: "gallery",
+        };
       case "back":
-        return { field: "backUri" as const, label: "document back", currentUri: backUri };
-      case "third":
-        return { field: "thirdUri" as const, label: "passport page / selfie", currentUri: thirdUri };
+        return {
+          field: "backUri" as const,
+          label: "document back",
+          currentUri: backUri,
+          mode: "gallery",
+        };
+      case "selfie":
+        return {
+          field: "selfieUri" as const,
+          label: "selfie photo",
+          currentUri: selfieUri,
+          mode: "camera",
+        };
     }
   };
 
   const currentTab = getCurrentTabDetails();
 
-  const handlePickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  // Handles picking images from the device gallery (For Front and Back documents)
+  const handlePickFromGallery = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      alert("Permission to access camera roll is required!");
+      Alert.alert(
+        "Permission Denied",
+        "Permission to access camera roll is required!",
+      );
       return;
     }
 
@@ -71,15 +91,93 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      // Inject image into current active controller frame
-      setValue(currentTab.field, result.assets[0].uri, { shouldValidate: true });
-      
-      // Auto-advance tabs for a smoother workflow
-      if (activeTab === "front") {
-        setActiveTab("back");
-      } else if (activeTab === "back") {
-        setActiveTab("third");
+      // Save URI to form state via current dynamic field key
+      setValue(currentTab.field, result.assets[0].uri, {
+        shouldValidate: true,
+      });
+      autoAdvanceTabs();
+    }
+  };
+
+  // Handles opening the native camera directly (For the Front-Facing Selfie)
+  // Handles opening the native camera directly (With simulator fallback)
+  const handleTakeSelfie = async () => {
+    // 1. Request camera permissions
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Permission Denied",
+        "Permission to access the camera is required!",
+      );
+      return;
+    }
+
+    try {
+      // 2. Try launching the live hardware camera
+      const result = await ImagePicker.launchCameraAsync({
+        cameraType: ImagePicker.CameraType.front,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setValue(currentTab.field, result.assets[0].uri, {
+          shouldValidate: true,
+        });
+        autoAdvanceTabs();
       }
+    } catch (error) {
+      // 3. Fallback: If it's a simulator, open the gallery instead of crashing
+      console.log(
+        "Camera failed (likely simulator), falling back to gallery:",
+        error,
+      );
+
+      Alert.alert(
+        "Simulator Detected",
+        "Camera hardware is missing. Opening photo gallery instead.",
+        [
+          {
+            text: "Open Gallery",
+            onPress: async () => {
+              const galleryResult = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 0.8,
+              });
+              if (
+                !galleryResult.canceled &&
+                galleryResult.assets &&
+                galleryResult.assets.length > 0
+              ) {
+                setValue(currentTab.field, galleryResult.assets[0].uri, {
+                  shouldValidate: true,
+                });
+                autoAdvanceTabs();
+              }
+            },
+          },
+        ],
+      );
+    }
+  };
+
+  // Switchboard director to call the correct capture function based on active tab mode
+  const handleMediaCaptureAction = () => {
+    if (currentTab.mode === "camera") {
+      handleTakeSelfie();
+    } else {
+      handlePickFromGallery();
+    }
+  };
+
+  // Helper utility to move the user along the tab sequence automatically
+  const autoAdvanceTabs = () => {
+    if (activeTab === "front") {
+      setActiveTab("back");
+    } else if (activeTab === "back") {
+      setActiveTab("selfie");
     }
   };
 
@@ -90,34 +188,75 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
 
   return (
     <View style={styles.container}>
-      
       {/* 1. TOP CARDS STEP LAYOUT */}
       <View style={styles.tabsContainer}>
         {/* FRONT CARD */}
-        <Pressable 
-          style={[styles.tabCard, activeTab === "front" && styles.tabCardActive]} 
+        <Pressable
+          style={[
+            styles.tabCard,
+            activeTab === "front" && styles.tabCardActive,
+          ]}
           onPress={() => setActiveTab("front")}
         >
-          <View style={[styles.statusIndicator, frontUri ? styles.statusIndicatorFilled : null]} />
-          <Text style={[styles.tabLabel, activeTab === "front" && styles.tabLabelActive]}>Front required</Text>
+          <View
+            style={[
+              styles.statusIndicator,
+              frontUri ? styles.statusIndicatorFilled : null,
+            ]}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              activeTab === "front" && styles.tabLabelActive,
+            ]}
+          >
+            Front required
+          </Text>
         </Pressable>
 
         {/* BACK CARD */}
-        <Pressable 
-          style={[styles.tabCard, activeTab === "back" && styles.tabCardActive]} 
+        <Pressable
+          style={[styles.tabCard, activeTab === "back" && styles.tabCardActive]}
           onPress={() => setActiveTab("back")}
         >
-          <View style={[styles.statusIndicator, backUri ? styles.statusIndicatorFilled : null]} />
-          <Text style={[styles.tabLabel, activeTab === "back" && styles.tabLabelActive]}>Back optional</Text>
+          <View
+            style={[
+              styles.statusIndicator,
+              backUri ? styles.statusIndicatorFilled : null,
+            ]}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              activeTab === "back" && styles.tabLabelActive,
+            ]}
+          >
+            Back optional
+          </Text>
         </Pressable>
 
-        {/* PASSPORT PAGE / SELFIE CARD */}
-        <Pressable 
-          style={[styles.tabCard, activeTab === "third" && styles.tabCardActive]} 
-          onPress={() => setActiveTab("third")}
+        {/* SELFIE CARD */}
+        <Pressable
+          style={[
+            styles.tabCard,
+            activeTab === "selfie" && styles.tabCardActive,
+          ]}
+          onPress={() => setActiveTab("selfie")}
         >
-          <View style={[styles.statusIndicator, thirdUri ? styles.statusIndicatorFilled : null]} />
-          <Text style={[styles.tabLabel, activeTab === "third" && styles.tabLabelActive]}>Passport page</Text>
+          <View
+            style={[
+              styles.statusIndicator,
+              selfieUri ? styles.statusIndicatorFilled : null,
+            ]}
+          />
+          <Text
+            style={[
+              styles.tabLabel,
+              activeTab === "selfie" && styles.tabLabelActive,
+            ]}
+          >
+            Selfie camera
+          </Text>
         </Pressable>
       </View>
 
@@ -127,17 +266,22 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
           control={control}
           name={currentTab.field}
           render={() => (
-            <Pressable 
+            <Pressable
               style={[
                 styles.dropzoneBox,
                 currentTab.currentUri ? styles.dropzoneBoxUploaded : null,
-                errors.frontUri && activeTab === "front" ? styles.dropzoneBoxError : null
-              ]} 
-              onPress={handlePickImage}
+                errors.frontUri && activeTab === "front"
+                  ? styles.dropzoneBoxError
+                  : null,
+              ]}
+              onPress={handleMediaCaptureAction}
             >
               {currentTab.currentUri ? (
                 <View style={styles.previewFrame}>
-                  <Image source={{ uri: currentTab.currentUri }} style={styles.imageOverlay} />
+                  <Image
+                    source={{ uri: currentTab.currentUri }}
+                    style={styles.imageOverlay}
+                  />
                   <View style={styles.statusBadge}>
                     <Text style={styles.statusBadgeText}>Image Selected</Text>
                   </View>
@@ -145,7 +289,11 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
               ) : (
                 <View style={styles.emptyPrompt}>
                   <View style={styles.innerDotIndicator} />
-                  <Text style={styles.dropzoneTitle}>Upload {currentTab.label}</Text>
+                  <Text style={styles.dropzoneTitle}>
+                    {currentTab.mode === "camera"
+                      ? "Open selfie camera"
+                      : `Upload ${currentTab.label}`}
+                  </Text>
                 </View>
               )}
             </Pressable>
@@ -191,7 +339,7 @@ const styles = StyleSheet.create({
   tabCard: {
     flex: 1,
     height: 104,
-    backgroundColor: "#11161D", // Base card shade matching image context background
+    backgroundColor: "#11161D",
     borderRadius: 16,
     padding: 16,
     justifyContent: "space-between",
@@ -199,7 +347,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   tabCardActive: {
-    backgroundColor: "#062319", // Smooth deep green focus shadow frame
+    backgroundColor: "#062319",
     borderColor: "rgba(34, 197, 94, 0.2)",
   },
   statusIndicator: {
@@ -209,7 +357,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.04)",
   },
   statusIndicatorFilled: {
-    backgroundColor: Colors.green || "#22C55E", // Flashes solid light green when file is loaded
+    backgroundColor: Colors.green || "#22C55E",
   },
   tabLabel: {
     fontSize: 12,
