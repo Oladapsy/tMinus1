@@ -16,7 +16,7 @@ interface KycScreen6Props {
 }
 
 export default function KycScreen6({ onSubmit, userData }: KycScreen6Props) {
-  const displayName = userData?.name || "Ada Student";
+  const displayName = userData?.name || "NO NAME";
   const displayCountry = userData?.country || "Nigeria";
   const displayDocType = userData?.docType || "National ID";
 

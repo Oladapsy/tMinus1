@@ -41,7 +41,11 @@ const kycSchema = z.object({
 
 type KycFormData = z.infer<typeof kycSchema>;
 
-export default function KycScreen3({ onNext }: { onNext: () => void }) {
+interface KycScreen3Props {
+  onNext: (formData: { name: string; country: string; docType: string }) => void;
+}
+
+export default function KycScreen3({ onNext }: KycScreen3Props) {
   const [modalVisible, setModalVisible] = useState(false);
 
   // Map backend keys to clean, user-friendly UI labels
@@ -73,8 +77,13 @@ export default function KycScreen3({ onNext }: { onNext: () => void }) {
     docOptions.find((o) => o.key === selectedDocType)?.label || "";
 
   const onSubmitForm = (data: KycFormData) => {
-    console.log("Validated Payload:", data);
-    onNext();
+    const humanReadableDocLabel = docOptions.find((o) => o.key === data.docType)?.label || "National ID";
+
+    onNext({
+      name: data.legalName,
+      country: data.country,
+      docType: humanReadableDocLabel,
+    });
   };
 
   return (
