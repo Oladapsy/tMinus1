@@ -1,6 +1,10 @@
-import { StyleSheet, View, } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
 import KycTierCard from "@/src/components/kyc/KycTierCard";
+import KycNoteCard from "../KycNoteCard";
+import PrimaryButton from "../../common/PrimaryButton";
+import { Colors } from "@/src/constants/colors";
+import { FontFamily } from "@/src/constants/fonts";
 interface KycScreenProps {
   onNext: () => void;
 }
@@ -31,6 +35,22 @@ export default function KycScreen2({ onNext }: KycScreenProps) {
           pillText="$5,000 trade · $2,500 withdrawal"
         />
       </View>
+
+      <KycNoteCard
+        showIcon={true}
+        text="Mismatched details can delay approval or require resubmission."
+      />
+
+      <View style={styles.button}>
+        <PrimaryButton
+          text="Continue"
+          onPress={onNext}
+          Bgcolor={Colors.green}
+          textColor={Colors.newBlack}
+          fontSize={13}
+          style={{ fontFamily: FontFamily.bold }}
+        />
+      </View>
     </View>
   );
 }
@@ -40,5 +60,9 @@ const styles = StyleSheet.create({
   },
   listWrapper: {
     marginTop: 36,
+    marginBottom: 24,
   },
+  button: {
+    marginTop: 48,
+  }
 });

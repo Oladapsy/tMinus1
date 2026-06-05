@@ -29,4 +29,5 @@ export const Colors = {
   newGreen: "#083D2B",
   newRed: "#E4484C",
   newBlack: "#080C11",
+  newYellow: "#DB9E3859",
 };
