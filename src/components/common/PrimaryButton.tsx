@@ -14,7 +14,9 @@ interface PrimaryButtonProps {
   borderColor?: string;
   fullWidth?: boolean;
   style?: object;
+  disabled?: boolean;
 }
+
 export default function PrimaryButton({
   text,
   textColor = Colors.darkText,
@@ -26,10 +28,12 @@ export default function PrimaryButton({
   borderColor,
   fullWidth = true,
   style,
+  disabled = false,
 }: PrimaryButtonProps) {
   return (
     <TouchableOpacity
-      onPress={onPress}
+      disabled={disabled}
+      onPress={disabled ? undefined : onPress}
       style={[
         styles.button,
         style,
@@ -39,6 +43,7 @@ export default function PrimaryButton({
           borderColor: borderColor,
           width: fullWidth ? "100%" : undefined,
         },
+        disabled && styles.disabledStyle,
       ]}
     >
       {icon}
@@ -58,7 +63,6 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 16,
     height: 54,
-    // width: "100%",
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
@@ -66,5 +70,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: FontFamily.regular,
+  },
+  disabledStyle: {
+    opacity: 0.4,
   },
 });

@@ -251,5 +251,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: FontFamily.bold,
   },
-  buttonContainer: { paddingBottom: 24, marginTop: 124 },
+  buttonContainer: {
+    paddingBottom: 24,
+    marginTop: 124,
+  },
 });
