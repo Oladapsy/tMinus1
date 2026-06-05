@@ -31,7 +31,7 @@ export default function Index() {
             {screenIndex === 2 && <KycScreen3 onNext={() => setScreenIndex(3)} />}
             {screenIndex === 3 && <KycScreen4 onNext={() => setScreenIndex(4)} />}
             {screenIndex === 4 && <KycScreen5 onNext={() => setScreenIndex(5)} />}
-            {screenIndex === 5 && <KycScreen6 onNext={() => setScreenIndex(6)} />}
+            {screenIndex === 5 && <KycScreen6 onSubmit={() => setScreenIndex(6)} />}
             {screenIndex === 6 && <KycScreen7 onNext={() => setScreenIndex(7)} />}
             {screenIndex === 7 && <KycScreen8 onNext={() => setScreenIndex(8)} />}
           </ScrollView>
