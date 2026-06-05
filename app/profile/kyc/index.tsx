@@ -2,14 +2,14 @@ import { ImageBackground, StyleSheet, View, ScrollView } from "react-native";
 import React, { useState } from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import KycHeader, {KycScreenIndex} from "@/src/components/kyc/KycHeader";
-import KycScreen1 from "@/src/components/kyc/KycScreen1";
-import KycScreen2 from "@/src/components/kyc/KycScreen2";
-import KycScreen3 from "@/src/components/kyc/KycScreen3";
-import KycScreen4 from "@/src/components/kyc/KycScreen4";
-import KycScreen5 from "@/src/components/kyc/KycScreen5";
-import KycScreen6 from "@/src/components/kyc/KycScreen6";
-import KycScreen7 from "@/src/components/kyc/KycScreen7";
-import KycScreen8 from "@/src/components/kyc/KycScreen8";
+import KycScreen1 from "@/src/components/kyc/screen/KycScreen1";
+import KycScreen2 from "@/src/components/kyc/screen/KycScreen2";
+import KycScreen3 from "@/src/components/kyc/screen/KycScreen3";
+import KycScreen4 from "@/src/components/kyc/screen/KycScreen4";
+import KycScreen5 from "@/src/components/kyc/screen/KycScreen5";
+import KycScreen6 from "@/src/components/kyc/screen/KycScreen6";
+import KycScreen7 from "@/src/components/kyc/screen/KycScreen7";
+import KycScreen8 from "@/src/components/kyc/screen/KycScreen8";
 
 export default function Index() {
   const [screenIndex, setScreenIndex] = useState<KycScreenIndex>(0);

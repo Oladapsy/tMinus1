@@ -2,8 +2,8 @@ import { StyleSheet, View } from "react-native";
 import React from "react";
 import KycLevelCard from "@/src/components/kyc/KycLevelCard";
 import KycLimitRow from "@/src/components/kyc/KycLimitRow";
-import PrimaryButton from "../common/PrimaryButton";
-import Paragraph from "../common/Paragraph";
+import PrimaryButton from "../../common/PrimaryButton";
+import Paragraph from "../../common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
