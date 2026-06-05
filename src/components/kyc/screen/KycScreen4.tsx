@@ -1,15 +1,16 @@
-import { StyleSheet, View, Text, Pressable, Image, Alert } from "react-native";
+import { StyleSheet, View, Text, Alert } from "react-native";
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import * as ImagePicker from "expo-image-picker";
 
+import KycStepTab from "@/src/components/kyc/KycStepTab";
+import MediaDropzone from "@/src/components/kyc/MediaDropzone";
 import PrimaryButton from "../../common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
-// 1. Zod schema: frontUri is required (min 1), while backUri and selfieUri remain optional
 const uploadSchema = z.object({
   frontUri: z.string().min(1, "The front image of your document is required"),
   backUri: z.string().optional(),
@@ -20,7 +21,6 @@ type UploadFormData = z.infer<typeof uploadSchema>;
 type TabType = "front" | "back" | "selfie";
 
 export default function KycScreen4({ onNext }: { onNext: () => void }) {
-  // Track which card tab is highlighted at the top
   const [activeTab, setActiveTab] = useState<TabType>("front");
 
   const {
@@ -31,19 +31,13 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
     formState: { errors },
   } = useForm<UploadFormData>({
     resolver: zodResolver(uploadSchema),
-    defaultValues: {
-      frontUri: "",
-      backUri: "",
-      selfieUri: "",
-    },
+    defaultValues: { frontUri: "", backUri: "", selfieUri: "" },
   });
 
-  // Watch the real-time upload state paths for image checkmarks & thumbnail loading
-  const frontUri = watch("frontUri");
-  const backUri = watch("backUri");
-  const selfieUri = watch("selfieUri");
+  const frontUri = watch("frontUri") || "";
+  const backUri = watch("backUri") || "";
+  const selfieUri = watch("selfieUri") || "";
 
-  // Determine current context string labels and target fields based on user tab navigation
   const getCurrentTabDetails = () => {
     switch (activeTab) {
       case "front":
@@ -51,28 +45,27 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
           field: "frontUri" as const,
           label: "document front",
           currentUri: frontUri,
-          mode: "gallery",
+          mode: "gallery" as const,
         };
       case "back":
         return {
           field: "backUri" as const,
           label: "document back",
           currentUri: backUri,
-          mode: "gallery",
+          mode: "gallery" as const,
         };
       case "selfie":
         return {
           field: "selfieUri" as const,
           label: "selfie photo",
           currentUri: selfieUri,
-          mode: "camera",
+          mode: "camera" as const,
         };
     }
   };
 
   const currentTab = getCurrentTabDetails();
 
-  // Handles picking images from the device gallery (For Front and Back documents)
   const handlePickFromGallery = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -83,15 +76,12 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
       );
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
-
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      // Save URI to form state via current dynamic field key
       setValue(currentTab.field, result.assets[0].uri, {
         shouldValidate: true,
       });
@@ -99,10 +89,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
     }
   };
 
-  // Handles opening the native camera directly (For the Front-Facing Selfie)
-  // Handles opening the native camera directly (With simulator fallback)
   const handleTakeSelfie = async () => {
-    // 1. Request camera permissions
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert(
@@ -111,59 +98,39 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
       );
       return;
     }
-
     try {
-      // 2. Try launching the live hardware camera
       const result = await ImagePicker.launchCameraAsync({
         cameraType: ImagePicker.CameraType.front,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
       });
-
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setValue(currentTab.field, result.assets[0].uri, {
           shouldValidate: true,
         });
         autoAdvanceTabs();
       }
-    } catch (error) {
-      // 3. Fallback: If it's a simulator, open the gallery instead of crashing
-      console.log(
-        "Camera failed (likely simulator), falling back to gallery:",
-        error,
-      );
-
-      Alert.alert(
-        "Simulator Detected",
-        "Camera hardware is missing. Opening photo gallery instead.",
-        [
-          {
-            text: "Open Gallery",
-            onPress: async () => {
-              const galleryResult = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                quality: 0.8,
-              });
-              if (
-                !galleryResult.canceled &&
-                galleryResult.assets &&
-                galleryResult.assets.length > 0
-              ) {
-                setValue(currentTab.field, galleryResult.assets[0].uri, {
-                  shouldValidate: true,
-                });
-                autoAdvanceTabs();
-              }
-            },
-          },
-        ],
-      );
+    } catch {
+      // Clean catch: removed unused 'error' declaration variable entirely
+      const galleryResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.8,
+      });
+      if (
+        !galleryResult.canceled &&
+        galleryResult.assets &&
+        galleryResult.assets.length > 0
+      ) {
+        setValue(currentTab.field, galleryResult.assets[0].uri, {
+          shouldValidate: true,
+        });
+        autoAdvanceTabs();
+      }
     }
   };
 
-  // Switchboard director to call the correct capture function based on active tab mode
   const handleMediaCaptureAction = () => {
     if (currentTab.mode === "camera") {
       handleTakeSelfie();
@@ -172,17 +139,12 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
     }
   };
 
-  // Helper utility to move the user along the tab sequence automatically
   const autoAdvanceTabs = () => {
-    if (activeTab === "front") {
-      setActiveTab("back");
-    } else if (activeTab === "back") {
-      setActiveTab("selfie");
-    }
+    if (activeTab === "front") setActiveTab("back");
+    else if (activeTab === "back") setActiveTab("selfie");
   };
 
-  const onSubmitForm = (data: UploadFormData) => {
-    console.log("Validated Form Payload Images submitted safely:", data);
+  const onSubmitForm = () => {
     onNext();
   };
 
@@ -190,123 +152,48 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
     <View style={styles.container}>
       {/* 1. TOP CARDS STEP LAYOUT */}
       <View style={styles.tabsContainer}>
-        {/* FRONT CARD */}
-        <Pressable
-          style={[
-            styles.tabCard,
-            activeTab === "front" && styles.tabCardActive,
-          ]}
+        <KycStepTab
+          label="Front required"
+          isActive={activeTab === "front"}
+          isFilled={!!frontUri}
+          hasError={!!errors.frontUri && activeTab === "front"} // Clears visual error highlights when navigating away
           onPress={() => setActiveTab("front")}
-        >
-          <View
-            style={[
-              styles.statusIndicator,
-              frontUri ? styles.statusIndicatorFilled : null,
-              activeTab === "front" && styles.statusIndicatorFilled,
-            ]}
-          />
-          <Text
-            style={[
-              styles.tabLabel,
-              activeTab === "front" && styles.tabLabelActive,
-            ]}
-          >
-            Front required
-          </Text>
-        </Pressable>
-
-        {/* BACK CARD */}
-        <Pressable
-          style={[styles.tabCard, activeTab === "back" && styles.tabCardActive]}
-          onPress={() => setActiveTab("back")}
-        >
-          <View
-            style={[
-              styles.statusIndicator,
-              backUri ? styles.statusIndicatorFilled : null,
-              activeTab === "back" && styles.statusIndicatorFilled,
-            ]}
-          />
-          <Text
-            style={[
-              styles.tabLabel,
-              activeTab === "back" && styles.tabLabelActive,
-            ]}
-          >
-            Back optional
-          </Text>
-        </Pressable>
-
-        {/* SELFIE CARD */}
-        <Pressable
-          style={[
-            styles.tabCard,
-            activeTab === "selfie" && styles.tabCardActive,
-          ]}
-          onPress={() => setActiveTab("selfie")}
-        >
-          <View
-            style={[
-              styles.statusIndicator,
-              selfieUri ? styles.statusIndicatorFilled : null,
-              activeTab === "selfie" && styles.statusIndicatorFilled,
-            ]}
-          />
-          <Text
-            style={[
-              styles.tabLabel,
-              activeTab === "selfie" && styles.tabLabelActive,
-            ]}
-          >
-            Selfie camera
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* 2. DYNAMIC DROPZONE CONTAINER */}
-      <View style={styles.dropzoneWrapper}>
-        <Controller
-          control={control}
-          name={currentTab.field}
-          render={() => (
-            <Pressable
-              style={[
-                styles.dropzoneBox,
-                currentTab.currentUri ? styles.dropzoneBoxUploaded : null,
-                errors.frontUri && (activeTab === "front" || activeTab === "selfie")
-                  ? styles.dropzoneBoxError
-                  : null,
-              ]}
-              onPress={handleMediaCaptureAction}
-            >
-              {currentTab.currentUri ? (
-                <View style={styles.previewFrame}>
-                  <Image
-                    source={{ uri: currentTab.currentUri }}
-                    style={styles.imageOverlay}
-                  />
-                  <View style={styles.statusBadge}>
-                    <Text style={styles.statusBadgeText}>Image Selected</Text>
-                  </View>
-                </View>
-              ) : (
-                <View style={styles.emptyPrompt}>
-                  <View style={styles.innerDotIndicator} />
-                  <Text style={styles.dropzoneTitle}>
-                    {currentTab.mode === "camera"
-                      ? "Open selfie camera"
-                      : `Upload ${currentTab.label}`}
-                  </Text>
-                </View>
-              )}
-            </Pressable>
-          )}
         />
-        {/* Front failure notification message box */}
-        {errors.frontUri && activeTab === "front" && (
-          <Text style={styles.errorLabel}>{errors.frontUri.message}</Text>
-        )}
+
+        <KycStepTab
+          label="Back optional"
+          isActive={activeTab === "back"}
+          isFilled={!!backUri}
+          hasError={false}
+          onPress={() => setActiveTab("back")}
+        />
+
+        <KycStepTab
+          label="Selfie camera"
+          isActive={activeTab === "selfie"}
+          isFilled={!!selfieUri}
+          hasError={!!errors.frontUri && activeTab === "selfie"}
+          onPress={() => setActiveTab("selfie")}
+        />
       </View>
+
+      {/* 2. MEDIA DROPZONE CONTAINER */}
+      <MediaDropzone
+        control={control}
+        fieldName={currentTab.field}
+        currentUri={currentTab.currentUri}
+        label={currentTab.label}
+        mode={currentTab.mode}
+        hasError={
+          !!errors.frontUri && (activeTab === "front" || activeTab === "selfie")
+        }
+        onPress={handleMediaCaptureAction}
+      />
+
+      {/* FIX: Displays the validation error text message under both Front and Selfie views */}
+      {errors.frontUri && (activeTab === "front" || activeTab === "selfie") && (
+        <Text style={styles.errorLabel}>{errors.frontUri.message}</Text>
+      )}
 
       {/* 3. ACCEPTED FILE TYPES BAR */}
       <View style={styles.acceptedFilesBar}>
@@ -330,111 +217,19 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   tabsContainer: {
     flexDirection: "row",
     gap: 12,
     marginTop: 24,
     width: "100%",
   },
-  tabCard: {
-    flex: 1,
-    height: 112,
-    backgroundColor: Colors.newDark,
-    borderRadius: 14,
-    padding: 16,
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  tabCardActive: {
-    backgroundColor: Colors.newGreen,
-    borderColor: Colors.green,
-  },
-  statusIndicator: {
-    width: 34,
-    height: 34,
-    borderRadius: 16,
-    backgroundColor: Colors.newGrey,
-  },
-  statusIndicatorFilled: {
-    backgroundColor: Colors.green,
-  },
-  tabLabel: {
-    fontSize: 12,
-    fontFamily: FontFamily.medium,
-    color: Colors.newSecondary,
-  },
-  tabLabelActive: {
-    color: Colors.newWhite ,
-  },
-  dropzoneWrapper: {
-    marginTop: 24,
-    marginBottom: 16,
-  },
-  dropzoneBox: {
-    height: 190,
-    backgroundColor: Colors.newDark,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  dropzoneBoxUploaded: {
-    borderWidth: 1.2,
-    borderColor: Colors.newGreen,
-  },
-  dropzoneBoxError: {
-    borderWidth: 1.2,
-    borderColor: Colors.newRed,
-  },
-  emptyPrompt: {
-    alignItems: "center",
-  },
-  innerDotIndicator: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.newGreen,
-    marginBottom: 16,
-  },
-  dropzoneTitle: {
-    color: Colors.newWhite,
-    fontSize: 14,
-    fontFamily: FontFamily.bold,
-  },
-  previewFrame: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  imageOverlay: {
-    width: "100%",
-    height: "100%",
-    position: "absolute",
-    opacity: 0.35,
-  },
-  statusBadge: {
-    backgroundColor: "rgba(34, 197, 94, 0.15)",
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.green,
-  },
-  statusBadgeText: {
-    color: Colors.green,
-    fontSize: 12,
-    fontFamily: FontFamily.bold,
-  },
   errorLabel: {
     color: Colors.newRed,
     fontSize: 11,
     fontFamily: FontFamily.regular,
-    marginTop: 6,
+    marginTop: -6,
+    marginBottom: 16,
     marginLeft: 4,
   },
   acceptedFilesBar: {
@@ -456,8 +251,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: FontFamily.bold,
   },
-  buttonContainer: {
-    paddingBottom: 24,
-    marginTop: 124,
-  },
+  buttonContainer: { paddingBottom: 24, marginTop: 124 },
 });
