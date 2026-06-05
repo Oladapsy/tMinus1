@@ -1,17 +1,15 @@
 import { ImageBackground, StyleSheet, View, ScrollView } from "react-native";
 import React, { useState } from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import KycHeader, {KycScreenIndex} from "@/src/components/kyc/KycHeader";
+import KycHeader, { KycScreenIndex } from "@/src/components/kyc/KycHeader";
 import KycScreen1 from "@/src/components/kyc/screen/KycScreen1";
 import KycScreen2 from "@/src/components/kyc/screen/KycScreen2";
 import KycScreen3 from "@/src/components/kyc/screen/KycScreen3";
 import KycScreen4 from "@/src/components/kyc/screen/KycScreen4";
 import KycScreen5 from "@/src/components/kyc/screen/KycScreen5";
 import KycScreen6 from "@/src/components/kyc/screen/KycScreen6";
-import KycScreen7 from "@/src/components/kyc/screen/KycScreen7";
-import KycScreen8 from "@/src/components/kyc/screen/KycScreen8";
+import KycStatusScreen from "@/src/components/kyc/screen/KycStatusScreen";
 
-// Define the data structure matching your KycScreen3 Zod outputs
 interface KycCollectedData {
   name: string;
   country: string;
@@ -19,7 +17,7 @@ interface KycCollectedData {
 }
 
 export default function Index() {
-  const [screenIndex, setScreenIndex] = useState<KycScreenIndex>(0);
+  const [screenIndex, setScreenIndex] = useState<KycScreenIndex>(5);
 
   // The central state bucket to hold data values safely across screen unmounts
   const [kycData, setKycData] = useState<KycCollectedData>({
@@ -39,32 +37,56 @@ export default function Index() {
           <KycHeader screenIndex={screenIndex} />
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            {screenIndex === 0 && <KycScreen1 onNext={() => setScreenIndex(1)} />}
-            {screenIndex === 1 && <KycScreen2 onNext={() => setScreenIndex(2)} />}
-            
-            {/* SCREEN 3: Intercept form data here and store it, then advance index to 3 */}
+            {screenIndex === 0 && (
+              <KycScreen1 onNext={() => setScreenIndex(1)} />
+            )}
+            {screenIndex === 1 && (
+              <KycScreen2 onNext={() => setScreenIndex(2)} />
+            )}
+
+            {/* SCREEN 3: Intercept form data here and i stored it, then advance index to 3 */}
             {screenIndex === 2 && (
-              <KycScreen3 
+              <KycScreen3
                 onNext={(formData) => {
                   setKycData(formData);
                   setScreenIndex(3);
-                }} 
+                }}
               />
             )}
-            
-            {screenIndex === 3 && <KycScreen4 onNext={() => setScreenIndex(4)} />}
-            {screenIndex === 4 && <KycScreen5 onNext={() => setScreenIndex(5)} />}
-            
+
+            {screenIndex === 3 && (
+              <KycScreen4 onNext={() => setScreenIndex(4)} />
+            )}
+            {screenIndex === 4 && (
+              <KycScreen5 onNext={() => setScreenIndex(5)} />
+            )}
+
             {/* SCREEN 6: Feed the stored kycData directly into your review component rows */}
             {screenIndex === 5 && (
-              <KycScreen6 
+              <KycScreen6
                 userData={kycData}
-                onSubmit={() => setScreenIndex(6)} 
+                onSubmit={() => setScreenIndex(6)}
               />
             )}
-            
-            {screenIndex === 6 && <KycScreen7 onNext={() => setScreenIndex(7)} />}
-            {screenIndex === 7 && <KycScreen8 onNext={() => setScreenIndex(8)} />}
+
+            {screenIndex === 6 && (
+              <KycStatusScreen
+                status="pending"
+                onAction={() => setScreenIndex(7)} // Routes to SUCCESS screen status for testing
+              />
+            )}
+            {screenIndex === 7 && (
+              <KycStatusScreen
+                status="success"
+                onAction={() => setScreenIndex(8)} // Routes to REJECTED screen status for testing
+              />
+            )}
+            {screenIndex === 8 && (
+              <KycStatusScreen
+                status="rejected"
+                onAction={() => setScreenIndex(2)} // Loops back to Screen 3 form so they can resubmit!
+              />
+            )}
           </ScrollView>
         </MySafeAreaView>
       </ImageBackground>
