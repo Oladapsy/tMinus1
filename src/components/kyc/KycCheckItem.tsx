@@ -12,7 +12,7 @@ export default function KycCheckItem({ label }: KycCheckItemProps) {
   return (
     <View style={styles.cardContainer}>
       <View style={styles.iconCircle}>
-        <Ionicons name="checkmark" size={16} color={Colors.newBlack || "#000000"} />
+        <Ionicons name="checkmark" size={16} color={Colors.newBlack} />
       </View>
       <Text style={styles.labelText}>{label}</Text>
     </View>

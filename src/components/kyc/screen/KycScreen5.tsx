@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import KycCheckItem from "@/src/components/kyc/KycCheckItem";
-import PrimaryButton from "../../common/PrimaryButton";
+import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
 export default function KycScreen5({ onNext }: { onNext: () => void }) {
   // Simple fake system states: 'analyzing' -> 'success'
-  const [matchStatus, setMatchStatus] = useState<"analyzing" | "success">("analyzing");
+  const [matchStatus, setMatchStatus] = useState<"analyzing" | "success">(
+    "analyzing",
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,14 +22,15 @@ export default function KycScreen5({ onNext }: { onNext: () => void }) {
 
   return (
     <View style={styles.container}>
-      
       {/* 1. CENTRAL FACE MATCH SCANNER */}
       <View style={styles.centerScannerContainer}>
         <View style={styles.outerRadarRing}>
-          <View style={[
-            styles.innerMatchCircle,
-            matchStatus === "success" && styles.innerMatchCircleSuccess
-          ]}>
+          <View
+            style={[
+              styles.innerMatchCircle,
+              matchStatus === "success" && styles.innerMatchCircleSuccess,
+            ]}
+          >
             {matchStatus === "analyzing" ? (
               <View style={styles.loadingColumn}>
                 <ActivityIndicator size="small" color={Colors.green} />
@@ -36,7 +38,12 @@ export default function KycScreen5({ onNext }: { onNext: () => void }) {
               </View>
             ) : (
               <View style={styles.loadingColumn}>
-                <Ionicons name="shield-checkmark" size={28} color={Colors.green} style={{ marginBottom: 4 }} />
+                <Ionicons
+                  name="shield-checkmark"
+                  size={28}
+                  color={Colors.green}
+                  style={{ marginBottom: 4 }}
+                />
                 <Text style={styles.matchText}>Face match</Text>
               </View>
             )}
@@ -54,7 +61,9 @@ export default function KycScreen5({ onNext }: { onNext: () => void }) {
       {/* 3. FOOTER CONTROL ACTION ACTION BUTTON */}
       <View style={styles.buttonContainer}>
         <PrimaryButton
-          text={matchStatus === "analyzing" ? "Verifying match..." : "Upload selfie"}
+          text={
+            matchStatus === "analyzing" ? "Verifying match..." : "Upload selfie"
+          }
           onPress={onNext}
           Bgcolor={Colors.green}
           textColor={Colors.newBlack}
