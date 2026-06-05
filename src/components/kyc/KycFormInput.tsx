@@ -21,9 +21,9 @@ export default function KycFormInput({
   return (
     <View style={styles.inputGroup}>
       <TextInput
-        autoCapitalize="words" // <-- Place default settings here
-        placeholderTextColor={Colors.newSecondary || "#64748B"}
-        {...props} // <-- Any prop you pass explicitly (like characters) will now override the default!
+        autoCapitalize="words"
+        placeholderTextColor={Colors.newSecondary}
+        {...props}
         style={[
           styles.inputField,
           style,
@@ -41,22 +41,22 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   inputField: {
-    backgroundColor: Colors.newDark || "#161C24",
+    backgroundColor: Colors.newDark,
     height: 52,
     borderRadius: 12,
     paddingHorizontal: 16,
-    color: Colors.newWhite || "white",
+    color: Colors.newWhite,
     fontSize: 14,
     fontFamily: FontFamily.regular,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.05)",
   },
   inputFieldError: {
-    borderColor: Colors.newRed || "#EF4444",
+    borderColor: Colors.newRed,
     borderWidth: 1.2,
   },
   errorText: {
-    color: Colors.newRed || "#EF4444",
+    color: Colors.newRed,
     fontSize: 11,
     fontFamily: FontFamily.regular,
     marginTop: 4,
