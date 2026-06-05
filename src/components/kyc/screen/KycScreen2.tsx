@@ -37,8 +37,8 @@ export default function KycScreen2({ onNext }: KycScreenProps) {
       </View>
 
       <KycNoteCard
-        showIcon={true}
-        text="Mismatched details can delay approval or require resubmission."
+        showIcon={false}
+        text="Verification is required before executing quotes or requesting withdrawals."
       />
 
       <View style={styles.button}>
