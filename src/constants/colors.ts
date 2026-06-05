@@ -28,4 +28,5 @@ export const Colors = {
   newDark: "#141820",
   newGreen: "#083D2B",
   newRed: "#E4484C",
+  newBlack: "#080C11",
 };
