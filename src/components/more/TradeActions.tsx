@@ -9,6 +9,13 @@ import GridTradingIcon from "@/assets/icons/home/gridTrading.svg";
 import ConvertIcon from "@/assets/icons/home/menu/convert.svg";
 import MarginIcon from "@/assets/icons/home/margin.svg";
 import LiquidSwapIcon from "@/assets/icons/home/liquidSwap.svg";
+import KycIcon from "@/assets/icons/profile/kyc/kyc.svg";
+import { useRouter } from "expo-router";
+
+
+export default function TradeActions() {
+  const nativeRouter = useRouter();
+
 
 const ACTIONS: IconGridItem[] = [
   {
@@ -36,9 +43,15 @@ const ACTIONS: IconGridItem[] = [
     label: "Liquid Swap",
     onPress: () => {},
   },
+  {
+    icon: <KycIcon width={36} height={48} color={Colors.green} />,
+    label: "KYC",
+    onPress: () => {
+      nativeRouter.push("/profile/kyc");
+    },
+  },
 ];
 
-export default function TradeActions() {
   return (
     <View style={styles.container}>
       <IconGrid
