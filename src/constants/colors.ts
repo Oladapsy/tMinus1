@@ -21,4 +21,8 @@ export const Colors = {
   lightPrimary: "#1E272E",
   favBg: "#3E474F1A",
   favBorder: "#3E474F80",
+  newWhite: "#F1F6F8",
+  newSecondary: "#8594A6",
+  newGrey: "#1B1F27",
+  newTertiary: "#29333D",
 };
