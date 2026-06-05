@@ -12,7 +12,7 @@ import KycScreen7 from "@/src/components/kyc/screen/KycScreen7";
 import KycScreen8 from "@/src/components/kyc/screen/KycScreen8";
 
 export default function Index() {
-  const [screenIndex, setScreenIndex] = useState<KycScreenIndex>(0);
+  const [screenIndex, setScreenIndex] = useState<KycScreenIndex>(4);
 
   return (
     <View style={styles.root}>

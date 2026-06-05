@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: "rgba(34, 197, 94, 0.1)", // Soft green outer aura tint
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
