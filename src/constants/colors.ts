@@ -25,4 +25,7 @@ export const Colors = {
   newSecondary: "#8594A6",
   newGrey: "#1B1F27",
   newTertiary: "#29333D",
+  newDark: "#141820",
+  newGreen: "#083D2B",
+  newRed: "#E4484C",
 };
