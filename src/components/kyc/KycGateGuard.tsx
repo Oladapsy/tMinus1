@@ -26,11 +26,11 @@ export default function KycGateGuard({
   }
 
   const handleGateAction = () => {
-    // Navigates directly over to your main master KYC processing router wizard
+    // Navigates to kyc
     router.push("/profile/kyc");
   };
 
-  // --- CASE A: HANDLES THE TRADES/BUY LOCKOUT STATE (Card 2 from Screenshot) ---
+  // --- CASE A: HANDLES THE TRADES/BUY LOCKOUT 
   if (
     gateType === "trades" &&
     (status === "NOT_STARTED" || status === "REJECTED")
@@ -64,7 +64,7 @@ export default function KycGateGuard({
     );
   }
 
-  // --- CASE B: HANDLES THE WALLETS PENDING REVIEW STATE (Card 3 from Screenshot) ---
+  // --- CASE B: HANDLES THE WALLETS PENDING REVIEW STATE 
   if (gateType === "wallets" && status === "PENDING") {
     return (
       <View style={styles.lockContainer}>
