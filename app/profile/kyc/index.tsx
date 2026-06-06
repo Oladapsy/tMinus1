@@ -43,20 +43,9 @@ export default function Index() {
 
   // Calculates what step index layout value to visually feed the header dots
   const getHeaderIndex = (): KycScreenIndex => {
-    if (screenIndex === 5) {
-      // FORCE Step 3 to show as ACTIVE (open ring), not completed yet!
-      // In STEPS_CONFIG, index 5 currently has stepTracker: 3. Let's keep it that way,
-      // but we will make KycHeader interpret it cleanly.
-      return 5;
-    }
-    if (screenIndex === 6 || screenIndex === 7) {
-      // Force step 3 to stay fully lit green for pending (6) and success (7) statuses!
-      return 6; // We'll point this to 6 so it handles completion clearly
-    }
-    if (screenIndex === 8) {
-      // Force step 2 and 3 down to grey inactive state for rejected (8) status view
-      return 8;
-    }
+    if (screenIndex === 5) return 5; // Matches stepTracker 3, isSubmitted false (Review Active Ring)
+    if (screenIndex === 6 || screenIndex === 7) return 6; // Matches stepTracker 3, isSubmitted true (All Green)
+    if (screenIndex === 8) return 8; // Matches stepTracker 1, isSubmitted false (Rejected Reset State)
     return screenIndex;
   };
 

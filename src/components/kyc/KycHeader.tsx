@@ -10,7 +10,6 @@ import IconAndText from "@/src/components/common/tab/IconAndText";
 
 export type KycScreenIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-// 1. Uncomment and activate your TypeScript props interface
 interface KycHeaderProps {
   screenIndex: KycScreenIndex;
   onBack?: () => void;
@@ -19,60 +18,67 @@ interface KycHeaderProps {
 const STEPS_CONFIG = {
   0: {
     stepTracker: 0,
+    isSubmitted: false,
     title: "Verify to unlock limits",
     desc: "Complete identity verification from inside the app before high-value trading or withdrawals.",
   },
   1: {
     stepTracker: 0,
+    isSubmitted: false,
     title: "Account limits",
     desc: "Your verification level controls trade, withdrawal, and sandbox deposit access.",
   },
   2: {
     stepTracker: 1,
+    isSubmitted: false,
     title: "Identity details",
     desc: "Enter details exactly as they appear on your document.",
   },
   3: {
     stepTracker: 2,
+    isSubmitted: false,
     title: "Upload document",
     desc: "Use a clear photo. All corners should be visible and text readable.",
   },
   4: {
     stepTracker: 2,
+    isSubmitted: false,
     title: "Selfie check",
     desc: "Take a clear selfie so compliance can compare your face with your document.",
   },
   5: {
     stepTracker: 3,
+    isSubmitted: false, // Step 3 is ACTIVE but not completed/submitted yet
     title: "Review submission",
     desc: "Check the details and files before sending them for admin review.",
   },
   6: {
     stepTracker: 3,
+    isSubmitted: true, // Step 3 turns into a fully finished green bubble!
     title: "Review in progress",
     desc: "Your identity submission has been sent for manual review.",
   },
   7: {
     stepTracker: 3,
+    isSubmitted: true, // Step 3 stays fully finished green bubble!
     title: "Verification approved",
     desc: "Your account limits have been upgraded.",
   },
   8: {
     stepTracker: 1,
+    isSubmitted: false,
     title: "Review needs attention",
     desc: "Compliance could not approve your submission yet.",
   },
 };
 
-// 2. Accept the screenIndex prop here
 export default function KycHeader({ screenIndex, onBack }: KycHeaderProps) {
   const router = useRouter();
 
-  // Look up the active configuration details based on the passed index
   const currentConfig = STEPS_CONFIG[screenIndex] || STEPS_CONFIG[0];
   const currentStep = currentConfig.stepTracker;
+  const isSubmitted = currentConfig.isSubmitted;
 
-  // Visual tracking configuration for the steps
   const trackBubbles = [
     { id: 1, label: "Identity" },
     { id: 2, label: "Document" },
@@ -84,11 +90,13 @@ export default function KycHeader({ screenIndex, onBack }: KycHeaderProps) {
       {/* Top Header Region */}
       <View style={styles.header}>
         <View style={styles.icon}>
-          <IconAndText icon={<Arrowback />} onPress={onBack ? onBack : () => router.back()} />
+          <IconAndText
+            icon={<Arrowback />}
+            onPress={onBack ? onBack : () => router.back()}
+          />
         </View>
 
         <View>
-          {/* 3. Dynamically read the config title */}
           <Title
             text={currentConfig.title}
             color={Colors.newWhite}
@@ -97,7 +105,6 @@ export default function KycHeader({ screenIndex, onBack }: KycHeaderProps) {
           />
 
           <View style={styles.paragraph}>
-            {/* 4. Dynamically read the config description */}
             <Paragraph
               text={currentConfig.desc}
               textAlign="left"
@@ -109,15 +116,16 @@ export default function KycHeader({ screenIndex, onBack }: KycHeaderProps) {
         </View>
       </View>
 
-      {/* 5. Conditional Stepper: Only displays when the wizard has officially begun (stepTracker > 0) */}
-      {currentStep >= 0 && (
+      {/* Conditional Stepper */}
+      {currentStep > 0 && (
         <View style={styles.stepperContainer}>
           {trackBubbles.map((bubble, index) => {
-            // 6. Use the dynamic step tracker state instead of a hardcoded value
-            const isCompleted = currentStep > bubble.id || currentStep === 3;
-            const isActive = currentStep === bubble.id && currentStep !== 3;
-
-            const isLineCompleted = currentStep > bubble.id || (currentStep === 3);
+            // FIXED STEP LOGIC ELEVATION RULES
+            const isCompleted =
+              currentStep > bubble.id || (bubble.id === 3 && isSubmitted);
+            const isActive = currentStep === bubble.id && !isCompleted;
+            const isLineCompleted =
+              currentStep > bubble.id || (bubble.id === 3 && isSubmitted);
 
             return (
               <React.Fragment key={bubble.id}>
@@ -168,7 +176,6 @@ export default function KycHeader({ screenIndex, onBack }: KycHeaderProps) {
   );
 }
 
-// ... styles stay exactly the same as your modified version!
 const styles = StyleSheet.create({
   container: { marginTop: 20 },
   header: {
