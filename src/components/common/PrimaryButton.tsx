@@ -50,6 +50,7 @@ export default function PrimaryButton({
       <Text
         style={[
           styles.text,
+          style,
           { color: textColor, fontSize, textAlign: alignText },
         ]}
       >
