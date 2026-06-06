@@ -1,18 +1,18 @@
 import { StyleSheet, View, Text, ImageBackground } from "react-native";
 import React from "react";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
+import Paragraph from "@/src/components/common/Paragraph";
+import Title from "@/src/components/common/Title";
 import { useRouter } from "expo-router";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import Paragraph from "@/src/components/common/Paragraph";
-import Title from "../../common/Title";
 
-export default function TradeNoKyc() {
+export default function WalletPendingKyc() {
   const router = useRouter();
 
   const handleGateAction = () => {
+    // Take them straight back to the main KYC route (Index) where screenIndex 6 handles the pending state UI!
     router.push("/profile/kyc");
   };
 
@@ -24,52 +24,45 @@ export default function TradeNoKyc() {
     >
       <MySafeAreaView style={styles.safeContainer}>
         <View style={styles.container}>
-          {/* TOP SECTION */}
+          
+          {/* 1. TOP SECTION: Muted Asset Balance Information Preview */}
           <View style={styles.topSection}>
-            <TitleAndParagraph
-              title="Buy Bitcoin"
-              paragraph="Create a quote after your verification is approved."
-            />
+            <View style={styles.disabledPreviewPlaceholder}>
+              <Text style={styles.placeholderText}>Withdraw USDT</Text>
+              <View style={styles.balanceContainer}>
+                <Title text="920.00" size={32} color={Colors.newWhite} />
+                <Text style={styles.usdtLabel}>USDT</Text>
+              </View>
+            </View>
           </View>
 
-          {/* MIDDLE SECTION: Mock interface row + Lock card overlay */}
+          {/* 2. MIDDLE SECTION: The Pending Warning Block Box */}
           <View style={styles.middleSection}>
-            <View style={styles.mockTickerCard}>
-              <View style={styles.tickerHeader}>
-                <Title text="BTC / USDT" size={15} color={Colors.newWhite} />
-              </View>
-              <View style={styles.tickerPriceRow}>
-                <Title text="64,200.50" size={32} color={Colors.newWhite} />
-                <Title text="+2.1%" size={13} color={Colors.green} />
-              </View>
-              <View style={styles.mockProgressBar} />
-            </View>
-
-            {/* Lock Error Card Overlay Component */}
             <View style={styles.lockBox}>
-              <View style={styles.lockBadgeBg}>
-                <Text style={styles.lockBadgeText}>Locked</Text>
-              </View>
+              <Text style={styles.warningBadgeText}>Withdrawal unavailable</Text>
+              
               <View style={styles.descMargin}>
                 <Paragraph
-                  text="Complete KYC before you can request buy, sell, or swap quotes."
+                  text="Your KYC is under review. Withdrawals unlock after approval."
                   color={Colors.newSecondary}
                   size={13}
-                  textAlign="center"
+                  textAlign="left"
                   lineHeight={18}
                 />
               </View>
+              
+              {/* Dynamic Limit Status Row Element */}
               <View style={styles.limitRow}>
-                <Text style={styles.limitLabel}>Trade limit</Text>
+                <Text style={styles.limitLabel}>Current withdrawal limit</Text>
                 <Text style={styles.limitValue}>$0</Text>
               </View>
             </View>
           </View>
 
-          {/* FOOTER SECTION */}
+          {/* 3. FOOTER SECTION: Dynamic Status Router Tracker Button */}
           <View style={styles.footerSection}>
             <PrimaryButton
-              text="Verify identity"
+              text="View verification status"
               onPress={handleGateAction}
               Bgcolor={Colors.green}
               textColor={Colors.newBlack}
@@ -77,6 +70,7 @@ export default function TradeNoKyc() {
               style={{ fontFamily: FontFamily.bold }}
             />
           </View>
+          
         </View>
       </MySafeAreaView>
     </ImageBackground>
@@ -97,77 +91,57 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingBottom: 24,
-    
   },
   topSection: {
     marginTop: 10,
     width: "100%",
   },
-
-  // here
+  disabledPreviewPlaceholder: {
+    opacity: 0.3, // Soft layout opacity blur mimicking disabled behind-the-scenes interface values
+    marginTop: 12,
+  },
+  placeholderText: {
+    color: Colors.newWhite || "#FFF",
+    fontSize: 22,
+    fontFamily: FontFamily.bold,
+  },
+  balanceContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 6,
+    marginTop: 8,
+  },
+  usdtLabel: {
+    color: Colors.newSecondary,
+    fontSize: 16,
+    fontFamily: FontFamily.bold,
+  },
   middleSection: {
-    justifyContent: "center",
     width: "100%",
-    gap: 16,
     marginTop: 30,
   },
   footerSection: {
     width: "100%",
     marginTop: 46,
   },
-  mockTickerCard: {
-    backgroundColor: Colors.newDark,
-    borderRadius: 14,
-    paddingHorizontal: 22,
-    width: "100%",
-    paddingBottom: 44,
-    paddingTop: 26,
-  },
-  tickerHeader: {
-    marginBottom: 8,
-  },
-  tickerPriceRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 8,
-  },
-  // here
-  mockProgressBar: {
-    height: 22,
-    backgroundColor: Colors.newGreen,
-    borderRadius: 8,
-    marginTop: 14,
-    width: "100%",
-  },
-
-  // Restrictive Lock Card UI Styles
+  // Restrictive Warning Card Module Styles
   lockBox: {
     backgroundColor: Colors.newDark,
     borderRadius: 20,
     padding: 24,
-    alignItems: "center",
     width: "100%",
     borderWidth: 1,
     borderColor: "rgba(255,77,77,0.12)",
-    marginTop: 17,
   },
-  lockBadgeBg: {
-    backgroundColor: Colors.newLightRed,
-    height: 90,
-    width: 90,
-    borderRadius: 45,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 14,
-  },
-  lockBadgeText: {
-    color: Colors.newRed,
-    fontSize: 16,
+  warningBadgeText: {
+    color: Colors.newRed || "#FF4D4D",
+    fontSize: 14,
     fontFamily: FontFamily.bold,
+    alignSelf: "flex-start",
+    marginBottom: 8,
   },
   descMargin: {
     marginBottom: 24,
-    paddingHorizontal: 6,
   },
   limitRow: {
     flexDirection: "row",
