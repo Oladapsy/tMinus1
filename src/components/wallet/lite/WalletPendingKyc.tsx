@@ -3,16 +3,16 @@ import React from "react";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
-import Title from "@/src/components/common/Title";
 import { useRouter } from "expo-router";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
+import MockFormInputCard from "@/src/components/common/MockFormInputCard";
 
 export default function WalletPendingKyc() {
   const router = useRouter();
 
   const handleGateAction = () => {
-    // Take them straight back to the main KYC route (Index) where screenIndex 6 handles the pending state UI!
     router.push("/profile/kyc");
   };
 
@@ -24,23 +24,41 @@ export default function WalletPendingKyc() {
     >
       <MySafeAreaView style={styles.safeContainer}>
         <View style={styles.container}>
-          
-          {/* 1. TOP SECTION: Muted Asset Balance Information Preview */}
+          {/* 1. TOP SECTION: Header Info */}
           <View style={styles.topSection}>
-            <View style={styles.disabledPreviewPlaceholder}>
-              <Text style={styles.placeholderText}>Withdraw USDT</Text>
-              <View style={styles.balanceContainer}>
-                <Title text="920.00" size={32} color={Colors.newWhite} />
-                <Text style={styles.usdtLabel}>USDT</Text>
-              </View>
-            </View>
+            <TitleAndParagraph
+              title="Withdraw USDT"
+              paragraph="Verification controls how much you can move out of your wallet."
+            />
           </View>
 
-          {/* 2. MIDDLE SECTION: The Pending Warning Block Box */}
+          {/* 2. MIDDLE REGION: Form Layout + Locked Overlay */}
           <View style={styles.middleSection}>
+            <View style={styles.disabledPreviewPlaceholder}>
+              <MockFormInputCard
+                label="Available"
+                value="920.00 USDT"
+                rightContent={
+                  <View style={styles.reviewChip}>
+                    <Text style={styles.reviewChipText}>Review</Text>
+                  </View>
+                }
+              />
+
+              {/* Card B: Amount Field Input */}
+              <MockFormInputCard
+                label="Amount"
+                value="500"
+                rightContent={<Text style={styles.currencyLabel}>USDT</Text>}
+              />
+            </View>
+
+            {/* The Actual Pending Warning Block Box */}
             <View style={styles.lockBox}>
-              <Text style={styles.warningBadgeText}>Withdrawal unavailable</Text>
-              
+              <Text style={styles.warningBadgeText}>
+                Withdrawal unavailable
+              </Text>
+
               <View style={styles.descMargin}>
                 <Paragraph
                   text="Your KYC is under review. Withdrawals unlock after approval."
@@ -50,7 +68,7 @@ export default function WalletPendingKyc() {
                   lineHeight={18}
                 />
               </View>
-              
+
               {/* Dynamic Limit Status Row Element */}
               <View style={styles.limitRow}>
                 <Text style={styles.limitLabel}>Current withdrawal limit</Text>
@@ -59,7 +77,7 @@ export default function WalletPendingKyc() {
             </View>
           </View>
 
-          {/* 3. FOOTER SECTION: Dynamic Status Router Tracker Button */}
+          {/* 3. FOOTER SECTION: Action Trigger */}
           <View style={styles.footerSection}>
             <PrimaryButton
               text="View verification status"
@@ -70,7 +88,6 @@ export default function WalletPendingKyc() {
               style={{ fontFamily: FontFamily.bold }}
             />
           </View>
-          
         </View>
       </MySafeAreaView>
     </ImageBackground>
@@ -96,35 +113,39 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: "100%",
   },
-  disabledPreviewPlaceholder: {
-    opacity: 0.3, // Soft layout opacity blur mimicking disabled behind-the-scenes interface values
-    marginTop: 12,
-  },
-  placeholderText: {
-    color: Colors.newWhite || "#FFF",
-    fontSize: 22,
-    fontFamily: FontFamily.bold,
-  },
-  balanceContainer: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 6,
-    marginTop: 8,
-  },
-  usdtLabel: {
-    color: Colors.newSecondary,
-    fontSize: 16,
-    fontFamily: FontFamily.bold,
-  },
   middleSection: {
     width: "100%",
     marginTop: 30,
+    gap: 16,
   },
+  disabledPreviewPlaceholder: {
+    gap: 20,
+    width: "100%",
+  },
+
+  reviewChip: {
+    backgroundColor: Colors.newBrightYellow,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 15,
+  },
+
+  reviewChipText: {
+    color: Colors.newBlack,
+    fontSize: 11,
+    fontFamily: FontFamily.bold,
+  },
+
+  currencyLabel: {
+    color: Colors.newSecondary,
+    fontSize: 13.5,
+    fontFamily: FontFamily.bold,
+  },
+  // here
   footerSection: {
     width: "100%",
-    marginTop: 46,
+    marginTop: 52,
   },
-  // Restrictive Warning Card Module Styles
   lockBox: {
     backgroundColor: Colors.newDark,
     borderRadius: 20,
@@ -132,9 +153,10 @@ const styles = StyleSheet.create({
     width: "100%",
     borderWidth: 1,
     borderColor: "rgba(255,77,77,0.12)",
+    marginTop: 4,
   },
   warningBadgeText: {
-    color: Colors.newRed || "#FF4D4D",
+    color: Colors.newRed,
     fontSize: 14,
     fontFamily: FontFamily.bold,
     alignSelf: "flex-start",
