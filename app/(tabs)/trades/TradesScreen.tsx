@@ -1,37 +1,26 @@
-import { StyleSheet, View, ImageBackground } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import { Colors } from "@/src/constants/colors";
 import KycGateGuard from "@/src/components/kyc/KycGateGuard";
 import LiteTradeScreen from "@/src/screens/Trade/LiteTradeScreen";
 
 const TradesScreen = () => {
-  // this will be grabbed from redux
+  // This will be grabbed from Redux later
   const currentKycStatus = "NOT_STARTED";
 
   return (
-    <View style={{ flex: 1 }}>
-      <ImageBackground
-        source={require("@/assets/images/kyc/kycBg.png")}
-        style={style.image}
-        resizeMode="cover"
-      >
-        <MySafeAreaView style={style.container}>
-          <KycGateGuard status={currentKycStatus} gateType="trades">
-            <LiteTradeScreen />
-          </KycGateGuard>
-        </MySafeAreaView>
-      </ImageBackground>
-    </View>
+    <KycGateGuard status={currentKycStatus} gateType="trades">
+      <MySafeAreaView style={styles.container}>
+        <LiteTradeScreen />
+      </MySafeAreaView>
+    </KycGateGuard>
   );
 };
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: Colors.primary,
   },
-  image: { flex: 1 },
 });
 
 export default TradesScreen;
