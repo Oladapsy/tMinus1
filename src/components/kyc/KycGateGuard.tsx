@@ -6,6 +6,7 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Paragraph from "@/src/components/common/Paragraph";
 import { useRouter } from "expo-router";
 import { GlobalKycStatus } from "@/src/types/kycGate";
+import TradeNoKyc from "../trades/lite/TradeNoKyc";
 
 interface KycGateGuardProps {
   status: GlobalKycStatus;
@@ -36,31 +37,7 @@ export default function KycGateGuard({
     (status === "NOT_STARTED" || status === "REJECTED")
   ) {
     return (
-      <View style={styles.lockContainer}>
-        <View style={styles.lockBox}>
-          <Text style={styles.lockBadgeText}>Locked</Text>
-          <View style={styles.descMargin}>
-            <Paragraph
-              text="Complete KYC before you can request buy, sell, or swap quotes."
-              color={Colors.newSecondary}
-              size={13}
-              textAlign="center"
-              lineHeight={18}
-            />
-          </View>
-          <View style={styles.limitRow}>
-            <Text style={styles.limitLabel}>Trade limit</Text>
-            <Text style={styles.limitValue}>$0</Text>
-          </View>
-        </View>
-
-        <PrimaryButton
-          text="Verify identity"
-          onPress={handleGateAction}
-          Bgcolor={Colors.green}
-          textColor={Colors.newBlack}
-        />
-      </View>
+      <TradeNoKyc/>
     );
   }
 
