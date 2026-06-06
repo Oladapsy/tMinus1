@@ -7,6 +7,8 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Paragraph from "@/src/components/common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import VertDotIcon from "@/assets/icons/profile/kyc/vertDot.svg";
+import Title from "../../common/Title";
 
 export type KycStatusType = "pending" | "success" | "rejected";
 
@@ -24,8 +26,9 @@ export default function KycStatusScreen({
     pending: {
       headline: "Pending review",
       sub: "You can browse markets while we review your documents. Trading and withdrawals stay locked.",
-      icon: <Text style={styles.dotsIcon}>•••</Text>,
-      iconBg: "rgba(245, 158, 11, 0.1)", // Amber tint
+      icon: <VertDotIcon />,
+      iconBg: Colors.newLightYellow,
+      iconInnerBg: Colors.newGrey,
       iconBorder: "transparent",
       btnText: "Back to home",
       btnBg: Colors.green,
@@ -33,11 +36,12 @@ export default function KycStatusScreen({
     },
     success: {
       headline: "Level 2 unlocked",
-      sub: "", // Screenshot shows no subtext block on success layout
+      sub: "",
       icon: <Ionicons name="checkmark" size={32} color={Colors.newBlack} />,
-      iconBg: Colors.green,
+      iconBg: Colors.newGreen,
+      iconInnerBg: Colors.green,
       iconBorder: "transparent",
-      btnText: "Start trading",
+      btnText: "Level 2 unlocked",
       btnBg: Colors.green,
       btnTextClr: Colors.newBlack,
     },
@@ -45,10 +49,11 @@ export default function KycStatusScreen({
       headline: "Try again",
       sub: "",
       icon: <Ionicons name="alert" size={32} color={Colors.newRed} />,
-      iconBg: "rgba(239, 68, 68, 0.1)", // Red tint
+      iconBg: Colors.newLightRed, // Red tint
+      iconInnerBg: Colors.newGrey,
       iconBorder: "rgba(239, 68, 68, 0.2)",
       btnText: "Resubmit documents",
-      btnBg: Colors.newRed || "#EF4444",
+      btnBg: Colors.newRed,
       btnTextClr: Colors.newWhite,
     },
   }[status];
@@ -66,13 +71,27 @@ export default function KycStatusScreen({
             },
           ]}
         >
-          {contentConfig.icon}
+          <View
+            style={[
+              styles.innerCircle,
+              {
+                backgroundColor: contentConfig.iconInnerBg,
+              },
+            ]}
+          >
+            {contentConfig.icon}
+          </View>
         </View>
       </View>
 
       {/* HEADLINE TEXT */}
-      <Text style={styles.headlineText}>{contentConfig.headline}</Text>
-
+      <Title
+        text={contentConfig.headline}
+        size={22}
+        fontFamily={FontFamily.bold}
+        color={Colors.newWhite}
+        textAlign="center"
+      />
       {/* CONDITIONALLY RENDER SUBTEXT PARAGRAPH */}
       {contentConfig.sub ? (
         <View style={styles.subTextWrapper}>
@@ -90,22 +109,22 @@ export default function KycStatusScreen({
       {/* 3. CONDITIONAL ROWS GRID BASED ON CURRENT SYSTEM STATE */}
       <View style={styles.rowsContainer}>
         {status === "pending" && (
-          <>
+          <View style={styles.footerBlock}>
             <KycReviewRow label="Current level" value="Review" />
             <KycReviewRow label="Sandbox deposit" value="$250 max" />
-          </>
+          </View>
         )}
 
         {status === "success" && (
-          <>
+          <View style={styles.footerBlock}>
             <KycReviewRow label="Trade per quote" value="$5,000" />
             <KycReviewRow label="Withdrawal request" value="$2,250" />
             <KycReviewRow label="Daily withdrawal" value="$10,000" />
-          </>
+          </View>
         )}
 
         {status === "rejected" && (
-          <>
+          <View style={styles.rejectedBlock}>
             {/* Reason Warning Banner Box */}
             <View style={styles.reasonCard}>
               <Text style={styles.reasonTitle}>Reason</Text>
@@ -115,7 +134,7 @@ export default function KycStatusScreen({
               </Text>
             </View>
             <KycReviewRow label="Current level" value="Starter" />
-          </>
+          </View>
         )}
       </View>
 
@@ -135,41 +154,46 @@ export default function KycStatusScreen({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center" },
-  centerIconContainer: { marginTop: 40, marginBottom: 24 },
+  container: {
+    flex: 1,
+    alignItems: "center",
+  },
+  centerIconContainer: {
+    marginTop: 26,
+    marginBottom: 28,
+  },
   outerCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 128,
+    height: 128,
+    borderRadius: 64,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1.5,
   },
-  dotsIcon: {
-    color: "#F59E0B",
-    fontSize: 28,
-    letterSpacing: -1,
-  },
-  headlineText: {
-    fontSize: 22,
-    fontFamily: FontFamily.bold,
-    color: Colors.newWhite,
-    textAlign: "center",
-    marginBottom: 12,
+  innerCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    justifyContent: "center",
+    alignItems: "center",
   },
   subTextWrapper: {
     paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 20,
+    marginTop: 12,
   },
   rowsContainer: {
     width: "100%",
     marginTop: 24,
   },
+  // here
+
   reasonCard: {
     backgroundColor: Colors.newDark,
     borderRadius: 14,
     padding: 16,
-    marginBottom: 16,
+    paddingVertical: 25,
+    marginBottom: 40,
     width: "100%",
   },
   reasonTitle: {
@@ -177,17 +201,27 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: FontFamily.regular,
     textTransform: "uppercase",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   reasonBody: {
     color: Colors.newWhite,
     fontSize: 13,
     fontFamily: FontFamily.medium,
     lineHeight: 18,
+    maxWidth: 280,
   },
   buttonContainer: {
     width: "100%",
     paddingBottom: 24,
     marginTop: "auto",
+  },
+  // here
+  footerBlock: {
+    marginBottom: 56,
+    marginTop: 50,
+  },
+  rejectedBlock: {
+    marginBottom: 56,
+    marginTop: 30,
   },
 });
