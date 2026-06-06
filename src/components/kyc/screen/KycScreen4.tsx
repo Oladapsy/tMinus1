@@ -11,10 +11,11 @@ import PrimaryButton from "../../common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
+// 1. FIX: Make selfieUri strictly compulsory
 const uploadSchema = z.object({
   frontUri: z.string().min(1, "The front image of your document is required"),
   backUri: z.string().optional(),
-  selfieUri: z.string().optional(),
+  selfieUri: z.string().min(1, "A clear selfie photo is required"),
 });
 
 type UploadFormData = z.infer<typeof uploadSchema>;
@@ -66,6 +67,11 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
 
   const currentTab = getCurrentTabDetails();
 
+  // 2. FIX: Dynamic helper to know if the currently visible tab has a validation error
+  const currentTabHasError = 
+    (activeTab === "front" && !!errors.frontUri) || 
+    (activeTab === "selfie" && !!errors.selfieUri);
+
   const handlePickFromGallery = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -112,7 +118,6 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
         autoAdvanceTabs();
       }
     } catch {
-      // Clean catch: removed unused 'error' declaration variable entirely
       const galleryResult = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -156,7 +161,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
           label="Front required"
           isActive={activeTab === "front"}
           isFilled={!!frontUri}
-          hasError={!!errors.frontUri && activeTab === "front"} // Clears visual error highlights when navigating away
+          hasError={!!errors.frontUri} // Isolated to front field error state
           onPress={() => setActiveTab("front")}
         />
 
@@ -172,7 +177,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
           label="Selfie camera"
           isActive={activeTab === "selfie"}
           isFilled={!!selfieUri}
-          hasError={!!errors.frontUri && activeTab === "selfie"}
+          hasError={!!errors.selfieUri} // Isolated to selfie field error state
           onPress={() => setActiveTab("selfie")}
         />
       </View>
@@ -184,24 +189,25 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
         currentUri={currentTab.currentUri}
         label={currentTab.label}
         mode={currentTab.mode}
-        hasError={
-          !!errors.frontUri && (activeTab === "front" || activeTab === "selfie")
-        }
+        hasError={currentTabHasError} // Evaluates current active view error state precisely
         onPress={handleMediaCaptureAction}
       />
 
-      {/* FIX: Displays the validation error text message under both Front and Selfie views */}
-      {errors.frontUri && (activeTab === "front" || activeTab === "selfie") && (
+      {/* 3. FIX: Display the correct targeted field error string dynamically */}
+      {activeTab === "front" && errors.frontUri && (
         <Text style={styles.errorLabel}>{errors.frontUri.message}</Text>
       )}
+      {activeTab === "selfie" && errors.selfieUri && (
+        <Text style={styles.errorLabel}>{errors.selfieUri.message}</Text>
+      )}
 
-      {/* 3. ACCEPTED FILE TYPES BAR */}
+      {/* 4. ACCEPTED FILE TYPES BAR */}
       <View style={styles.acceptedFilesBar}>
         <Text style={styles.acceptedTextLeft}>Accepted files</Text>
         <Text style={styles.acceptedTextRight}>JPG · PNG</Text>
       </View>
 
-      {/* 4. SUBMISSION ACTION CONTROL BUTTON */}
+      {/* 5. SUBMISSION ACTION CONTROL BUTTON */}
       <View style={styles.buttonContainer}>
         <PrimaryButton
           text="Upload and continue"

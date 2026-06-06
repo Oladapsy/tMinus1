@@ -13,6 +13,7 @@ export type KycScreenIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 // 1. Uncomment and activate your TypeScript props interface
 interface KycHeaderProps {
   screenIndex: KycScreenIndex;
+  onBack?: () => void;
 }
 
 const STEPS_CONFIG = {
@@ -64,7 +65,7 @@ const STEPS_CONFIG = {
 };
 
 // 2. Accept the screenIndex prop here
-export default function KycHeader({ screenIndex }: KycHeaderProps) {
+export default function KycHeader({ screenIndex, onBack }: KycHeaderProps) {
   const router = useRouter();
 
   // Look up the active configuration details based on the passed index
@@ -83,7 +84,7 @@ export default function KycHeader({ screenIndex }: KycHeaderProps) {
       {/* Top Header Region */}
       <View style={styles.header}>
         <View style={styles.icon}>
-          <IconAndText icon={<Arrowback />} onPress={() => router.back()} />
+          <IconAndText icon={<Arrowback />} onPress={onBack ? onBack : () => router.back()} />
         </View>
 
         <View>
@@ -113,8 +114,10 @@ export default function KycHeader({ screenIndex }: KycHeaderProps) {
         <View style={styles.stepperContainer}>
           {trackBubbles.map((bubble, index) => {
             // 6. Use the dynamic step tracker state instead of a hardcoded value
-            const isCompleted = currentStep > bubble.id;
-            const isActive = currentStep === bubble.id;
+            const isCompleted = currentStep > bubble.id || currentStep === 3;
+            const isActive = currentStep === bubble.id && currentStep !== 3;
+
+            const isLineCompleted = currentStep > bubble.id || (currentStep === 3);
 
             return (
               <React.Fragment key={bubble.id}>
@@ -152,7 +155,7 @@ export default function KycHeader({ screenIndex }: KycHeaderProps) {
                   <View
                     style={[
                       styles.line,
-                      currentStep > bubble.id && styles.lineCompleted,
+                      isLineCompleted && styles.lineCompleted,
                     ]}
                   />
                 )}
