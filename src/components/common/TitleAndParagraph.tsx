@@ -7,28 +7,36 @@ import { FontFamily } from "@/src/constants/fonts";
 
 interface Props {
   title: string;
-  paragraph: string;
+  titleSize?: number;
+  paragraphSize?: number;
+  paragraph?: string;
 }
-export default function TitleAndParagraph({ title, paragraph }: Props) {
+export default function TitleAndParagraph({
+  title,
+  paragraph,
+  paragraphSize,
+  titleSize,
+}: Props) {
   return (
     <View>
       <View style={{ marginBottom: 2 }}>
         <Title
           text={title}
           color={Colors.newWhite}
-          size={24}
+          size={titleSize || 24}
           fontFamily={FontFamily.bold}
         />
       </View>
-
-      <Paragraph
-        text={paragraph}
-        color={Colors.newSecondary}
-        size={12}
-        textAlign="left"
-        fontFamily={FontFamily.regular}
-        lineHeight={16}
-      />
+      {paragraph && (
+        <Paragraph
+          text={paragraph}
+          color={Colors.newSecondary}
+          size={paragraphSize || 12}
+          textAlign="left"
+          fontFamily={FontFamily.regular}
+          lineHeight={16}
+        />
+      )}
     </View>
   );
 }

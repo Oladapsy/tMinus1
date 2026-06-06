@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "rgba(0, 255, 128, 0.15)",
+    backgroundColor: Colors.green,
   },
   textColumn: {
     flexDirection: "column",
