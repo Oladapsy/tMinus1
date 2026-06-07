@@ -6,14 +6,14 @@ import { FontFamily } from "@/src/constants/fonts";
 interface ProfileOptionRowProps {
   title: string;
   subtitle: string;
-  badgeCount?: number;
+  badgeText?: string | number; // This can now take numbers OR strings like "Set", "On", "View"
   onPress?: () => void;
 }
 
 export default function ProfileOptionRow({
   title,
   subtitle,
-  badgeCount,
+  badgeText,
   onPress,
 }: ProfileOptionRowProps) {
   return (
@@ -30,10 +30,10 @@ export default function ProfileOptionRow({
         </View>
       </View>
 
-      {/* Right Content Indicator Badges */}
-      {badgeCount && badgeCount > 0 ? (
+      {/* Tweak 2: Dynamic condition to display text OR numbers */}
+      {badgeText !== undefined && badgeText !== null && badgeText !== "" ? (
         <View style={styles.badgeContainer}>
-          <Text style={styles.badgeText}>{badgeCount}</Text>
+          <Text style={styles.badgeText}>{badgeText}</Text>
         </View>
       ) : null}
     </Pressable>
@@ -80,10 +80,8 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.regular,
   },
   badgeContainer: {
-    backgroundColor: "rgba(0, 255, 128, 0.12)",
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 10,
   },
   badgeText: {
     color: Colors.green,

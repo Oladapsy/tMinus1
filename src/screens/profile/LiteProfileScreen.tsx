@@ -1,4 +1,5 @@
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
+import PrimaryButton from "@/src/components/common/PrimaryButton";
 import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow";
 import { Colors } from "@/src/constants/colors";
@@ -6,12 +7,11 @@ import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-    ImageBackground,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 export default function LiteProfileScreen() {
@@ -65,18 +65,18 @@ export default function LiteProfileScreen() {
             <ProfileOptionRow
               title="Security"
               subtitle="2FA, PIN, recovery codes"
-              //   onPress={() => router.push("/profile/security")}
+                onPress={() => router.push("/profile/security")}
             />
             <ProfileOptionRow
               title="Price alerts"
               subtitle="3 active alerts"
-              badgeCount={3}
+              badgeText={3}
               //   onPress={() => router.push("/profile/alerts")}
             />
             <ProfileOptionRow
               title="Notifications"
               subtitle="2 unread messages"
-              badgeCount={2}
+              badgeText={2}
               //   onPress={() => router.push("/profile/notifications")}
             />
             <ProfileOptionRow
@@ -88,9 +88,16 @@ export default function LiteProfileScreen() {
 
           {/* FOOTER DISMISS BUTTON */}
           <View style={styles.footerSection}>
-            <Pressable style={styles.logoutButton}>
-              <Text style={styles.logoutText}>Logout</Text>
-            </Pressable>
+            <PrimaryButton
+              text="Logout"
+              Bgcolor={Colors.newDark}
+              textColor={Colors.newWhite}
+              fontSize={14}
+              style={{ fontFamily: FontFamily.bold }}
+              onPress={() => {
+                console.log("logged out pressed");
+              }}
+            />
           </View>
         </ScrollView>
       </MySafeAreaView>
@@ -99,9 +106,19 @@ export default function LiteProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: { flex: 1, width: "100%", height: "100%" },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
   pageTitle: {
     marginTop: 14,
     marginBottom: 20,
@@ -125,7 +142,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: FontFamily.bold,
   },
-  userInfo: { flexDirection: "column", alignItems: "flex-start" },
+  userInfo: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
   verifiedPill: {
     backgroundColor: "rgba(0, 255, 128, 0.12)",
     paddingHorizontal: 10,
@@ -145,19 +165,6 @@ const styles = StyleSheet.create({
   },
   footerSection: {
     width: "100%",
-    marginTop: 48,
-  },
-  logoutButton: {
-    backgroundColor: Colors.newDark,
-    borderRadius: 16,
-    width: "100%",
-    paddingVertical: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logoutText: {
-    color: Colors.newWhite,
-    fontSize: 14,
-    fontFamily: FontFamily.bold,
+    marginTop: 100,
   },
 });

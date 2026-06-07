@@ -33,4 +33,7 @@ export const Colors = {
   newLightYellow: "#DB9E382E",
   newLightRed: "#E4484C24",
   newBrightYellow: "#DB9E38",
+  newYellowSlim: "#2B2416",
+  newYellowWarning: "#C9A96C",
+  
 };
