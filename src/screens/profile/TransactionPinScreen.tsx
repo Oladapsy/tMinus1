@@ -1,20 +1,29 @@
-import MockFormInputCard from "@/src/components/common/MockFormInputCard";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
+import PinInputField from "@/src/components/common/PinInputField"; // Import your new functional field!
 import PrimaryButton from "@/src/components/common/PrimaryButton";
+import Title from "@/src/components/common/Title";
 import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import React from "react";
-import {
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import React, { useState } from "react";
+import { ImageBackground, ScrollView, StyleSheet, View } from "react-native";
 
 export default function TransactionPinScreen() {
+  // Local state tracking parameters
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+
+  const handleUpdatePin = () => {
+    console.log("Submitting secure values:", {
+      currentPin,
+      newPin,
+      confirmPin,
+    });
+    // validation check logics or submit handling functions here!
+  };
+
   return (
     <ImageBackground
       source={require("@/assets/images/kyc/kycBg.png")}
@@ -34,16 +43,34 @@ export default function TransactionPinScreen() {
             />
           </View>
 
-          {/* 2. MIDDLE REGION: Input Cards Group */}
+          {/* 2. MIDDLE REGION: Live Functional Input Cards Group */}
           <View style={styles.inputGroup}>
-            <MockFormInputCard label="Current PIN" value="••••" />
-            <MockFormInputCard label="New PIN" value="" />
-            <MockFormInputCard label="Confirm PIN" value="••••" />
+            <PinInputField
+              label="Current PIN"
+              value={currentPin}
+              onChangeText={setCurrentPin}
+            />
+            <PinInputField
+              label="New PIN"
+              value={newPin}
+              onChangeText={setNewPin}
+              placeholder="Enter 4 digits" // Optional
+            />
+            <PinInputField
+              label="Confirm PIN"
+              value={confirmPin}
+              onChangeText={setConfirmPin}
+            />
           </View>
 
           {/* 3. INFORMATION SECTION: PIN Rules Text */}
           <View style={styles.rulesContainer}>
-            <Text style={styles.rulesTitle}>PIN rules</Text>
+            <Title
+              text="PIN rules"
+              size={13}
+              color={Colors.newWhite}
+              fontFamily={FontFamily.bold}
+            />
             <View style={styles.rulesDescMargin}>
               <Paragraph
                 text="Use four digits. Avoid repeated or obvious numbers in production apps."
@@ -63,7 +90,7 @@ export default function TransactionPinScreen() {
               textColor={Colors.newBlack}
               fontSize={13}
               style={{ fontFamily: FontFamily.bold }}
-              onPress={() => console.log("Update PIN executed")}
+              onPress={handleUpdatePin}
             />
           </View>
         </ScrollView>
@@ -96,19 +123,14 @@ const styles = StyleSheet.create({
   },
   rulesContainer: {
     width: "100%",
-    marginTop: 28,
+    marginTop: 36,
     backgroundColor: Colors.newDark,
     borderRadius: 16,
     padding: 22,
   },
-  rulesTitle: {
-    color: Colors.newWhite,
-    fontSize: 13.5,
-    fontFamily: FontFamily.bold,
-    marginBottom: 6,
-  },
   rulesDescMargin: {
     width: "100%",
+    marginTop: 6,
   },
   footerSection: {
     width: "100%",
