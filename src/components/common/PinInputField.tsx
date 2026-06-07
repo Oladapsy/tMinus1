@@ -25,10 +25,10 @@ export default function PinInputField({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="rgba(255, 255, 255, 0.15)"
-        secureTextEntry={true} // Masks input with dots automatically
-        keyboardType="numeric" // Forces numeric keypad layout
-        maxLength={4} // Limits entry to a standard 4-digit token code
-        selectionColor={Colors.green} // Custom active tint cursor line match
+        secureTextEntry={true}
+        keyboardType="numeric"
+        maxLength={4}
+        selectionColor={Colors.green}
       />
     </View>
   );
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   },
   input: {
     color: Colors.newWhite,
-    fontSize: 24,
+    fontSize: 15,
     fontFamily: FontFamily.bold,
     padding: 0, // Clears default Android text padding anomalies entirely
     width: "100%",
