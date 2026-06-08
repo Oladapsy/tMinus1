@@ -55,7 +55,9 @@ export default function SecurityScreen() {
               title="Registered devices"
               subtitle="iPhone 15 Pro · push enabled"
               badgeText="2"
-              //   onPress={() => router.push("/profile/security/devices")}
+              onPress={() =>
+                router.push("/profile/security/registered-devices")
+              }
             />
             <ProfileOptionRow
               title="Biometric login"

@@ -1,7 +1,7 @@
-import { StyleSheet, View, Text, Pressable } from "react-native";
-import React from "react";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface ProfileOptionRowProps {
   title: string;
