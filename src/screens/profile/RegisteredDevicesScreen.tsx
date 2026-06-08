@@ -1,19 +1,15 @@
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
+import Paragraph from "@/src/components/common/Paragraph";
+import Title from "@/src/components/common/Title";
 import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow"; // Reusing your beautiful custom row component!
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import React from "react";
-import {
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import { ImageBackground, ScrollView, StyleSheet, View } from "react-native";
 
 export default function RegisteredDevicesScreen() {
-  // Pure static configurations clean mapped from the screen design mockup
+  // Pure static configurations use end point later
   const devicesData = [
     {
       id: "1",
@@ -31,7 +27,7 @@ export default function RegisteredDevicesScreen() {
       id: "3",
       title: "Expo Go",
       subtitle: "Android · Last seen yesterday",
-      badgeText: "", // Empty string means no badge shows up on the right flank, matching item 3!
+      badgeText: "",
     },
   ];
 
@@ -68,10 +64,19 @@ export default function RegisteredDevicesScreen() {
 
           {/* Bottom Calm State Message Box Panel matching the screenshot mockups */}
           <View style={styles.unknownAlertBox}>
-            <Text style={styles.alertBoxTitleText}>No unknown devices</Text>
-            <Text style={styles.alertBoxDescText}>
-              New device alerts appear here after sign in from another device.
-            </Text>
+            <Title
+              text="No unknown devices"
+              color={Colors.newWhite}
+              size={14}
+              fontFamily={FontFamily.bold}
+            />
+            <Paragraph
+              text="New device alerts appear here after sign in from another device."
+              color={Colors.newSecondary}
+              size={12}
+              lineHeight={16}
+              textAlign="left"
+            />
           </View>
         </ScrollView>
       </MySafeAreaView>
@@ -80,11 +85,28 @@ export default function RegisteredDevicesScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: { flex: 1, width: "100%", height: "100%" },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
-  pageTitle: { marginTop: 24, marginBottom: 28 },
-  deviceListWrapper: { width: "100%", flexDirection: "column", gap: 12 },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  pageTitle: {
+    marginTop: 24,
+    marginBottom: 28,
+  },
+  deviceListWrapper: {
+    width: "100%",
+    flexDirection: "column",
+    gap: 12,
+  },
   unknownAlertBox: {
     backgroundColor: Colors.newDark,
     borderRadius: 16,
@@ -94,16 +116,5 @@ const styles = StyleSheet.create({
     minHeight: 120,
     justifyContent: "center",
     gap: 8,
-  },
-  alertBoxTitleText: {
-    color: Colors.newWhite,
-    fontSize: 14,
-    fontFamily: FontFamily.bold,
-  },
-  alertBoxDescText: {
-    color: "rgba(255, 255, 255, 0.4)",
-    fontSize: 12,
-    fontFamily: FontFamily.regular,
-    lineHeight: 18,
   },
 });
