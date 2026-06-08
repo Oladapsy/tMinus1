@@ -3,22 +3,31 @@ import Paragraph from "@/src/components/common/Paragraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
 import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
-import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow";
+import PriceAlertRow from "@/src/components/profile/PriceAlertRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { useToast } from "@/src/context/ToastContext";
 import React, { useState } from "react";
 import {
-    ImageBackground,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
+interface PriceAlertItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  badgeText: "On" | "Off" | "Read";
+}
+
 export default function PriceAlertsScreen() {
-  // Static dataset mirroring the middle screen of Screenshot 2026-06-08 at 1.47.11 AM.png
-  const [alerts, setAlerts] = useState([
+  const { showToast } = useToast();
+
+  const [alerts, setAlerts] = useState<PriceAlertItem[]>([
     {
       id: "1",
       title: "BTC above $72,000",
@@ -29,7 +38,7 @@ export default function PriceAlertsScreen() {
       id: "2",
       title: "ETH below $2,900",
       subtitle: "Paused",
-      badgeText: "Off", // Will handle red/off state styling safely
+      badgeText: "Off",
     },
     {
       id: "3",
@@ -39,17 +48,47 @@ export default function PriceAlertsScreen() {
     },
   ]);
 
-  // Handle showing the inline delete confirmation dialog shown in the mockup
-  const [showDeleteModal, setShowDeleteModal] = useState(true);
+  // Track state targets for interactive deletions safely
+  const [activeDeleteTarget, setActiveDeleteTarget] =
+    useState<PriceAlertItem | null>(null);
 
   const handleCreateAlert = () => {
-    console.log("Navigate to or open create alert modal flow");
+    showToast("Opening alert creation panel...");
   };
 
-  const handleDeleteAlert = () => {
-    // Simulates deleting the target alert
-    setAlerts((prev) => prev.filter((a) => a.id !== "1"));
-    setShowDeleteModal(false);
+  // 1. Tapping an item switches its active states or prompts modal deletion
+  const handleRowInteraction = (item: PriceAlertItem) => {
+    // If it's already triggered (Read), prompt the user to delete it
+    if (item.badgeText === "Read") {
+      setActiveDeleteTarget(item);
+    } else {
+      // Otherwise, toggle its state between active (On) and paused (Off)
+      setAlerts((prev) =>
+        prev.map((alert) => {
+          if (alert.id === item.id) {
+            const nextState = alert.badgeText === "On" ? "Off" : "On";
+            showToast(
+              `Alert set to ${nextState === "On" ? "Active" : "Paused"}`,
+            );
+            return {
+              ...alert,
+              badgeText: nextState,
+              subtitle:
+                nextState === "On" ? "Active · push notification on" : "Paused",
+            };
+          }
+          return alert;
+        }),
+      );
+    }
+  };
+
+  const executeDeleteAction = () => {
+    if (!activeDeleteTarget) return;
+
+    setAlerts((prev) => prev.filter((a) => a.id !== activeDeleteTarget.id));
+    showToast(`Removed "${activeDeleteTarget.title}" alert.`);
+    setActiveDeleteTarget(null);
   };
 
   return (
@@ -63,7 +102,6 @@ export default function PriceAlertsScreen() {
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header sector matching configuration */}
           <View style={styles.pageTitle}>
             <TitleAndParagraph
               title="Price alerts"
@@ -71,35 +109,31 @@ export default function PriceAlertsScreen() {
             />
           </View>
 
-          {/* Primary Action Button Positioned at Top */}
           <View style={styles.actionBtnWrapper}>
             <PrimaryButton
               text="Create alert"
               Bgcolor={Colors.green}
               textColor={Colors.newDark}
               onPress={handleCreateAlert}
-              fontSize={17}
-              style={{ fontfamily: FontFamily.bold }}
+              fontSize={15}
+              style={{ fontFamily: FontFamily.bold }}
             />
           </View>
 
-          {/* Alert Configuration Stack Row List */}
+          {/* Interactive Stack Row mapping */}
           <View style={styles.listWrapper}>
             {alerts.map((alert) => (
-              <ProfileOptionRow
+              <PriceAlertRow
                 key={alert.id}
-                title={alert.title}
-                subtitle={alert.subtitle}
-                badgeText={alert.badgeText}
-                onPress={() =>
-                  console.log("Edit or toggle alert configurations", alert.id)
-                }
+                item={alert}
+                onPress={() => handleRowInteraction(alert)} // Toggles On / Off on simple tap
+                onDeleteTrigger={() => setActiveDeleteTarget(alert)} // Opens the modal when the trash can is tapped!
               />
             ))}
           </View>
 
-          {/* Inline Target Confirmation Dialog Overlay Panel Box */}
-          {showDeleteModal && (
+          {/* 3. DYNAMIC DELETE DIALOG: Only appears when a deletion target is active */}
+          {activeDeleteTarget && (
             <View style={styles.deleteDialogBox}>
               <Title
                 text="Delete alert?"
@@ -109,7 +143,7 @@ export default function PriceAlertsScreen() {
               />
               <View style={styles.dialogDescMargin}>
                 <Paragraph
-                  text="This removes the BTC above $72,000 alert from your list."
+                  text={`This removes the ${activeDeleteTarget.title} alert from your tracking dashboard.`}
                   color={Colors.newSecondary}
                   size={12.5}
                   lineHeight={17}
@@ -120,14 +154,14 @@ export default function PriceAlertsScreen() {
               <View style={styles.dialogActionsRow}>
                 <Pressable
                   style={styles.cancelActionBtn}
-                  onPress={() => setShowDeleteModal(false)}
+                  onPress={() => setActiveDeleteTarget(null)}
                 >
                   <Text style={styles.cancelBtnText}>Cancel</Text>
                 </Pressable>
 
                 <Pressable
                   style={styles.deleteActionBtn}
-                  onPress={handleDeleteAlert}
+                  onPress={executeDeleteAction}
                 >
                   <Text style={styles.deleteBtnText}>Delete</Text>
                 </Pressable>
@@ -141,46 +175,41 @@ export default function PriceAlertsScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
+  backgroundImage: { flex: 1, width: "100%", height: "100%" },
+  safeContainer: { flex: 1, backgroundColor: "transparent" },
+  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
+  pageTitle: { marginTop: 24, marginBottom: 20 },
+  actionBtnWrapper: { width: "100%", marginBottom: 24 },
+  listWrapper: { width: "100%", flexDirection: "column", gap: 12 },
+  rowWrapper: { position: "relative", width: "100%" },
+
+  // Positions the custom styled badge exactly over the row's standard badge spot
+  badgeOverlayAnchor: {
+    position: "absolute",
+    right: 20,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "flex-end",
   },
-  safeContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
+  floatingBadgeText: {
+    fontSize: 12,
+    fontFamily: FontFamily.bold,
   },
-  scrollContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-  },
-  pageTitle: {
-    marginTop: 24,
-    marginBottom: 20,
-  },
-  actionBtnWrapper: {
-    width: "100%",
-    marginBottom: 24,
-  },
-  listWrapper: {
-    width: "100%",
-    flexDirection: "column",
-    gap: 12,
-  },
+  badgeGreen: { color: Colors.green },
+  badgeRed: { color: "#FF4D4D" }, // Custom theme red color override
+  badgeMuted: { color: Colors.newSecondary },
+
   deleteDialogBox: {
     backgroundColor: Colors.newDark,
     borderRadius: 20,
     padding: 24,
-    marginTop: 48,
+    marginTop: 42,
     width: "100%",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.04)",
   },
-  dialogDescMargin: {
-    width: "100%",
-    marginTop: 8,
-    marginBottom: 20,
-  },
+  dialogDescMargin: { width: "100%", marginTop: 8, marginBottom: 20 },
   dialogActionsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -202,7 +231,7 @@ const styles = StyleSheet.create({
   },
   deleteActionBtn: {
     flex: 1,
-    backgroundColor: "#FF4D4D", // Soft red/coral button color from design mockup
+    backgroundColor: "#FF4D4D",
     borderRadius: 12,
     height: 44,
     alignItems: "center",

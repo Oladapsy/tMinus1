@@ -77,7 +77,7 @@ export default function LiteProfileScreen() {
               title="Notifications"
               subtitle="2 unread messages"
               badgeText={2}
-              //   onPress={() => router.push("/profile/notifications")}
+              onPress={() => router.push("/profile/notifications")}
             />
             <ProfileOptionRow
               title="Watchlist"
