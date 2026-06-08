@@ -63,7 +63,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
     return Colors.green;
   };
-
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}

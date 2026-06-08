@@ -1,9 +1,9 @@
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { Ionicons } from "@expo/vector-icons"; // Clean Expo core package bundle
 import React from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
-import { Ionicons } from "@expo/vector-icons"; // Clean Expo core package bundle
 
 interface PriceAlertRowProps {
   item: {
