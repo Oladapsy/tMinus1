@@ -2,7 +2,8 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import React from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { Swipeable } from "react-native-gesture-handler";
+import Swipeable from "react-native-gesture-handler/Swipeable";
+import { Ionicons } from "@expo/vector-icons";
 
 interface PriceAlertRowProps {
   item: {
@@ -20,12 +21,11 @@ export default function PriceAlertRow({
   onPress,
   onDeleteTrigger,
 }: PriceAlertRowProps) {
-  // 1. Render the hidden swipe actions (The Trash Can background panel)
   const renderRightActions = (
-    // progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>,
+    progressAnimatedValue: Animated.AnimatedInterpolation<number>,
+    dragAnimatedValue: Animated.AnimatedInterpolation<number>,
   ) => {
-    const scale = dragX.interpolate({
+    const scale = dragAnimatedValue.interpolate({
       inputRange: [-80, 0],
       outputRange: [1, 0],
       extrapolate: "clamp",
@@ -33,16 +33,13 @@ export default function PriceAlertRow({
 
     return (
       <Pressable style={styles.deleteSwipeButton} onPress={onDeleteTrigger}>
-        <Animated.Text
-          style={[styles.deleteIconText, { transform: [{ scale }] }]}
-        >
-          🗑️
-        </Animated.Text>
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <Ionicons name="trash-outline" size={22} color={Colors.newWhite} />
+        </Animated.View>
       </Pressable>
     );
   };
 
-  // 2. Map color states cleanly based on badge selection parameters
   const isOn = item.badgeText === "On";
   const isOff = item.badgeText === "Off";
 
@@ -66,7 +63,6 @@ export default function PriceAlertRow({
     >
       <Pressable style={styles.rowContainer} onPress={onPress}>
         <View style={styles.leftContent}>
-          {/* Status-colored icon dot indicator */}
           <View style={[styles.iconDot, dotStyle]} />
 
           <View style={styles.textColumn}>
@@ -100,14 +96,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   iconDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
   },
-  dotGreen: { backgroundColor: "rgba(0, 255, 128, 0.2)" },
-  dotRed: { backgroundColor: "rgba(255, 77, 77, 0.2)" },
-  dotMuted: { backgroundColor: "rgba(255, 255, 255, 0.1)" },
-
+  dotGreen: { backgroundColor: Colors.green },
+  dotRed: { backgroundColor: Colors.newRed },
+  dotMuted: { backgroundColor: Colors.newSecondary },
   textColumn: {
     flexDirection: "column",
     gap: 3,
@@ -131,21 +126,15 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
   },
   badgeGreen: { color: Colors.green },
-  badgeRed: { color: "#FF4D4D" },
+  badgeRed: { color: Colors.newRed },
   badgeMuted: { color: Colors.newSecondary },
-
-  // Swipe Action Background Tray Styling
   deleteSwipeButton: {
-    backgroundColor: "#FF4D4D",
+    backgroundColor: Colors.newRed,
     justifyContent: "center",
     alignItems: "center",
-    width: 80,
+    width: 74,
     height: "100%",
     borderRadius: 16,
-    marginLeft: 8,
-  },
-  deleteIconText: {
-    color: Colors.newWhite,
-    fontSize: 20,
+    marginLeft: 10,
   },
 });
