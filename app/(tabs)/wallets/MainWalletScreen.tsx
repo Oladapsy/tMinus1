@@ -6,7 +6,8 @@ import { View } from "react-native";
 const MainWalletScreen = () => {
   // 1. This value will be pulled from global Redux state slice later!
   // "APPROVED" state changes the UI
-  const currentKycStatus = "PENDING";
+  // PENDING
+  const currentKycStatus = "APPROVED";
 
   return (
     <View style={{ flex: 1 }}>

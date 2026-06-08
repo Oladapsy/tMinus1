@@ -9,7 +9,7 @@ import Deposit from "@/src/components/wallet/Deposit";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import React, { useState } from "react";
-import { StyleSheet, ImageBackground, View } from "react-native";
+import { ImageBackground, StyleSheet, View } from "react-native";
 
 import bgImage from "@/assets/images/wallet/WalletBg.png";
 

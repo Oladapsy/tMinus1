@@ -15,6 +15,7 @@ interface PrimaryButtonProps {
   fullWidth?: boolean;
   style?: object;
   disabled?: boolean;
+  fontFamily?: string;
 }
 
 export default function PrimaryButton({
@@ -29,6 +30,7 @@ export default function PrimaryButton({
   fullWidth = true,
   style,
   disabled = false,
+  fontFamily = FontFamily.regular,
 }: PrimaryButtonProps) {
   return (
     <TouchableOpacity
@@ -50,8 +52,13 @@ export default function PrimaryButton({
       <Text
         style={[
           styles.text,
-          style,
-          { color: textColor, fontSize, textAlign: alignText },
+          // style,
+          {
+            color: textColor,
+            fontSize,
+            textAlign: alignText,
+            fontFamily: fontFamily,
+          },
         ]}
       >
         {text}
@@ -70,7 +77,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   text: {
-    fontFamily: FontFamily.regular,
+    // fontFamily: FontFamily.regular,
   },
   disabledStyle: {
     opacity: 0.4,
