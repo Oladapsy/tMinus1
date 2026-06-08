@@ -7,11 +7,11 @@ import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-  ImageBackground,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ImageBackground,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 export default function LiteProfileScreen() {
@@ -65,13 +65,13 @@ export default function LiteProfileScreen() {
             <ProfileOptionRow
               title="Security"
               subtitle="2FA, PIN, recovery codes"
-                onPress={() => router.push("/profile/security")}
+              onPress={() => router.push("/profile/security")}
             />
             <ProfileOptionRow
               title="Price alerts"
               subtitle="3 active alerts"
               badgeText={3}
-              //   onPress={() => router.push("/profile/alerts")}
+              onPress={() => router.push("/profile/security/price-alerts")}
             />
             <ProfileOptionRow
               title="Notifications"
