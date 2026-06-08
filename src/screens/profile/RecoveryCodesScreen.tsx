@@ -21,7 +21,7 @@ import {
 export default function RecoveryCodesScreen() {
   const router = useRouter();
   const params = useLocalSearchParams(); // 3. Reads parameters out of current URL route context
-  const { showToast } = useToast(); // Hooking our brand new global toast engine
+  const { showToast } = useToast(); // Hooking global toast engine
   const [regenerating, setRegenerating] = useState(false);
   const [currentCodes, setCurrentCodes] = useState<string[] | null>(null);
 
@@ -168,8 +168,15 @@ export default function RecoveryCodesScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: { flex: 1, width: "100%", height: "100%" },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
   topNavBar: {
     width: "100%",
     paddingHorizontal: 24,
@@ -187,7 +194,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: FontFamily.bold,
   },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
   pageTitle: { marginTop: 14, marginBottom: 24 },
   gridContainer: {
     flexDirection: "row",
@@ -218,13 +228,23 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
     letterSpacing: 0.5,
   },
-  copyLinkWrapper: { marginTop: 18, alignSelf: "center", paddingVertical: 6 },
+  copyLinkWrapper: {
+    marginTop: 18,
+    alignSelf: "center",
+    paddingVertical: 6,
+  },
   copyLinkText: {
     color: Colors.green,
     fontSize: 13,
     fontFamily: FontFamily.bold,
     textDecorationLine: "underline",
   },
-  warningWrapper: { width: "100%", marginTop: 32 },
-  footerSection: { width: "100%", marginTop: 48 },
+  warningWrapper: {
+    width: "100%",
+    marginTop: 32,
+  },
+  footerSection: {
+    width: "100%",
+    marginTop: 48,
+  },
 });
