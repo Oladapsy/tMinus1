@@ -1,12 +1,12 @@
-import { StyleSheet, View, Text, ImageBackground } from "react-native";
-import React from "react";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import { useRouter } from "expo-router";
+import Paragraph from "@/src/components/common/Paragraph";
+import PrimaryButton from "@/src/components/common/PrimaryButton";
+import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import Paragraph from "@/src/components/common/Paragraph";
+import { useRouter } from "expo-router";
+import React from "react";
+import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import Title from "../../common/Title";
 
 export default function TradeNoKyc() {
@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingBottom: 24,
-    
   },
   topSection: {
     marginTop: 10,

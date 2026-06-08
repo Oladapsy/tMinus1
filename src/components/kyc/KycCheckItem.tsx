@@ -1,8 +1,8 @@
-import React from "react";
-import { StyleSheet, View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 interface KycCheckItemProps {
   label: string;

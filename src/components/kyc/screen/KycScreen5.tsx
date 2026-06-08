@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import KycCheckItem from "@/src/components/kyc/KycCheckItem";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
+import KycCheckItem from "@/src/components/kyc/KycCheckItem";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 export default function KycScreen5({ onNext }: { onNext: () => void }) {
   // Simple fake system states: 'analyzing' -> 'success'

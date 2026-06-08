@@ -1,7 +1,7 @@
-import { View } from "react-native";
-import React from "react";
 import KycGateGuard from "@/src/components/kyc/KycGateGuard";
 import ProWalletScreen from "@/src/screens/wallet/ProWalletScreen";
+import React from "react";
+import { View } from "react-native";
 
 const MainWalletScreen = () => {
   // 1. This value will be pulled from global Redux state slice later!

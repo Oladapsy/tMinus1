@@ -1,19 +1,19 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-} from "react-native";
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+    Modal,
+    Pressable,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import * as z from "zod";
 
+import PrimaryButton from "@/src/components/common/PrimaryButton";
 import KycFormInput from "@/src/components/kyc/KycFormInput";
 import KycNoteCard from "@/src/components/kyc/KycNoteCard";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
@@ -42,7 +42,11 @@ const kycSchema = z.object({
 type KycFormData = z.infer<typeof kycSchema>;
 
 interface KycScreen3Props {
-  onNext: (formData: { name: string; country: string; docType: string }) => void;
+  onNext: (formData: {
+    name: string;
+    country: string;
+    docType: string;
+  }) => void;
 }
 
 export default function KycScreen3({ onNext }: KycScreen3Props) {
@@ -77,7 +81,8 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
     docOptions.find((o) => o.key === selectedDocType)?.label || "";
 
   const onSubmitForm = (data: KycFormData) => {
-    const humanReadableDocLabel = docOptions.find((o) => o.key === data.docType)?.label || "National ID";
+    const humanReadableDocLabel =
+      docOptions.find((o) => o.key === data.docType)?.label || "National ID";
 
     onNext({
       name: data.legalName,

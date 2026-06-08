@@ -1,13 +1,13 @@
-import React from "react";
-import { StyleSheet, View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-import KycReviewRow from "@/src/components/kyc/KycReviewRow";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+import VertDotIcon from "@/assets/icons/profile/kyc/vertDot.svg";
 import Paragraph from "@/src/components/common/Paragraph";
+import PrimaryButton from "@/src/components/common/PrimaryButton";
+import KycReviewRow from "@/src/components/kyc/KycReviewRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import VertDotIcon from "@/assets/icons/profile/kyc/vertDot.svg";
 import Title from "../../common/Title";
 
 export type KycStatusType = "pending" | "success" | "rejected";

@@ -1,10 +1,10 @@
-import { StyleSheet, View } from "react-native";
-import React from "react";
 import KycTierCard from "@/src/components/kyc/KycTierCard";
-import KycNoteCard from "../KycNoteCard";
-import PrimaryButton from "../../common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import PrimaryButton from "../../common/PrimaryButton";
+import KycNoteCard from "../KycNoteCard";
 interface KycScreenProps {
   onNext: () => void;
 }
@@ -64,5 +64,5 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 48,
-  }
+  },
 });

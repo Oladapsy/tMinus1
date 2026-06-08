@@ -1,9 +1,9 @@
-import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import Paragraph from "@/src/components/common/Paragraph";
+import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 interface KycLevelCardProps {
   levelText: string;
@@ -11,7 +11,11 @@ interface KycLevelCardProps {
   description: string;
 }
 
-export default function KycLevelCard({ levelText, title, description }: KycLevelCardProps) {
+export default function KycLevelCard({
+  levelText,
+  title,
+  description,
+}: KycLevelCardProps) {
   return (
     <View style={styles.cardContainer}>
       {/* Dynamic level background circle badge */}

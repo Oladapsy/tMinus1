@@ -1,7 +1,7 @@
-import React from "react";
-import { StyleSheet, View, Text } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 interface KycReviewRowProps {
   label: string;

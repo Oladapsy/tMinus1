@@ -1,10 +1,10 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import KycReviewRow from "@/src/components/kyc/KycReviewRow";
+import Paragraph from "@/src/components/common/Paragraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
+import KycReviewRow from "@/src/components/kyc/KycReviewRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import Paragraph from "@/src/components/common/Paragraph";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 
 interface KycScreen6Props {
   onSubmit: () => void;

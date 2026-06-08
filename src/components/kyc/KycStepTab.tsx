@@ -1,7 +1,7 @@
-import React from "react";
-import { StyleSheet, View, Text, Pressable } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface KycStepTabProps {
   label: string;
@@ -35,7 +35,13 @@ export default function KycStepTab({
           hasError && !isFilled && styles.statusIndicatorError, // Circular dot turns red too
         ]}
       />
-      <Text style={[styles.tabLabel, isActive && styles.tabLabelActive, hasError && !isFilled && styles.tabLabelError]}>
+      <Text
+        style={[
+          styles.tabLabel,
+          isActive && styles.tabLabelActive,
+          hasError && !isFilled && styles.tabLabelError,
+        ]}
+      >
         {label}
       </Text>
     </Pressable>

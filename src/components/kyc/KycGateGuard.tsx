@@ -1,5 +1,5 @@
-import React from "react";
 import { GlobalKycStatus } from "@/src/types/kycGate";
+import React from "react";
 import TradeNoKyc from "../trades/lite/TradeNoKyc";
 import WalletPendingKyc from "../wallet/lite/WalletPendingKyc";
 
@@ -14,7 +14,6 @@ export default function KycGateGuard({
   gateType,
   children,
 }: KycGateGuardProps) {
-
   // If user is completely verified and approved, show the actual underlying screen!
   if (status === "APPROVED") {
     return <>{children}</>;

@@ -1,15 +1,15 @@
-import { StyleSheet, View, Text, Alert } from "react-native";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import * as z from "zod";
-import * as ImagePicker from "expo-image-picker";
 
 import KycStepTab from "@/src/components/kyc/KycStepTab";
 import MediaDropzone from "@/src/components/kyc/MediaDropzone";
-import PrimaryButton from "../../common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import PrimaryButton from "../../common/PrimaryButton";
 
 // 1. FIX: Make selfieUri strictly compulsory
 const uploadSchema = z.object({
@@ -68,8 +68,8 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
   const currentTab = getCurrentTabDetails();
 
   // 2. FIX: Dynamic helper to know if the currently visible tab has a validation error
-  const currentTabHasError = 
-    (activeTab === "front" && !!errors.frontUri) || 
+  const currentTabHasError =
+    (activeTab === "front" && !!errors.frontUri) ||
     (activeTab === "selfie" && !!errors.selfieUri);
 
   const handlePickFromGallery = async () => {

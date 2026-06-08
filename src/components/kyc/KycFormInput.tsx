@@ -1,13 +1,13 @@
-import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  TextInputProps,
-} from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import React from "react";
+import {
+    StyleSheet,
+    Text,
+    TextInput,
+    TextInputProps,
+    View,
+} from "react-native";
 
 interface KycFormInputProps extends TextInputProps {
   error?: string; // Captures validation errors sent down by react-hook-form

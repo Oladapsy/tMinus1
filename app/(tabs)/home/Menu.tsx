@@ -1,18 +1,18 @@
-import { ScrollView, StyleSheet, View } from "react-native";
-import React from "react";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import { Colors } from "@/src/constants/colors";
-import IconAndText from "@/src/components/common/tab/IconAndText";
-import { FontFamily } from "@/src/constants/fonts";
 import Back from "@/assets/icons/main/backward.svg";
 import More from "@/assets/icons/main/More.svg";
-import { router } from "expo-router";
-import ProfileHeader from "@/src/components/more/MarketHeader";
 import Avatar from "@/assets/images/market/avatar.png";
-import { LinearGradient } from "expo-linear-gradient";
+import MySafeAreaView from "@/src/components/common/MySafeAreaView";
+import IconAndText from "@/src/components/common/tab/IconAndText";
 import CommonActions from "@/src/components/more/CommonActions";
-import TradeActions from "@/src/components/more/TradeActions";
 import FinanceActions from "@/src/components/more/FinanceActions";
+import ProfileHeader from "@/src/components/more/MarketHeader";
+import TradeActions from "@/src/components/more/TradeActions";
+import { Colors } from "@/src/constants/colors";
+import { FontFamily } from "@/src/constants/fonts";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function MenuScreen() {
   return (

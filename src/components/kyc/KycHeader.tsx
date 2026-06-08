@@ -1,12 +1,12 @@
-import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import Arrowback from "@/assets/icons/profile/kyc/kycBack.svg";
+import Paragraph from "@/src/components/common/Paragraph";
+import IconAndText from "@/src/components/common/tab/IconAndText";
+import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import Arrowback from "@/assets/icons/profile/kyc/kycBack.svg";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
 import { useRouter } from "expo-router";
-import IconAndText from "@/src/components/common/tab/IconAndText";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 export type KycScreenIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
