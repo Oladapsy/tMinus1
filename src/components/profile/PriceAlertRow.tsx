@@ -3,7 +3,7 @@ import { FontFamily } from "@/src/constants/fonts";
 import React from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons"; // Clean Expo core package bundle
 
 interface PriceAlertRowProps {
   item: {
@@ -22,11 +22,11 @@ export default function PriceAlertRow({
   onDeleteTrigger,
 }: PriceAlertRowProps) {
   const renderRightActions = (
-    progressAnimatedValue: Animated.AnimatedInterpolation<number>,
+    _progressAnimatedValue: Animated.AnimatedInterpolation<number>, // Added leading underscore to silence the unused warning
     dragAnimatedValue: Animated.AnimatedInterpolation<number>,
   ) => {
     const scale = dragAnimatedValue.interpolate({
-      inputRange: [-80, 0],
+      inputRange: [-74, 0],
       outputRange: [1, 0],
       extrapolate: "clamp",
     });
@@ -34,7 +34,11 @@ export default function PriceAlertRow({
     return (
       <Pressable style={styles.deleteSwipeButton} onPress={onDeleteTrigger}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <Ionicons name="trash-outline" size={22} color={Colors.newWhite} />
+          <Ionicons
+            name="trash-bin-outline"
+            size={22}
+            color={Colors.newWhite}
+          />
         </Animated.View>
       </Pressable>
     );
@@ -130,8 +134,8 @@ const styles = StyleSheet.create({
   badgeMuted: { color: Colors.newSecondary },
   deleteSwipeButton: {
     backgroundColor: Colors.newRed,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center", // Keeps your new basket centered perfectly vertically
+    alignItems: "center", // Keeps your new basket centered perfectly horizontally
     width: 74,
     height: "100%",
     borderRadius: 16,
