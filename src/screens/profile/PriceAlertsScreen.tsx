@@ -85,10 +85,16 @@ export default function PriceAlertsScreen() {
   };
 
   const executeDeleteAction = () => {
+    // Safety guard clause: if there is no active delete target, stop immediately
     if (!activeDeleteTarget) return;
 
+    // Filter out the deleted alert from the list state
     setAlerts((prev) => prev.filter((a) => a.id !== activeDeleteTarget.id));
+
+    // Show a success toast message referencing the title
     showToast(`Removed "${activeDeleteTarget.title}" alert.`);
+
+    // Close the modal dialog box by resetting the state back to null
     setActiveDeleteTarget(null);
   };
 
