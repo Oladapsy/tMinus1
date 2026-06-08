@@ -23,13 +23,14 @@ export default function SecurityScreen() {
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          x{/* HEADER SECTOR */}
+          {/* HEADER SECTOR */}
           <View style={styles.pageTitle}>
             <TitleAndParagraph
               title="Security"
               paragraph="Protect account access and sensitive actions."
             />
           </View>
+
           {/* SECURITY CONFIGURATION LIST ROWS */}
           <View style={styles.menuSection}>
             <ProfileOptionRow
@@ -42,13 +43,13 @@ export default function SecurityScreen() {
               title="Authenticator app"
               subtitle="Enabled for login protection"
               badgeText="On"
-              //   onPress={() => router.push("/profile/security/two-factor")}
+              onPress={() => router.push("/profile/security/two-factor")}
             />
             <ProfileOptionRow
               title="Recovery codes"
               subtitle="8 backup codes remaining"
               badgeText="View"
-              //   onPress={() => router.push("/profile/security/recovery-codes")}
+              onPress={() => router.push("/profile/security/recovery-codes")}
             />
             <ProfileOptionRow
               title="Registered devices"
@@ -63,6 +64,7 @@ export default function SecurityScreen() {
               onPress={() => console.log("Toggle Biometrics")}
             />
           </View>
+
           {/* ADMIN CALLOUT WARNING BOX */}
           <View style={styles.warningBox}>
             <Title

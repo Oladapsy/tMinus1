@@ -1,8 +1,9 @@
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
-import { Stack } from "expo-router";
-import { useEffect } from "react";
+import { ToastProvider } from "@/src/context/ToastContext";
 import { store } from "@/src/store/store";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 import { Provider } from "react-redux";
 
 export default function RootLayout() {
@@ -29,11 +30,15 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-     <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
+      <ToastProvider>
+        {" "}
+        {/* <-- Must go here */}
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </ToastProvider>
     </Provider>
   );
 }

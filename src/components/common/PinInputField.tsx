@@ -8,6 +8,7 @@ interface PinInputFieldProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  maxLength?: number; // Added dynamic support
 }
 
 export default function PinInputField({
@@ -15,6 +16,7 @@ export default function PinInputField({
   value,
   onChangeText,
   placeholder = "••••",
+  maxLength = 4, // Defaults back to 4 cleanly if omitted
 }: PinInputFieldProps) {
   return (
     <View style={styles.card}>
@@ -27,7 +29,7 @@ export default function PinInputField({
         placeholderTextColor="rgba(255, 255, 255, 0.15)"
         secureTextEntry={true}
         keyboardType="numeric"
-        maxLength={4}
+        maxLength={maxLength} // Dynamically controlled limits
         selectionColor={Colors.green}
       />
     </View>
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     color: Colors.newWhite,
     fontSize: 15,
     fontFamily: FontFamily.bold,
-    padding: 0, // Clears default Android text padding anomalies entirely
+    padding: 0,
     width: "100%",
   },
 });
