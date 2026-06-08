@@ -53,7 +53,8 @@ export default function PriceAlertsScreen() {
     useState<PriceAlertItem | null>(null);
 
   const handleCreateAlert = () => {
-    showToast("Opening alert creation panel...");
+    // showToast("Opening alert creation panel...");
+    console.log("Opening alert creation panel...");
   };
 
   // 1. Tapping an item switches its active states or prompts modal deletion
@@ -138,7 +139,7 @@ export default function PriceAlertsScreen() {
               <Title
                 text="Delete alert?"
                 color={Colors.newWhite}
-                size={15}
+                size={17}
                 fontFamily={FontFamily.bold}
               />
               <View style={styles.dialogDescMargin}>
@@ -175,31 +176,32 @@ export default function PriceAlertsScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: { flex: 1, width: "100%", height: "100%" },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
-  pageTitle: { marginTop: 24, marginBottom: 20 },
-  actionBtnWrapper: { width: "100%", marginBottom: 24 },
-  listWrapper: { width: "100%", flexDirection: "column", gap: 12 },
-  rowWrapper: { position: "relative", width: "100%" },
-
-  // Positions the custom styled badge exactly over the row's standard badge spot
-  badgeOverlayAnchor: {
-    position: "absolute",
-    right: 20,
-    top: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "flex-end",
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
   },
-  floatingBadgeText: {
-    fontSize: 12,
-    fontFamily: FontFamily.bold,
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
   },
-  badgeGreen: { color: Colors.green },
-  badgeRed: { color: "#FF4D4D" }, // Custom theme red color override
-  badgeMuted: { color: Colors.newSecondary },
-
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  pageTitle: {
+    marginTop: 24,
+    marginBottom: 20,
+  },
+  actionBtnWrapper: {
+    width: "100%",
+    marginBottom: 24,
+  },
+  listWrapper: {
+    width: "100%",
+    flexDirection: "column",
+    gap: 12,
+  },
   deleteDialogBox: {
     backgroundColor: Colors.newDark,
     borderRadius: 20,
@@ -209,7 +211,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.04)",
   },
-  dialogDescMargin: { width: "100%", marginTop: 8, marginBottom: 20 },
+  dialogDescMargin: {
+    width: "100%",
+    marginTop: 8,
+    marginBottom: 20,
+  },
   dialogActionsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -231,7 +237,7 @@ const styles = StyleSheet.create({
   },
   deleteActionBtn: {
     flex: 1,
-    backgroundColor: "#FF4D4D",
+    backgroundColor: Colors.newRed,
     borderRadius: 12,
     height: 44,
     alignItems: "center",
