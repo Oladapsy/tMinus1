@@ -11,7 +11,7 @@ import { Animated, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // 1. Define possible toast states
-type ToastType = "success" | "error";
+type ToastType = "success" | "error" | "warning";
 
 interface ToastContextType {
   showToast: (message: string, type?: ToastType) => void;
@@ -53,10 +53,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [slideAnim],
   );
 
-  // 4. Dynamic accent color calculation
+  // 4. Dynamic accent color calculation for success or error
   const getAccentColor = () => {
     if (toastType === "error") {
       return Colors.red;
+    }
+    if (toastType === "warning") {
+      return Colors.yellow;
     }
     return Colors.green;
   };
