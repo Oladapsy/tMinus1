@@ -1,5 +1,6 @@
 import KycGateGuard from "@/src/components/kyc/KycGateGuard";
-import ProWalletScreen from "@/src/screens/wallet/ProWalletScreen";
+import NewWalletScreen from "@/src/screens/wallet/NewWalletScreen";
+import OldWalletScreen from "@/src/screens/wallet/OldWalletScreen";
 import React from "react";
 import { View } from "react-native";
 
@@ -9,11 +10,14 @@ const MainWalletScreen = () => {
   // PENDING
   const currentKycStatus = "APPROVED";
 
+  const oldScreen = false;
+
   return (
     <View style={{ flex: 1 }}>
       <KycGateGuard status={currentKycStatus} gateType="wallets">
         {/* This mount the pro screen for old design  */}
-        <ProWalletScreen />
+        {oldScreen && <OldWalletScreen />}
+        {oldScreen === false && <NewWalletScreen />}
         {/* i will then use a lite flow later for new design */}
       </KycGateGuard>
     </View>

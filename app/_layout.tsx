@@ -31,8 +31,6 @@ export default function RootLayout() {
   return (
     <Provider store={store}>
       <ToastProvider>
-        {" "}
-        {/* <-- Must go here */}
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />

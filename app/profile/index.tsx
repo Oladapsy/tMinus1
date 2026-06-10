@@ -1,10 +1,10 @@
-import React from "react";
-import ProfileScreen from "@/src/screens/profile/ProfileScreen";
 import LiteProfileScreen from "@/src/screens/profile/LiteProfileScreen";
+import ProfileScreen from "@/src/screens/profile/ProfileScreen";
+import React from "react";
 
 export default function Index() {
   // for the old and new switch
-  const isProVersion = false;
+  const isProVersion = true;
 
   if (isProVersion) {
     return <ProfileScreen />;
