@@ -35,5 +35,7 @@ export const Colors = {
   newBrightYellow: "#DB9E38",
   newYellowSlim: "#2B2416",
   newYellowWarning: "#C9A96C",
-  
+  newCryptoYellow: "#F2A627",
+  purple: "#8F9BFF",
+  walletCard: "#14231F",
 };

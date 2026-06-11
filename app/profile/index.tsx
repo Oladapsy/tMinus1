@@ -4,7 +4,7 @@ import React from "react";
 
 export default function Index() {
   // for the old and new switch
-  const isProVersion = true;
+  const isProVersion = false;
 
   if (isProVersion) {
     return <ProfileScreen />;
