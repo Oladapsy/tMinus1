@@ -38,7 +38,7 @@ export default function WelcomeBackState({
 
   return (
     <View style={styles.container}>
-      <View>
+      <View style={styles.text}>
         <TitleAndParagraph
           title="Welcome back"
           titleSize={32}
@@ -118,20 +118,29 @@ export default function WelcomeBackState({
           disabled={!passwordValue || (!hasSavedEmail && !emailValue)}
         />
 
-        <TouchableOpacity
-          style={styles.faceIdButton}
+        <PrimaryButton
+          text="Use Face ID"
+          Bgcolor={Colors.tertiary}
+          textColor={Colors.newWhite}
           onPress={() => console.log("FaceID pressed")}
-        >
-          <Text style={styles.faceIdText}>Use Face ID</Text>
-        </TouchableOpacity>
+        />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { width: "100%", alignItems: "center" },
-  avatarContainer: { marginTop: 40, marginBottom: 16 },
+  container: {
+    width: "100%",
+  },
+  text: {
+    marginTop: 40,
+  },
+  avatarContainer: {
+    marginTop: 40,
+    marginBottom: 16,
+    alignItems: "center",
+  },
   avatarCircle: {
     width: 100,
     height: 100,
@@ -150,8 +159,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: FontFamily.bold,
   },
-  titleSection: { alignItems: "center", marginBottom: 32 },
-  inputContainer: { width: "100%", marginBottom: 20 },
+  titleSection: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
+  inputContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
   inputLabel: {
     color: Colors.secondary,
     fontSize: 12,
@@ -173,14 +188,15 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.regular,
     fontSize: 14,
   },
-  footer: { width: "100%", gap: 12, marginTop: 16 },
-  faceIdButton: {
+  footer: {
     width: "100%",
-    height: 54,
-    borderRadius: 12,
-    backgroundColor: Colors.tertiary,
-    justifyContent: "center",
-    alignItems: "center",
+    gap: 12,
+    marginTop: 16,
   },
-  faceIdText: { color: "white", fontSize: 16, fontFamily: FontFamily.medium },
+  faceIdButton: {},
+  faceIdText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: FontFamily.medium,
+  },
 });

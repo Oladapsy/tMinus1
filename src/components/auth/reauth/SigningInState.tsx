@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
   },
   titleLeftAlignment: {
     alignSelf: "flex-start",
+    marginTop: 40,
   },
   skeletonGroup: {
     width: "100%",
