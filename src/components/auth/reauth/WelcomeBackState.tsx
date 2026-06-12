@@ -193,7 +193,6 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 16,
   },
-  faceIdButton: {},
   faceIdText: {
     color: "white",
     fontSize: 16,

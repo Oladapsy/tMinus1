@@ -42,7 +42,7 @@ export default function ReauthOverlay() {
 
   const [loginCustomer] = useLoginCustomerMutation();
 
-  // Clean formatting matching your real AuthForm component
+  // Clean formatting matching real AuthForm component
   const targetEmail = (initialEmail || typedEmail).trim().toLowerCase();
 
   // Phase 1: Sign In Credentials Check
@@ -53,7 +53,7 @@ export default function ReauthOverlay() {
     }
     if (!password) return;
 
-    setViewState("SIGNING_IN"); // 🌟 Bring back the fullscreen status loader step
+    setViewState("SIGNING_IN"); //Bring back the fullscreen status loader step
 
     try {
       const result = await loginCustomer({
@@ -133,8 +133,14 @@ const styles = StyleSheet.create({
     zIndex: 999999,
     backgroundColor: Colors.dark,
   },
-  backgroundImage: { width: "100%", height: "100%" },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
+  backgroundImage: {
+    width: "100%",
+    height: "100%",
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
   scrollContainer: {
     paddingHorizontal: 24,
     paddingBottom: 40,
