@@ -4,7 +4,7 @@ import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import CalloutBox from "../../common/CalloutBox";
+import CalloutBox from "@/src/components/common/CalloutBox";
 
 interface SignInFailedProps {
   savedEmail: string;
