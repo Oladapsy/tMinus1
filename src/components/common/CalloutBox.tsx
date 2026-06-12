@@ -12,6 +12,8 @@ interface CalloutBoxProps {
   paragraphColor?: ColorValue;
   titleSize?: number;
   paragraphSize?: number;
+  paddingTop?: number;
+  paddingBottom?: number;
 }
 
 export default function CalloutBox({
@@ -22,9 +24,11 @@ export default function CalloutBox({
   paragraphColor = Colors.newYellowWarning,
   titleSize = 13,
   paragraphSize = 12,
+  paddingTop,
+  paddingBottom,
 }: CalloutBoxProps) {
   return (
-    <View style={[styles.box, { backgroundColor }]}>
+    <View style={[styles.box, { backgroundColor, paddingTop, paddingBottom }]}>
       <Text style={[styles.title, { color: titleColor, fontSize: titleSize }]}>
         {title}
       </Text>
