@@ -11,12 +11,12 @@ import { FontFamily } from "@/src/constants/fonts";
 import SocialLoginButton from "../SocialLoginButton";
 import FingerprintButton from "../FingerprintButton";
 import AuthForm from "./AuthForm";
-// import { router } from "expo-router";
 import Paragraph from "../../common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 
 export default function SignInForm() {
   const [useEmail, setUseEmail] = useState(true);
+
   return (
     <View>
       <View style={styles.text}>
@@ -27,24 +27,31 @@ export default function SignInForm() {
           fontFamily={FontFamily.bold}
         />
       </View>
-      {/* The form */}
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <AuthForm
             fieldLabel={useEmail ? "Email" : "Mobile Number"}
             fieldPlaceholder={
-              useEmail ? "Enter your email" : "Enter your mobile"
+              useEmail
+                ? "Enter your email"
+                : "Enter your mobile number"
             }
-            fieldKeyboardType={useEmail ? "email-address" : "phone-pad"}
+            fieldKeyboardType={
+              useEmail
+                ? "email-address"
+                : "phone-pad"
+            }
             toggleLinkText={
-              useEmail ? "Sign in with mobile" : "Sign in with email"
+              useEmail
+                ? "Sign in with mobile"
+                : "Sign in with email"
             }
-            onToggleLink={() => setUseEmail(!useEmail)}
-            showForgotPassword={true}
+            onToggleLink={() => setUseEmail((prev) => !prev)}
+            showForgotPassword
             buttonText="Sign in"
-            // onSubmit={() => router.replace("/(tabs)/home")}
           />
 
           <View style={styles.extraText}>
@@ -56,7 +63,6 @@ export default function SignInForm() {
           </View>
 
           <SocialLoginButton />
-
           <FingerprintButton />
         </ScrollView>
       </KeyboardAvoidingView>

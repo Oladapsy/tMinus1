@@ -1,27 +1,45 @@
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import NavigateIconText from "@/src/components/common/NavigateIconText";
 import { Colors } from "@/src/constants/colors";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import Cancel from "@/assets/icons/main/cancel.svg";
 import AuthTabs from "@/src/components/auth/AuthTabs";
 import { useState } from "react";
 import SignInForm from "@/src/components/auth/forms/SignInForm";
 import SignUpForm from "@/src/components/auth/forms/SignUpForm";
+import { router } from "expo-router";
 
 export default function SignInScreen() {
   const [activeTab, setActiveTab] = useState(0);
+
   return (
     <MySafeAreaView style={style.container}>
-      <NavigateIconText icon={<Cancel color={Colors.secondary} />} />
+      {/* Keyboard Avoiding View prevents the software keyboard from overlapping inputs */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+        style={style.flexContainer}
+      >
+        <View style={style.headerWrapper}>
+          <NavigateIconText icon={<Cancel color={Colors.secondary} />} onClickIcon={() => router.back()} />
+        </View>
 
-      {/* The tab */}
-      <AuthTabs
-        tabs={["Sign In", "Sign Up"]}
-        activeIndex={activeTab}
-        onChange={setActiveTab}
-      />
+        {/* The tab navigation */}
+        <AuthTabs
+          tabs={["Sign In", "Sign Up"]}
+          activeIndex={activeTab}
+          onChange={setActiveTab}
+        />
 
-      {activeTab === 0 ? <SignInForm /> : <SignUpForm />}
+        {/* 🌟 SCROLL VIEW ENGINE: Absorbs dynamic layout expansion gracefully */}
+        <ScrollView 
+          style={style.scrollEngine}
+          contentContainerStyle={style.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {activeTab === 0 ? <SignInForm /> : <SignUpForm />}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </MySafeAreaView>
   );
 }
@@ -31,5 +49,20 @@ const style = StyleSheet.create({
     backgroundColor: Colors.primary,
     flex: 1,
     paddingHorizontal: 24,
+  },
+  flexContainer: {
+    flex: 1,
+  },
+  headerWrapper: {
+    marginTop: 5,
+    // marginBottom: 10,
+  },
+  scrollEngine: {
+    flex: 1,
+    // marginTop: 16,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+    flexGrow: 1,       
   },
 });

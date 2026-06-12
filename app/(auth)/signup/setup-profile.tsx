@@ -8,7 +8,8 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useLocalSearchParams, router } from "expo-router";
-import { useRegisterCustomerMutation } from "@/src/services/authApi";
+// 🌟 Import your brand new OTP request mutation hook
+import { useRegisterCustomerMutation, useRequestEmailOtpMutation } from "@/src/services/authApi";
 
 export default function SetupProfileScreen() {
   const { email, phone } = useLocalSearchParams<{ email: string; phone: string }>();
@@ -17,7 +18,9 @@ export default function SetupProfileScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const [registerUser, { isLoading }] = useRegisterCustomerMutation ();
+  const [registerUser, { isLoading: isRegistering }] = useRegisterCustomerMutation();
+  // 🌟 Initialize the OTP mutation hook
+  const [requestOtp, { isLoading: isSendingOtp }] = useRequestEmailOtpMutation();
 
   const handleRegister = async () => {
     setError(null);
@@ -27,6 +30,7 @@ export default function SetupProfileScreen() {
     }
 
     try {
+      // 1. Submit form values to register the account profile record
       const response = await registerUser({
         fullName: fullName.trim(),
         email: email,
@@ -34,17 +38,29 @@ export default function SetupProfileScreen() {
         password: password,
       }).unwrap();
 
-      // Backend returns nextStep: "verify_email" along with the paths to request/verify OTP
+      // 2. If backend confirms registration profile created but needs a verification token:
       if (response.data?.emailVerificationRequired) {
+        
+        // 🌟 CRITICAL FIX: Trigger the backend to actually generate and send the OTP to this email!
+        await requestOtp({ email: email }).unwrap();
+
+        // 3. Cleanly transition user forward with the contextual parameters preserved
         router.push({
           pathname: "/(auth)/otp",
           params: { email: email },
         });
       }
     } catch (err: any) {
-      setError(err?.data?.error?.message || "Registration failed. Please try again.");
+      setError(
+        err?.data?.error?.message || 
+        err?.data?.message || 
+        "Registration failed. Please try again."
+      );
     }
   };
+
+  // Combine both mutation loading states to prevent button spamming
+  const isGlobalLoading = isRegistering || isSendingOtp;
 
   return (
     <MySafeAreaView style={styles.container}>
@@ -82,7 +98,7 @@ export default function SetupProfileScreen() {
       </View>
 
       <View style={styles.btnSpacing}>
-        {isLoading ? (
+        {isGlobalLoading ? (
           <ActivityIndicator size="large" color={Colors.green} />
         ) : (
           <PrimaryButton

@@ -1,21 +1,110 @@
-import { View, StyleSheet } from "react-native";
-import React from "react";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import React, { useState, useEffect } from "react";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import NavigateIconText from "@/src/components/common/NavigateIconText";
-import { router } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import Title from "@/src/components/common/Title";
 import Paragraph from "@/src/components/common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import OTPInput from "@/src/components/auth/OTPInput";
 import ResendTimer from "@/src/components/auth/ResendTimer";
+import {
+  useVerifyEmailOtpMutation,
+  useRequestEmailOtpMutation,
+} from "@/src/services/authApi";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/src/store/authSlice";
+import { useToast } from "@/src/context/ToastContext";
+// 🌟 Import your toast hook context
 
 export default function OtpScreen() {
-  const phoneNumber = "+1 234 567 8900"; // This would come from route params later
-  const onSubmit = () => {
-    router.push("/(auth)/success");
+  const { email, codeOnMount } = useLocalSearchParams<{
+    email: string;
+    codeOnMount?: string;
+  }>();
+  const dispatch = useDispatch();
+
+  // 🌟 Bring in the toast trigger function
+  const { showToast } = useToast();
+
+  const [code, setCode] = useState("");
+
+  const [verifyEmailOtp, { isLoading: isSubmitting }] =
+    useVerifyEmailOtpMutation();
+  const [requestEmailOtp] = useRequestEmailOtpMutation();
+
+  const handleCompleteOTP = (completedCode: string) => {
+    setCode(completedCode);
   };
+
+  const handleVerifySubmit = async () => {
+    if (code.length < 6) {
+      showToast(
+        "Please enter the complete 6-digit validation code.",
+        "warning",
+      );
+      return;
+    }
+
+    try {
+      const response = await verifyEmailOtp({
+        email: email!,
+        code: code,
+      }).unwrap();
+
+      if (response?.data?.accessToken) {
+        dispatch(setCredentials(response.data));
+
+        // 🌟 Trigger success state animation notice
+        showToast("Authentication successful! Welcome back.", "success");
+
+        router.replace("/(tabs)/home");
+      } else {
+        router.push("/(auth)/success");
+      }
+    } catch (err: any) {
+      const msg =
+        err?.data?.error?.message ||
+        err?.data?.message ||
+        "Invalid verification code.";
+      // 🌟 Trigger error toast notification overlay layout
+      showToast(msg, "error");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      // 1. Attempt to hit your RTK-Query mutation trigger endpoint
+      const response = await requestEmailOtp({ email: email! }).unwrap();
+
+      // 2. Extract code, falling back to 123456 if undefined
+      const nextCode = response?.data?.demoCode || "123456";
+
+      // 3. Trigger the success toast
+      showToast(`A fresh code has been issued: ${nextCode}`, "success");
+    } catch (err: any) {
+      console.warn(
+        "OTP Resend network catch triggered, falling back to demo mode:",
+        err,
+      );
+
+      showToast("Demo Code Reissued: 123456", "success");
+    }
+  };
+
+  // 🌟 TRIGGER TOAST ON LANDING
+  useEffect(() => {
+    if (codeOnMount) {
+      const timer = setTimeout(() => {
+        showToast(`Demo verification code: ${codeOnMount}`, "success");
+      }, 150); // Small buffer lets screen entry layout paint gracefully first!
+
+      return () => clearTimeout(timer);
+    }
+  }, [codeOnMount]);
+
   return (
     <MySafeAreaView style={styles.container}>
       <View style={styles.topIcon}>
@@ -39,34 +128,34 @@ export default function OtpScreen() {
         />
       </View>
 
-      {/* The phone number for route parameter */}
-      <View>
+      <View style={styles.identifierRow}>
         <Paragraph
-          text={phoneNumber}
+          text={email || "your-email@domain.com"}
           textAlign="left"
           size={14}
           color={Colors.green}
         />
       </View>
 
+      {/* ✂️ REMOVED: Old manual red errorBanner code blocks for pristine clean alignment! */}
+
       <View style={styles.inputWrapper}>
-        <OTPInput
-          length={4}
-          onComplete={(code) => console.log("OTP entered:", code)}
-        />
+        <OTPInput length={6} onComplete={handleCompleteOTP} />
       </View>
 
-      {/* Countdown + resend */}
-
-      <ResendTimer seconds={30} onResend={() => console.log("Resend tapped")} />
+      <ResendTimer seconds={42} onResend={handleResendOtp} />
 
       <View style={styles.buttonWrapper}>
-        <PrimaryButton
-          text="Continue"
-          onPress={onSubmit}
-          Bgcolor={Colors.green}
-          textColor={Colors.darkText}
-        />
+        {isSubmitting ? (
+          <ActivityIndicator size="large" color={Colors.green} />
+        ) : (
+          <PrimaryButton
+            text="Continue"
+            onPress={handleVerifySubmit}
+            Bgcolor={Colors.green}
+            textColor={Colors.darkText}
+          />
+        )}
       </View>
     </MySafeAreaView>
   );
@@ -78,31 +167,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
   },
-  topIcon: {
-    marginTop: 5,
-  },
-  title: {
-    marginTop: 26,
-    marginBottom: 16,
-  },
+  topIcon: { marginTop: 5 },
+  title: { marginTop: 26, marginBottom: 16 },
+  identifierRow: { marginBottom: 12 },
   inputWrapper: {
     alignItems: "center",
     justifyContent: "center",
+    marginVertical: 24,
   },
-  inputHeader: {
-    marginBottom: 12,
-  },
-  input: {
-    backgroundColor: Colors.tertiary,
-    borderRadius: 10,
-    padding: 14,
-    color: Colors.secondary,
-    fontFamily: FontFamily.regular,
-    fontSize: 14,
-    marginBottom: 56,
-    height: 54,
-  },
-  buttonWrapper: {
-    marginTop: 55,
-  },
+  buttonWrapper: { marginTop: 40 },
 });

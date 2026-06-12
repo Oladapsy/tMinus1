@@ -10,8 +10,11 @@ export default function AuthLayout() {
       }}
     >
       <Stack.Screen name="signin/index" />
+      <Stack.Screen name="signup/index" />
+      <Stack.Screen name="signup-mobile/index" />
       <Stack.Screen name="signup/setup-profile" />
       <Stack.Screen name="otp/index" />
+      <Stack.Screen name="success/index" />
     </Stack>
   );
 }

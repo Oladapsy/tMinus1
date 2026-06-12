@@ -6,6 +6,11 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  // Temporary storage context for step-by-step registration tracking
+  registrationDraft: {
+    email: string | null;
+    phone: string | null;
+  };
 }
 
 const initialState: AuthState = {
@@ -13,42 +18,41 @@ const initialState: AuthState = {
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  registrationDraft: {
+    email: null,
+    phone: null,
+  },
 };
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    // Call this action when a user successfully logs in or signs up
-    setCredentials: (
-      state, 
-      action: PayloadAction<LoginAndSessionResponse>
-    ) => {
+    setCredentials: (state, action: PayloadAction<LoginAndSessionResponse>) => {
       const { user, accessToken, refreshToken } = action.payload;
       state.user = user;
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
       state.isAuthenticated = true;
+      // Wipe trace info upon successful entry sequence
+      state.registrationDraft = { email: null, phone: null };
     },
-    
-    // Call this action when a user logs out
+    saveDraftCredentials: (state, action: PayloadAction<{ email: string; phone: string }>) => {
+      state.registrationDraft.email = action.payload.email;
+      state.registrationDraft.phone = action.payload.phone;
+    },
     logOut: (state) => {
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
     },
-    
-    // Call this action specifically when the token rotates via /auth/refresh
-    updateTokens: (
-      state, 
-      action: PayloadAction<{ accessToken: string; refreshToken: string }>
-    ) => {
+    updateTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) => {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
     },
   },
 });
 
-export const { setCredentials, logOut, updateTokens } = authSlice.actions;
+export const { setCredentials, saveDraftCredentials, logOut, updateTokens } = authSlice.actions;
 export default authSlice.reducer;
