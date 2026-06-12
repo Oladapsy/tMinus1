@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, Dimensions, View } from "react-native";
+import {
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  View,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
@@ -12,6 +18,7 @@ import { useToast } from "@/src/context/ToastContext";
 import WelcomeBackState from "./reauth/WelcomeBackState";
 import SigningInState from "./reauth/SigningInState";
 import SignInFailedState from "./reauth/SignInFailedState";
+import { Colors } from "@/src/constants/colors";
 
 const { width, height } = Dimensions.get("window");
 
@@ -20,7 +27,7 @@ type MachineState = "WELCOME_BACK" | "SIGNING_IN" | "SIGN_IN_FAILED";
 export default function ReauthOverlay() {
   const dispatch = useDispatch();
   const { showToast } = useToast();
-  
+
   // Check active state memory credentials
   const savedUser = useSelector((state: RootState) => state.auth.user);
   const initialEmail = savedUser?.email || "";
@@ -29,13 +36,13 @@ export default function ReauthOverlay() {
   const [viewState, setViewState] = useState<MachineState>("WELCOME_BACK");
   const [password, setPassword] = useState("");
   const [backendError, setBackendError] = useState("");
-  
+
   // Dynamic email fallback storage handler
   const [typedEmail, setTypedEmail] = useState(initialEmail);
 
   const [loginCustomer] = useLoginCustomerMutation();
 
-  // Clean formatting matching your real AuthForm component 
+  // Clean formatting matching your real AuthForm component
   const targetEmail = (initialEmail || typedEmail).trim().toLowerCase();
 
   // Phase 1: Sign In Credentials Check
@@ -63,9 +70,9 @@ export default function ReauthOverlay() {
       }
     } catch (err: any) {
       setBackendError(
-        err?.data?.error?.message || 
-        err?.data?.message || 
-        "Check your email, phone number, or password and try again."
+        err?.data?.error?.message ||
+          err?.data?.message ||
+          "Check your email, phone number, or password and try again.",
       );
       setViewState("SIGN_IN_FAILED");
     }
@@ -79,13 +86,12 @@ export default function ReauthOverlay() {
         resizeMode="cover"
       >
         <MySafeAreaView style={styles.safeContainer}>
-          <ScrollView 
-            contentContainerStyle={styles.scrollContainer} 
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
             bounces={false}
             keyboardShouldPersistTaps="handled"
           >
-            
             {viewState === "WELCOME_BACK" && (
               <WelcomeBackState
                 savedName={savedName}
@@ -106,11 +112,10 @@ export default function ReauthOverlay() {
                 errorMessage={backendError}
                 onTryAgain={() => {
                   setPassword("");
-                  setViewState("WELCOME_BACK"); 
+                  setViewState("WELCOME_BACK");
                 }}
               />
             )}
-
           </ScrollView>
         </MySafeAreaView>
       </ImageBackground>
@@ -119,8 +124,20 @@ export default function ReauthOverlay() {
 }
 
 const styles = StyleSheet.create({
-  masterWrapper: { position: "absolute", top: 0, left: 0, width, height, zIndex: 999999, backgroundColor: "#000" },
+  masterWrapper: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width,
+    height,
+    zIndex: 999999,
+    backgroundColor: Colors.dark,
+  },
   backgroundImage: { width: "100%", height: "100%" },
   safeContainer: { flex: 1, backgroundColor: "transparent" },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40, minHeight: "100%", justifyContent: "center" },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+    minHeight: "100%",
+  },
 });

@@ -1,11 +1,19 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import EyeIcon from "@/assets/icons/wallet/eye-slash.svg";
 import EyeOpenIcon from "@/assets/icons/wallet/eye-open.svg";
+import Paragraph from "@/src/components/common/Paragraph";
+import Title from "@/src/components/common/Title";
 
 interface WelcomeBackProps {
   savedName: string;
@@ -30,21 +38,33 @@ export default function WelcomeBackState({
 
   return (
     <View style={styles.container}>
+      <View>
+        <TitleAndParagraph
+          title="Welcome back"
+          titleSize={32}
+          paragraphSize={18}
+        />
+      </View>
+
       {/* Avatar Head */}
       <View style={styles.avatarContainer}>
         <View style={styles.avatarCircle}>
           <Text style={styles.avatarLetter}>
-            {savedName && hasSavedEmail ? savedName.charAt(0).toUpperCase() : "A"}
+            {savedName && hasSavedEmail
+              ? savedName.charAt(0).toUpperCase()
+              : "A"}
           </Text>
         </View>
       </View>
 
       <View style={styles.titleSection}>
-        <TitleAndParagraph 
-          title="Welcome back" 
-          titleSize={32} 
-          paragraph={hasSavedEmail ? savedName : "Sign in to your session"}
-          paragraphSize={18}
+        <Title
+          text={hasSavedEmail ? savedName : "Sign in to your session"}
+          size={20}
+        />
+        <Paragraph
+          text="Use password or Face ID approved on this device."
+          size={12}
         />
       </View>
 
@@ -93,12 +113,15 @@ export default function WelcomeBackState({
         <PrimaryButton
           text="Sign in"
           Bgcolor={Colors.green}
-          textColor={Colors.darkText || "#000000"}
+          textColor={Colors.darkText}
           onPress={onSubmit}
           disabled={!passwordValue || (!hasSavedEmail && !emailValue)}
         />
-        
-        <TouchableOpacity style={styles.faceIdButton} onPress={() => console.log("FaceID pressed")}>
+
+        <TouchableOpacity
+          style={styles.faceIdButton}
+          onPress={() => console.log("FaceID pressed")}
+        >
           <Text style={styles.faceIdText}>Use Face ID</Text>
         </TouchableOpacity>
       </View>
@@ -109,14 +132,55 @@ export default function WelcomeBackState({
 const styles = StyleSheet.create({
   container: { width: "100%", alignItems: "center" },
   avatarContainer: { marginTop: 40, marginBottom: 16 },
-  avatarCircle: { width: 100, height: 100, borderRadius: 50, backgroundColor: Colors.green, justifyContent: "center", alignItems: "center" },
-  avatarLetter: { color: Colors.primary, fontSize: 36, fontFamily: FontFamily.bold },
+  avatarCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.green,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarLetter: {
+    color: Colors.primary,
+    fontSize: 36,
+    fontFamily: FontFamily.bold,
+  },
+  sessionName: {
+    color: Colors.primary,
+    fontSize: 15,
+    fontFamily: FontFamily.bold,
+  },
   titleSection: { alignItems: "center", marginBottom: 32 },
   inputContainer: { width: "100%", marginBottom: 20 },
-  inputLabel: { color: Colors.secondary, fontSize: 12, fontFamily: FontFamily.regular, marginBottom: 8, paddingLeft: 4 },
-  inputRow: { flexDirection: "row", alignItems: "center", backgroundColor: Colors.tertiary || "#1E1E1E", borderRadius: 12, paddingHorizontal: 16, height: 54 },
-  inputFlex: { flex: 1, color: "white", fontFamily: FontFamily.regular, fontSize: 14 },
+  inputLabel: {
+    color: Colors.secondary,
+    fontSize: 12,
+    fontFamily: FontFamily.regular,
+    marginBottom: 8,
+    paddingLeft: 4,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.tertiary,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 54,
+  },
+  inputFlex: {
+    flex: 1,
+    color: "white",
+    fontFamily: FontFamily.regular,
+    fontSize: 14,
+  },
   footer: { width: "100%", gap: 12, marginTop: 16 },
-  faceIdButton: { width: "100%", height: 54, borderRadius: 12, backgroundColor: Colors.tertiary || "#1E1E1E", justifyContent: "center", alignItems: "center" },
+  faceIdButton: {
+    width: "100%",
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: Colors.tertiary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   faceIdText: { color: "white", fontSize: 16, fontFamily: FontFamily.medium },
 });

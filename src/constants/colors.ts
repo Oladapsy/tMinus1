@@ -38,4 +38,5 @@ export const Colors = {
   newCryptoYellow: "#F2A627",
   purple: "#8F9BFF",
   walletCard: "#14231F",
+  skelenton: "#141820BF",
 };
