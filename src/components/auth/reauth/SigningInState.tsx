@@ -19,7 +19,9 @@ export default function SigningInState() {
         <View style={styles.skeletonField} />
       </View>
 
-      <Text style={styles.statusText}>Checking credentials and security settings...</Text>
+      <Text style={styles.statusText}>
+        Checking credentials and security settings...
+      </Text>
     </View>
   );
 }

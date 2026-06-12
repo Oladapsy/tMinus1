@@ -1,11 +1,34 @@
-import { ToastProvider } from "@/src/context/ToastContext";
-import { store } from "@/src/store/store";
+import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 
+import { ToastProvider } from "@/src/context/ToastContext";
+import { store, RootState } from "@/src/store/store";
+import ReauthOverlay from "@/src/components/auth/ReauthOverlay";
+
+// 1. Inner wrapper that sits safely inside the Redux context
+function RootNavigationContent() {
+  // Listen directly for session expiration flags
+  const isSessionExpired = useSelector((state: RootState) => state.auth.isSessionExpired);
+
+  return (
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+
+      {/* 🌟 THE GLOBAL SECURITY LAYER */}
+      {/* Floating independently above all router navigation stacks */}
+      {isSessionExpired && <ReauthOverlay />}
+    </>
+  );
+}
+
+// 2. Core Root Layout wrapper running asset preloads
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     "NeueMontreal-Regular": require("@/assets/fonts/NeueMontreal-Regular.otf"),
@@ -31,11 +54,7 @@ export default function RootLayout() {
   return (
     <Provider store={store}>
       <ToastProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <RootNavigationContent />
       </ToastProvider>
     </Provider>
   );

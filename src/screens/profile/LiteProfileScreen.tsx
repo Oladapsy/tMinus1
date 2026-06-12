@@ -14,9 +14,14 @@ import {
     View,
 } from "react-native";
 
+// 🌟 TEST IMPORTS ADDED
+import { useDispatch } from "react-redux";
+import { setSessionExpired } from "@/src/store/authSlice";
+
 export default function LiteProfileScreen() {
   const router = useRouter();
-  const kycStatus = "APPROVED"; // Grabbed from global state later
+  const dispatch = useDispatch(); // 🌟 Access the Redux action pipeline
+  const kycStatus = "APPROVED"; 
 
   return (
     <ImageBackground
@@ -57,6 +62,16 @@ export default function LiteProfileScreen() {
 
           {/* LITE MODE NAVIGATION OPTIONS */}
           <View style={styles.menuSection}>
+            {/* 🌟 TEMPORARY TEST ROW: Click this to instantly reveal your new Reauth UI */}
+            <ProfileOptionRow
+              title="⚠️ Test Reauth Lockscreen"
+              subtitle="Simulate session timeout layout"
+              onPress={() => {
+                console.log("Triggering reauth lock screen overlay state...");
+                dispatch(setSessionExpired(true));
+              }}
+            />
+
             <ProfileOptionRow
               title="Edit profile"
               subtitle="Name, email, phone"
@@ -82,7 +97,6 @@ export default function LiteProfileScreen() {
             <ProfileOptionRow
               title="Watchlist"
               subtitle="BTC, ETH, SOL"
-              //   onPress={() => router.push("/profile/watchlist")}
             />
           </View>
 
@@ -165,6 +179,6 @@ const styles = StyleSheet.create({
   },
   footerSection: {
     width: "100%",
-    marginTop: 100,
+    marginTop: 50,
   },
 });
