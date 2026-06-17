@@ -1,76 +1,61 @@
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import Paragraph from "@/src/components/common/Paragraph";
-import { Colors } from "@/src/constants/colors";
-import { FontFamily } from "@/src/constants/fonts";
-import { useToast } from "@/src/context/ToastContext";
-import * as Clipboard from "expo-clipboard";
-import React, { useState } from "react";
-import { ImageBackground, StyleSheet, View } from "react-native";
-
-// Modular Imports
-import DepositSelectorView from "@/src/components/wallet/lite/DepositSelectorView";
-import UsdtDepositQrView from "@/src/components/wallet/lite/UsdtDepositQrView";
 import WalletDashboardView from "@/src/components/wallet/lite/WalletDashboardView";
-import { CryptoAsset, WalletWorkflowMode } from "@/src/types/wallet";
+import { Colors } from "@/src/constants/colors";
+import React, { useState } from "react";
+import { ImageBackground, StyleSheet } from "react-native";
+
+type WorkflowMode =
+  | "dashboard"
+  | "portfolio_history"
+  | "deposit_selector"
+  | "usdt_deposit"
+  | "simulate_deposit";
 
 export default function NewWalletScreen() {
-  const { showToast } = useToast();
-  const [workflowMode, setWorkflowMode] =
-    useState<WalletWorkflowMode>("dashboard");
-  const [copied, setCopied] = useState(false);
+  const [workflowMode, setWorkflowMode] = useState<WorkflowMode>("dashboard");
 
-  // Core Balances State
-  const [usdtBalance, setUsdtBalance] = useState(1000);
-  const [btcBalance] = useState(0.02);
-  const [ethBalance] = useState(0.34);
-
-  const currentUsdtValue = usdtBalance * 1;
-  const currentBtcValue = btcBalance * 64200;
-  const currentEthValue = ethBalance * 3407;
-  const totalPortfolioValue =
-    currentUsdtValue + currentBtcValue + currentEthValue;
-
-  const CRYPTO_ASSETS: CryptoAsset[] = [
+  const mockAssets = [
     {
       id: "usdt",
       name: "Tether",
       symbol: "USDT",
       network: "TRC20",
-      value: currentUsdtValue,
-      balance: usdtBalance,
-      dotColor: Colors.green,
-      recommended: true,
+      balance: "1,000.00 USDT",
+      value: "$2,450.00",
+      color: Colors.green,
     },
     {
       id: "btc",
       name: "Bitcoin",
       symbol: "BTC",
       network: "Testnet",
-      value: currentBtcValue,
-      balance: btcBalance,
-      dotColor: Colors.newCryptoYellow,
+      balance: "0.0200 BTC",
+      value: "$1,284.00",
+      color: Colors.newCryptoYellow,
     },
     {
       id: "eth",
       name: "Ethereum",
       symbol: "ETH",
       network: "Sepolia",
-      value: currentEthValue,
-      balance: ethBalance,
-      dotColor: Colors.purple,
+      balance: "0.3400 ETH",
+      value: "$1,158.40",
+      color: Colors.purple,
     },
   ];
 
-  const handleCopy = async () => {
-    await Clipboard.setStringAsync("TXYZ5dirgMNYdQskfiP5zj39VYemXareK4C");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+  // Handle action button routing hooks
+  const handleDepositNavigation = () => {
+    console.log("Navigating to Deposit Selector view...");
+    setWorkflowMode("deposit_selector"); // Updates step workflow routing
   };
 
-  const handleSimulatedCredit = (amount: number) => {
-    setUsdtBalance((prev) => prev + amount);
-    setWorkflowMode("dashboard");
-    showToast(`Successfully credited +$${amount.toFixed(2)} USDT!`, "success");
+  const handleWithdrawNavigation = () => {
+    console.log("Navigating to Withdraw variant view...");
+  };
+
+  const handleTradeNavigation = () => {
+    console.log("Navigating to active Market trading module...");
   };
 
   return (
@@ -83,40 +68,15 @@ export default function NewWalletScreen() {
         style={styles.safeContainer}
         edges={["top", "bottom", "left", "right"]}
       >
-        {copied && (
-          <View style={styles.toast}>
-            <Paragraph
-              text="Copied address!"
-              size={12}
-              color={Colors.green}
-              fontFamily={FontFamily.bold}
-            />
-          </View>
-        )}
-
+        {/* State Conditional Workflow Orchestrator Engine */}
         {workflowMode === "dashboard" && (
           <WalletDashboardView
-            totalPortfolioValue={totalPortfolioValue}
-            cryptoAssets={CRYPTO_ASSETS}
-            onNavigateToDeposit={() => setWorkflowMode("deposit_selector")}
-          />
-        )}
-
-        {workflowMode === "deposit_selector" && (
-          <DepositSelectorView
-            cryptoAssets={CRYPTO_ASSETS}
-            onSelectAsset={(id) =>
-              id === "usdt" ? setWorkflowMode("usdt_deposit") : null
-            }
-            onCancel={() => setWorkflowMode("dashboard")}
-          />
-        )}
-
-        {workflowMode === "usdt_deposit" && (
-          <UsdtDepositQrView
-            onCopyAddress={handleCopy}
-            onSimulateDeposit={handleSimulatedCredit}
-            onGoBack={() => setWorkflowMode("deposit_selector")}
+            totalBalance="$4,892.40"
+            trendText="+3.8% today"
+            assets={mockAssets}
+            onDepositPress={handleDepositNavigation}
+            onWithdrawPress={handleWithdrawNavigation}
+            onTradePress={handleTradeNavigation}
           />
         )}
       </MySafeAreaView>
@@ -127,22 +87,10 @@ export default function NewWalletScreen() {
 const styles = StyleSheet.create({
   backgroundImageWrapper: {
     flex: 1,
-    backgroundColor: Colors.primary, // Fallback color while image is loading
+    backgroundColor: Colors.primary,
   },
   safeContainer: {
     flex: 1,
-    backgroundColor: "transparent", // Transparent so the image texture shows through perfectly!
-  },
-  toast: {
-    position: "absolute",
-    top: 20,
-    alignSelf: "center",
-    backgroundColor: Colors.newDark,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    zIndex: 999,
+    backgroundColor: "transparent",
   },
 });

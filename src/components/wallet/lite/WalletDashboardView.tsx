@@ -1,184 +1,157 @@
-import React, { useState } from "react";
-import { StyleSheet, View, ScrollView, Text } from "react-native";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+import React from "react";
+import { ScrollView, StyleSheet, View, Text } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { CryptoAsset } from "@/src/types/wallet";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 
-interface Props {
-  totalPortfolioValue: number;
-  cryptoAssets: CryptoAsset[];
-  onNavigateToDeposit: () => void;
+// Atom and Core Imports
+import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
+import PrimaryButton from "@/src/components/common/PrimaryButton";
+import PortfolioValueCard from "./PortfolioValueCard";
+import WalletAssetRow from "./WalletAssetRow";
+
+interface AssetMockData {
+  id: string;
+  name: string;
+  symbol: string;
+  network: string;
+  balance: string;
+  value: string;
+  color: string;
+}
+
+interface WalletDashboardViewProps {
+  totalBalance: string;
+  trendText: string;
+  assets: AssetMockData[];
+  onDepositPress: () => void;
+  onWithdrawPress: () => void;
+  onTradePress: () => void;
 }
 
 export default function WalletDashboardView({
-  totalPortfolioValue,
-  cryptoAssets,
-  onNavigateToDeposit,
-}: Props) {
-  const [tab, setTabs] = useState<"Deposit" | "Withdrawl" | "Trade">("Deposit");
-
+  totalBalance,
+  trendText,
+  assets,
+  onDepositPress,
+  onWithdrawPress,
+  onTradePress,
+}: WalletDashboardViewProps) {
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollContainer}
+      style={styles.container}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContent}
     >
-      <View style={styles.headerTitleRow}>
+      {/* The wallet nheader */}
+      <View style={styles.headerSection}>
         <TitleAndParagraph
           title="Wallet"
           paragraph="Aggregated in USD from active asset balances."
         />
       </View>
 
-      <View style={styles.portfolioCard}>
-        <Paragraph
-          text="Total portfolio value"
-          color={Colors.newSecondary}
-          size={11}
-          textAlign="left"
-        />
-        <View style={styles.balanceRow}>
-          <Title
-            text={`$${totalPortfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            color={Colors.newWhite}
-            size={32}
-            fontFamily={FontFamily.bold}
+      {/* 2. Total Balance View Card */}
+      <PortfolioValueCard
+        totalValueString={totalBalance}
+        percentageChangeString={trendText}
+      />
+
+      {/* 3. Horizontal Action Pill Matrix */}
+      <View style={styles.actionButtonGrid}>
+        <View style={styles.buttonFlexWrapper}>
+          <PrimaryButton
+            text="Deposit"
+            fontSize={13}
+            fontFamily={FontFamily.medium}
+            onPress={onDepositPress}
           />
         </View>
-        <Text style={styles.growthText}>+2.8% today</Text>
+        <View style={styles.buttonFlexWrapper}>
+          <PrimaryButton
+            text="Withdraw"
+            fontSize={14}
+            Bgcolor={Colors.dark}
+            textColor={Colors.newWhite}
+            fontFamily={FontFamily.medium}
+            onPress={onWithdrawPress}
+          />
+        </View>
+        <View style={styles.buttonFlexWrapper}>
+          <PrimaryButton
+            fontFamily={FontFamily.medium}
+            text="Trade"
+            fontSize={14}
+            Bgcolor={Colors.dark}
+            textColor={Colors.newWhite}
+            onPress={onTradePress}
+          />
+        </View>
       </View>
 
-      <View style={styles.actionsButtonBar}>
-        <PrimaryButton
-          text="Deposit"
-          Bgcolor={Colors.green}
-          textColor={Colors.newDark}
-          onPress={onNavigateToDeposit}
-          style={styles.actionBtnFlex}
-          fontSize={13}
-        />
-        <PrimaryButton
-          text="Withdraw"
-          Bgcolor={Colors.newDark}
-          textColor={Colors.newWhite}
-          onPress={() => console.log("Withdraw clicked")}
-          style={[styles.actionBtnFlex, styles.outlineButtonBorder]}
-          fontSize={13}
-        />
-        <PrimaryButton
-          text="Trade"
-          Bgcolor={Colors.newDark}
-          textColor={Colors.newWhite}
-          onPress={() => console.log("Trade clicked")}
-          style={[styles.actionBtnFlex, styles.outlineButtonBorder]}
-          fontSize={13}
-        />
-      </View>
-
-      <View style={styles.listContainerStack}>
-        {cryptoAssets.map((asset) => (
-          <View key={asset.id} style={styles.assetItemRow}>
-            <View style={styles.leftAssetMeta}>
-              <View
-                style={[styles.statusDot, { backgroundColor: asset.dotColor }]}
-              />
-              <View style={styles.textStackColumn}>
-                <Title
-                  text={asset.name}
-                  color={Colors.newWhite}
-                  size={13.5}
-                  fontFamily={FontFamily.bold}
-                />
-                <Paragraph
-                  text={`${asset.symbol} · ${asset.network}`}
-                  color={Colors.newSecondary}
-                  size={11}
-                  textAlign="left"
-                />
-              </View>
-            </View>
-            <View style={styles.rightAssetValues}>
-              <Title
-                text={`$${asset.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-                color={Colors.newWhite}
-                size={13.5}
-                fontFamily={FontFamily.bold}
-                textAlign="right"
-              />
-              <Paragraph
-                text={`${asset.balance.toLocaleString()} ${asset.symbol}`}
-                color={Colors.newSecondary}
-                size={11}
-                textAlign="right"
-              />
-            </View>
-          </View>
+      {/* 4. Crypto Assets List Group */}
+      <View style={styles.listSection}>
+        {assets.map((asset) => (
+          <WalletAssetRow
+            key={asset.id}
+            name={asset.name}
+            symbol={asset.symbol}
+            balanceString={asset.balance}
+            valueString={asset.value}
+            dotColor={asset.color}
+            disabled={true} // Dashboard row display only
+          />
         ))}
       </View>
+
+      {/* 5. Recent Transaction Module Placeholder */}
+      <View style={styles.recentTransactionsHeader}>
+        <Text style={styles.sectionTitleText}>Recent transactions</Text>
+      </View>
+
+      <WalletAssetRow
+        name="Sandbox deposit"
+        symbol="USDT"
+        network="Completed"
+        balanceString="Today"
+        valueString="+$250.00"
+        dotColor={Colors.green}
+        disabled={true}
+      />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
-  headerTitleRow: {
-    marginTop: 24,
-    marginBottom: 20,
-    flexDirection: "column",
-    gap: 4,
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
   },
-  portfolioCard: {
-    backgroundColor: Colors.walletCard,
-    borderRadius: 22,
-    paddingHorizontal: 22,
-    paddingTop: 26,
-    paddingBottom: 36,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.04)",
-    width: "100%",
+  scrollContent: {
+    paddingTop: 20,
+    paddingBottom: 40,
   },
-  balanceRow: {
-    marginTop: 4,
-    marginBottom: 2,
+  headerSection: {
+    marginBottom: 16,
   },
-  growthText: {
-    color: Colors.green,
-    fontSize: 12,
-    fontFamily: FontFamily.bold,
-    marginTop: 2,
-  },
-  actionsButtonBar: {
+  actionButtonGrid: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    width: "100%",
-    marginTop: 24,
-    marginBottom: 28,
-  },
-  actionBtnFlex: { flex: 1, height: 42, borderRadius: 12 },
-  outlineButtonBorder: {
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-  },
-  sectionHeader: { marginBottom: 12 },
-  listContainerStack: { flexDirection: "column", gap: 10 },
-  assetItemRow: {
-    backgroundColor: Colors.newDark,
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    flexDirection: "row",
-    alignItems: "center",
+    gap: 15,
+    marginVertical: 24,
     justifyContent: "space-between",
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.02)",
   },
-  leftAssetMeta: { flexDirection: "row", alignItems: "center", gap: 14 },
-  statusDot: { width: 18, height: 18, borderRadius: 9 },
-  textStackColumn: { flexDirection: "column", gap: 2 },
-  rightAssetValues: { flexDirection: "column", gap: 2, alignItems: "flex-end" },
+  buttonFlexWrapper: {
+    flex: 1,
+  },
+  listSection: {
+    marginTop: 8,
+  },
+  recentTransactionsHeader: {
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  sectionTitleText: {
+    color: Colors.newWhite,
+    fontSize: 16,
+    fontFamily: FontFamily.bold,
+  },
 });
