@@ -104,7 +104,7 @@ export default function WalletDashboardView({
       </View>
 
       {/* 4. Crypto Assets List Group */}
-      
+
       <View style={styles.listSection}>
         {assets.map((asset) => (
           <WalletAssetRow
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   recentTransactionsHeader: {
     marginTop: 24,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   sectionTitleText: {
     color: Colors.newWhite,

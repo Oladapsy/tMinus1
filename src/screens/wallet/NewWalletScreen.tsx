@@ -4,18 +4,33 @@ import { Colors } from "@/src/constants/colors";
 import React, { useState } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
 import DepositSelectorView from "@/src/components/wallet/lite/DepositSelectorView";
+import CryptoDepositQrView from "@/src/components/wallet/lite/CryptoDepositQrView";
 
 type WorkflowMode =
   | "dashboard"
   | "portfolio_history"
   | "deposit_selector"
-  | "usdt_deposit"
+  | "crypto_deposit"
   | "simulate_deposit";
+
+interface AssetData {
+  id: string;
+  name: string;
+  symbol: string;
+  network: string;
+  balance: string;
+  value: string;
+  color: string;
+  depositAddress: string;
+}
 
 export default function NewWalletScreen() {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>("dashboard");
 
-  const mockAssets = [
+  // 🌟 Missing state added: Track chosen asset for dynamic generation
+  const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
+
+  const mockAssets: AssetData[] = [
     {
       id: "usdt",
       name: "Tether",
@@ -24,6 +39,7 @@ export default function NewWalletScreen() {
       balance: "1,000.00 USDT",
       value: "$2,450.00",
       color: Colors.green,
+      depositAddress: "TXYZ5dirgMNYdQskfiP5zj39VYemXareK4C",
     },
     {
       id: "btc",
@@ -33,6 +49,7 @@ export default function NewWalletScreen() {
       balance: "0.0200 BTC",
       value: "$1,284.00",
       color: Colors.newCryptoYellow,
+      depositAddress: "tb1qrp33g0q5c2txzc97w784ttvthm",
     },
     {
       id: "eth",
@@ -42,13 +59,12 @@ export default function NewWalletScreen() {
       balance: "0.3400 ETH",
       value: "$1,158.40",
       color: Colors.purple,
+      depositAddress: "0x71C7656EC7ab88b098defB751B7401B5f",
     },
   ];
 
-  // Handle action button routing hooks
   const handleDepositNavigation = () => {
-    console.log("Navigating to Deposit Selector view...");
-    setWorkflowMode("deposit_selector"); // Updates step workflow routing
+    setWorkflowMode("deposit_selector");
   };
 
   const handleWithdrawNavigation = () => {
@@ -81,17 +97,31 @@ export default function NewWalletScreen() {
           />
         )}
 
-        {/* deposit selector */}
+        {/* Deposit Selector */}
         {workflowMode === "deposit_selector" && (
           <DepositSelectorView
             assets={mockAssets}
             onSelectAsset={(assetId) => {
               console.log(`Asset selected for deposit processing: ${assetId}`);
-              if (assetId === "usdt") {
-                setWorkflowMode("usdt_deposit"); // We will build this QR screen view next!
+              const foundAsset = mockAssets.find((a) => a.id === assetId);
+              if (foundAsset) {
+                setSelectedAsset(foundAsset); // 🚀 Bind dynamic properties
+                setWorkflowMode("crypto_deposit"); // 🚀 Works seamlessly for all coins!
               }
             }}
             onCancel={() => setWorkflowMode("dashboard")}
+          />
+        )}
+
+        {/* Dynamic Crypto Deposit Screen */}
+        {workflowMode === "crypto_deposit" && selectedAsset && (
+          <CryptoDepositQrView
+            asset={selectedAsset}
+            onCopyAddress={() =>
+              console.log(`${selectedAsset.symbol} address copied!`)
+            }
+            onSimulateDeposit={() => setWorkflowMode("simulate_deposit")}
+            onGoBack={() => setWorkflowMode("deposit_selector")}
           />
         )}
       </MySafeAreaView>

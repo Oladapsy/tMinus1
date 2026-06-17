@@ -1,6 +1,5 @@
 import React from "react";
 import { StyleSheet, View, ScrollView } from "react-native";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import BackHeader from "@/src/components/common/BackHeader";
 import WalletAssetRow from "./WalletAssetRow";
 
@@ -27,17 +26,9 @@ export default function DepositSelectorView({
 }: DepositSelectorViewProps) {
   return (
     <View style={styles.container}>
-      {/* 1. Reusable Back Header Row */}
-      <BackHeader title="Deposit" onBack={onCancel} />
+      <BackHeader title="Deposit" paragraph="Choose the asset you want to fund in sandbox mode." onBack={onCancel} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* 2. Headline prompt tracking */}
-        <View style={styles.titleSpace}>
-          <TitleAndParagraph 
-            title="Select Asset" 
-            paragraph="Choose the cryptocurrency you wish to fund your sandbox wallet with."
-          />
-        </View>
 
         {/* 3. Render List Grid directly leveraging our existing Asset Rows */}
         <View style={styles.listContainer}>
@@ -50,7 +41,7 @@ export default function DepositSelectorView({
               balanceString={asset.balance}
               valueString={asset.value}
               dotColor={asset.color}
-              onPress={() => onSelectAsset(asset.id)} // Interactive select trigger!
+              onPress={() => onSelectAsset(asset.id)}
             />
           ))}
         </View>
@@ -66,10 +57,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
-  },
-  titleSpace: {
-    marginTop: 8,
-    marginBottom: 24,
   },
   listContainer: {
     gap: 2,
