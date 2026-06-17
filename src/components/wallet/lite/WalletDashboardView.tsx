@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, View, Text } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
@@ -23,9 +23,9 @@ interface WalletDashboardViewProps {
   totalBalance: string;
   trendText: string;
   assets: AssetMockData[];
-  onDepositPress: () => void;
-  onWithdrawPress: () => void;
-  onTradePress: () => void;
+  onDepositPress?: () => void;
+  onWithdrawPress?: () => void;
+  onTradePress?: () => void;
 }
 
 export default function WalletDashboardView({
@@ -36,13 +36,26 @@ export default function WalletDashboardView({
   onWithdrawPress,
   onTradePress,
 }: WalletDashboardViewProps) {
+  const [activeTab, setActiveTab] = useState<"deposit" | "withdraw" | "trade">("deposit");
+
+  const handlePress = (tab: "deposit" | "withdraw" | "trade", callback?: () => void) => {
+    setActiveTab(tab);
+    
+    // Fire the navigation redirect layout trigger after a tiny delay so they see the color shift
+    if (callback) {
+      setTimeout(() => {
+        callback();
+      }, 150);
+    }
+  };
+
   return (
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scrollContent}
     >
-      {/* The wallet nheader */}
+      {/* 1. Header Section */}
       <View style={styles.headerSection}>
         <TitleAndParagraph
           title="Wallet"
@@ -56,39 +69,42 @@ export default function WalletDashboardView({
         percentageChangeString={trendText}
       />
 
-      {/* 3. Horizontal Action Pill Matrix */}
+      {/* 3. Interactive Horizontal Action Matrix */}
       <View style={styles.actionButtonGrid}>
         <View style={styles.buttonFlexWrapper}>
           <PrimaryButton
             text="Deposit"
             fontSize={13}
             fontFamily={FontFamily.medium}
-            onPress={onDepositPress}
+            Bgcolor={activeTab === "deposit" ? Colors.green : Colors.dark}
+            textColor={activeTab === "deposit" ? Colors.darkText : Colors.newWhite}
+            onPress={() => handlePress("deposit", onDepositPress)}
           />
         </View>
         <View style={styles.buttonFlexWrapper}>
           <PrimaryButton
             text="Withdraw"
             fontSize={14}
-            Bgcolor={Colors.dark}
-            textColor={Colors.newWhite}
             fontFamily={FontFamily.medium}
-            onPress={onWithdrawPress}
+            Bgcolor={activeTab === "withdraw" ? Colors.green : Colors.dark}
+            textColor={activeTab === "withdraw" ? Colors.darkText : Colors.newWhite}
+            onPress={() => handlePress("withdraw", onWithdrawPress)}
           />
         </View>
         <View style={styles.buttonFlexWrapper}>
           <PrimaryButton
-            fontFamily={FontFamily.medium}
             text="Trade"
             fontSize={14}
-            Bgcolor={Colors.dark}
-            textColor={Colors.newWhite}
-            onPress={onTradePress}
+            fontFamily={FontFamily.medium}
+            Bgcolor={activeTab === "trade" ? Colors.green : Colors.dark}
+            textColor={activeTab === "trade" ? Colors.darkText : Colors.newWhite}
+            onPress={() => handlePress("trade", onTradePress)}
           />
         </View>
       </View>
 
       {/* 4. Crypto Assets List Group */}
+      
       <View style={styles.listSection}>
         {assets.map((asset) => (
           <WalletAssetRow
@@ -98,12 +114,12 @@ export default function WalletDashboardView({
             balanceString={asset.balance}
             valueString={asset.value}
             dotColor={asset.color}
-            disabled={true} // Dashboard row display only
+            disabled={true}
           />
         ))}
       </View>
 
-      {/* 5. Recent Transaction Module Placeholder */}
+      {/* 5. Recent Transaction Module */}
       <View style={styles.recentTransactionsHeader}>
         <Text style={styles.sectionTitleText}>Recent transactions</Text>
       </View>

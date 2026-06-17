@@ -3,6 +3,7 @@ import WalletDashboardView from "@/src/components/wallet/lite/WalletDashboardVie
 import { Colors } from "@/src/constants/colors";
 import React, { useState } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
+import DepositSelectorView from "@/src/components/wallet/lite/DepositSelectorView";
 
 type WorkflowMode =
   | "dashboard"
@@ -77,6 +78,20 @@ export default function NewWalletScreen() {
             onDepositPress={handleDepositNavigation}
             onWithdrawPress={handleWithdrawNavigation}
             onTradePress={handleTradeNavigation}
+          />
+        )}
+
+        {/* deposit selector */}
+        {workflowMode === "deposit_selector" && (
+          <DepositSelectorView
+            assets={mockAssets}
+            onSelectAsset={(assetId) => {
+              console.log(`Asset selected for deposit processing: ${assetId}`);
+              if (assetId === "usdt") {
+                setWorkflowMode("usdt_deposit"); // We will build this QR screen view next!
+              }
+            }}
+            onCancel={() => setWorkflowMode("dashboard")}
           />
         )}
       </MySafeAreaView>

@@ -39,4 +39,5 @@ export const Colors = {
   purple: "#8F9BFF",
   walletCard: "#14231F",
   skelenton: "#141820BF",
+
 };

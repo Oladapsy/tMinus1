@@ -7,9 +7,9 @@ interface WalletAssetRowProps {
   name: string;
   symbol: string;
   network?: string;
-  balanceString: string; // e.g. "1,000 USDT" or "0.0200 BTC"
-  valueString: string;   // e.g. "$2,450.00"
-  dotColor: string;      // Color circle placeholder from constants
+  balanceString: string;
+  valueString: string; 
+  dotColor: string; 
   onPress?: () => void;
   disabled?: boolean;
 }
@@ -33,10 +33,8 @@ export default function WalletAssetRow({
     >
       {/* Left side info block: Circle identifier and names */}
       <View style={styles.leftSection}>
-        <View style={[styles.avatarCircle, { backgroundColor: `${dotColor}20` }]}>
-          <Text style={[styles.avatarInitial, { color: dotColor }]}>
-            {symbol.charAt(0)}
-          </Text>
+        <View style={[styles.avatarCircle, { backgroundColor: dotColor }]}>
+          <Text style={styles.avatarInitial}>{symbol.charAt(0)}</Text>
         </View>
         <View style={styles.nameMetadata}>
           <Text style={styles.assetTitle}>{name}</Text>
@@ -60,13 +58,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: Colors.thinWhite, // Clean slate overlay fill matching spec sheets
+    backgroundColor: Colors.newDark,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 13,
     borderRadius: 16,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.02)",
   },
   leftSection: {
     flexDirection: "row",
@@ -74,28 +70,29 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   avatarCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     justifyContent: "center",
     alignItems: "center",
   },
   avatarInitial: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: FontFamily.bold,
+    color: Colors.newBlack,
   },
   nameMetadata: {
     flexDirection: "column",
-    gap: 2,
+    gap: 5,
   },
   assetTitle: {
     color: Colors.newWhite,
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: FontFamily.bold,
   },
   assetSubtitle: {
     color: Colors.newSecondary,
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: FontFamily.regular,
   },
   rightSection: {
@@ -104,12 +101,12 @@ const styles = StyleSheet.create({
   },
   fiatValueText: {
     color: Colors.newWhite,
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: FontFamily.bold,
   },
   balanceText: {
     color: Colors.newSecondary,
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: FontFamily.regular,
   },
 });
