@@ -1,13 +1,13 @@
 import React from "react";
-import { StyleSheet, View, ScrollView } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
+import BackHeader from "@/src/components/common/BackHeader";
+import CalloutBox from "@/src/components/common/CalloutBox";
+import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import BackHeader from "@/src/components/common/BackHeader";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
-import CalloutBox from "@/src/components/common/CalloutBox";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
+import ItemAndAddress from "../../common/ItemAndAdress";
 
 interface SelectedAssetPayload {
   id: string;
@@ -30,6 +30,13 @@ export default function CryptoDepositQrView({
   onSimulateDeposit,
   onGoBack,
 }: CryptoDepositQrViewProps) {
+  // Truncate helper function
+  const truncateAddress = (address: string) => {
+    if (!address || address.length < 10) return address;
+    //grab first 4 band last 4
+    return `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
+  };
+
   return (
     <View style={styles.container}>
       {/* 🌟 Dynamic Title Generation based on what asset token was selected */}
@@ -57,21 +64,17 @@ export default function CryptoDepositQrView({
 
         {/* 🌟 Dynamic Field 1: Network */}
         <View style={styles.fieldWrapper}>
-          <TitleAndParagraph
+          <ItemAndAddress
             title="Network"
-            paragraph={`${asset.network} sandbox network`}
-            titleSize={12}
-            paragraphSize={15}
+            address={`${asset.network} sandbox network`}
           />
         </View>
 
         {/* 🌟 Dynamic Field 2: Address */}
         <View style={styles.fieldWrapper}>
-          <TitleAndParagraph
+          <ItemAndAddress
             title="Deposit address"
-            paragraph={asset.depositAddress}
-            titleSize={12}
-            paragraphSize={15}
+            address={truncateAddress(asset.depositAddress)}
           />
         </View>
 
