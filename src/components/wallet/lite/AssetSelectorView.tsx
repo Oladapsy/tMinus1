@@ -13,24 +13,35 @@ interface AssetData {
   color: string;
 }
 
-interface DepositSelectorViewProps {
+interface AssetSelectorViewProps {
+  title: "Deposit" | "Withdraw"; // 🌟 Dynamic layout variant configurations
   assets: AssetData[];
   onSelectAsset: (assetId: string) => void;
   onCancel: () => void;
 }
 
-export default function DepositSelectorView({
+export default function AssetSelectorView({
+  title,
   assets,
   onSelectAsset,
   onCancel,
-}: DepositSelectorViewProps) {
+}: AssetSelectorViewProps) {
+  
+  // Dynamic descriptive context paragraphs based on state variant
+  const contextParagraph =
+    title === "Deposit"
+      ? "Choose the asset you want to fund in sandbox mode."
+      : "Choose the asset you want to withdraw from your sandbox wallet.";
+
   return (
     <View style={styles.container}>
-      <BackHeader title="Deposit" paragraph="Choose the asset you want to fund in sandbox mode." onBack={onCancel} />
+      <BackHeader 
+        title={title} 
+        paragraph={contextParagraph} 
+        onBack={onCancel} 
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-
-        {/* 3. Render List Grid directly leveraging our existing Asset Rows */}
         <View style={styles.listContainer}>
           {assets.map((asset) => (
             <WalletAssetRow

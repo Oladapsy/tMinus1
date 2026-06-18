@@ -3,15 +3,21 @@ import WalletDashboardView from "@/src/components/wallet/lite/WalletDashboardVie
 import { Colors } from "@/src/constants/colors";
 import React, { useState } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
-import DepositSelectorView from "@/src/components/wallet/lite/DepositSelectorView";
+// 🌟 Updated selector import to use the new generic component
+import AssetSelectorView from "@/src/components/wallet/lite/AssetSelectorView";
 import CryptoDepositQrView from "@/src/components/wallet/lite/CryptoDepositQrView";
+import SimulateDepositView from "@/src/components/wallet/lite/SimulateDepositView";
+import WithdrawFormView from "@/src/components/wallet/lite/WithdrawFormView";
+// import WithdrawFormView from "@/src/components/wallet/lite/WithdrawFormView"; // 🌟 Added
 
 type WorkflowMode =
   | "dashboard"
   | "portfolio_history"
   | "deposit_selector"
   | "crypto_deposit"
-  | "simulate_deposit";
+  | "simulate_deposit"
+  | "withdraw_selector" // 🌟 Added
+  | "withdraw_form"; // 🌟 Added
 
 interface AssetData {
   id: string;
@@ -26,8 +32,6 @@ interface AssetData {
 
 export default function NewWalletScreen() {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>("dashboard");
-
-  // 🌟 Missing state added: Track chosen asset for dynamic generation
   const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
 
   const mockAssets: AssetData[] = [
@@ -68,7 +72,8 @@ export default function NewWalletScreen() {
   };
 
   const handleWithdrawNavigation = () => {
-    console.log("Navigating to Withdraw variant view...");
+    // 🌟 Rerouted dashboard click event straight to our multi-mode selector
+    setWorkflowMode("withdraw_selector");
   };
 
   const handleTradeNavigation = () => {
@@ -97,16 +102,32 @@ export default function NewWalletScreen() {
           />
         )}
 
-        {/* Deposit Selector */}
+        {/* 📥 Deposit Selector Using The Reusable Component */}
         {workflowMode === "deposit_selector" && (
-          <DepositSelectorView
+          <AssetSelectorView
+            title="Deposit"
             assets={mockAssets}
             onSelectAsset={(assetId) => {
-              console.log(`Asset selected for deposit processing: ${assetId}`);
               const foundAsset = mockAssets.find((a) => a.id === assetId);
               if (foundAsset) {
-                setSelectedAsset(foundAsset); // 🚀 Bind dynamic properties
-                setWorkflowMode("crypto_deposit"); // 🚀 Works seamlessly for all coins!
+                setSelectedAsset(foundAsset);
+                setWorkflowMode("crypto_deposit");
+              }
+            }}
+            onCancel={() => setWorkflowMode("dashboard")}
+          />
+        )}
+
+        {/* 📤 Withdrawal Selector Using The Reusable Component */}
+        {workflowMode === "withdraw_selector" && (
+          <AssetSelectorView
+            title="Withdraw"
+            assets={mockAssets}
+            onSelectAsset={(assetId) => {
+              const foundAsset = mockAssets.find((a) => a.id === assetId);
+              if (foundAsset) {
+                setSelectedAsset(foundAsset);
+                setWorkflowMode("withdraw_form"); // 🚀 direct straight to form input layout
               }
             }}
             onCancel={() => setWorkflowMode("dashboard")}
@@ -122,6 +143,30 @@ export default function NewWalletScreen() {
             }
             onSimulateDeposit={() => setWorkflowMode("simulate_deposit")}
             onGoBack={() => setWorkflowMode("deposit_selector")}
+          />
+        )}
+
+        {/* Dynamic Simulate Deposit Testing View Frame */}
+        {workflowMode === "simulate_deposit" && selectedAsset && (
+          <SimulateDepositView
+            asset={selectedAsset}
+            onGoBack={() => setWorkflowMode("crypto_deposit")}
+            onCreateDeposit={() => {
+              console.log("Creating pending sandbox deposit record...");
+              setWorkflowMode("dashboard");
+            }}
+          />
+        )}
+
+        {/* 🌟 New Dynamic Withdrawal Input Form Panel View */}
+        {workflowMode === "withdraw_form" && selectedAsset && (
+          <WithdrawFormView
+            asset={selectedAsset}
+            onGoBack={() => setWorkflowMode("withdraw_selector")}
+            onPreviewWithdrawal={() => {
+              console.log("Processing formal withdrawal confirmation preview layer...");
+              setWorkflowMode("dashboard"); // Go back home on completion
+            }}
           />
         )}
       </MySafeAreaView>

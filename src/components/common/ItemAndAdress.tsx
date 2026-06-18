@@ -19,7 +19,7 @@ export default function ItemAndAddress({
   addressSize = 15,
 }: Props) {
   return (
-    <View style={styles.container}>
+    <View style={styles.cardContainer}>
       <View style={styles.titleWrapper}>
         <Paragraph
           text={title}
@@ -42,13 +42,18 @@ export default function ItemAndAddress({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  cardContainer: {
+    backgroundColor: Colors.newDark,
     width: "100%",
-    alignItems: "flex-start", // 🌟 Forces all children to align perfectly left
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: "flex-start",
     justifyContent: "center",
+    marginBottom: 16,
   },
   titleWrapper: {
-    marginBottom: 6,
+    marginBottom: 5,
     alignItems: "flex-start",
   },
 });

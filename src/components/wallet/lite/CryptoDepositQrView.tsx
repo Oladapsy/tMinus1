@@ -30,7 +30,6 @@ export default function CryptoDepositQrView({
   onSimulateDeposit,
   onGoBack,
 }: CryptoDepositQrViewProps) {
-  // Truncate helper function
   const truncateAddress = (address: string) => {
     if (!address || address.length < 10) return address;
     //grab first 4 band last 4
@@ -63,20 +62,16 @@ export default function CryptoDepositQrView({
         </View>
 
         {/* 🌟 Dynamic Field 1: Network */}
-        <View style={styles.fieldWrapper}>
-          <ItemAndAddress
-            title="Network"
-            address={`${asset.network} sandbox network`}
-          />
-        </View>
+        <ItemAndAddress
+          title="Network"
+          address={`${asset.network} sandbox network`}
+        />
 
         {/* 🌟 Dynamic Field 2: Address */}
-        <View style={styles.fieldWrapper}>
-          <ItemAndAddress
-            title="Deposit address"
-            address={truncateAddress(asset.depositAddress)}
-          />
-        </View>
+        <ItemAndAddress
+          title="Deposit address"
+          address={truncateAddress(asset.depositAddress)}
+        />
 
         {/* Horizontal Action Row Split Matrix */}
         <View style={styles.actionRowGrid}>
@@ -134,15 +129,6 @@ const styles = StyleSheet.create({
   qrWhiteBox: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  fieldWrapper: {
-    backgroundColor: Colors.newDark,
-    width: "100%",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    marginBottom: 14,
-    alignItems: "flex-start",
   },
   actionRowGrid: {
     flexDirection: "row",
