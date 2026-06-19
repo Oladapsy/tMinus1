@@ -1,23 +1,25 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
 interface PortfolioValueCardProps {
-  totalValueString: string;      // e.g., "$4,892.40"
+  totalValueString: string; // e.g., "$4,892.40"
   percentageChangeString: string; // e.g., "+3.8% today"
+  onPress?: () => void;
 }
 
 export default function PortfolioValueCard({
   totalValueString,
   percentageChangeString,
+  onPress,
 }: PortfolioValueCardProps) {
   return (
-    <View style={styles.cardWrapper}>
+    <TouchableOpacity onPress={onPress} style={styles.cardWrapper}>
       <Text style={styles.label}>Total portfolio value</Text>
       <Text style={styles.amount}>{totalValueString}</Text>
       <Text style={styles.trendIndicator}>{percentageChangeString}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 

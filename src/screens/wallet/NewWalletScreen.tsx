@@ -8,7 +8,11 @@ import AssetSelectorView from "@/src/components/wallet/lite/AssetSelectorView";
 import CryptoDepositQrView from "@/src/components/wallet/lite/CryptoDepositQrView";
 import SimulateDepositView from "@/src/components/wallet/lite/SimulateDepositView";
 import WithdrawFormView from "@/src/components/wallet/lite/WithdrawFormView";
-// import WithdrawFormView from "@/src/components/wallet/lite/WithdrawFormView"; // 🌟 Added
+import WithdrawalSuccessView from "@/src/components/wallet/lite/WithdrawalSuccessView";
+import WithdrawConfirmationView from "@/src/components/wallet/lite/ithdrawConfirmationView";
+import TransactionHistoryView from "@/src/components/wallet/lite/TransactionHistoryView";
+import TransactionDetailsView from "@/src/components/wallet/lite/TransactionDetailsView";
+import PortfolioHistoryView from "@/src/components/wallet/lite/PortfolioHistoryView";
 
 type WorkflowMode =
   | "dashboard"
@@ -16,8 +20,12 @@ type WorkflowMode =
   | "deposit_selector"
   | "crypto_deposit"
   | "simulate_deposit"
-  | "withdraw_selector" // 🌟 Added
-  | "withdraw_form"; // 🌟 Added
+  | "withdraw_selector"
+  | "withdraw_form"
+  | "withdraw_confirmation"
+  | "withdraw_success"
+  | "transaction_history"
+  | "transaction_details";
 
 interface AssetData {
   id: string;
@@ -33,6 +41,7 @@ interface AssetData {
 export default function NewWalletScreen() {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>("dashboard");
   const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
+  const [selectedTx, setSelectedTx] = useState<any | null>(null);
 
   const mockAssets: AssetData[] = [
     {
@@ -99,7 +108,12 @@ export default function NewWalletScreen() {
             onDepositPress={handleDepositNavigation}
             onWithdrawPress={handleWithdrawNavigation}
             onTradePress={handleTradeNavigation}
+            onBalancePress={() => setWorkflowMode("portfolio_history")}
           />
+        )}
+
+        {workflowMode === "portfolio_history" && (
+          <PortfolioHistoryView onGoBack={() => setWorkflowMode("dashboard")} />
         )}
 
         {/* 📥 Deposit Selector Using The Reusable Component */}
@@ -164,9 +178,51 @@ export default function NewWalletScreen() {
             asset={selectedAsset}
             onGoBack={() => setWorkflowMode("withdraw_selector")}
             onPreviewWithdrawal={() => {
-              console.log("Processing formal withdrawal confirmation preview layer...");
-              setWorkflowMode("dashboard"); // Go back home on completion
+              console.log(
+                "Processing formal withdrawal confirmation preview layer...",
+              );
+              setWorkflowMode("withdraw_confirmation"); // Go back home on completion
             }}
+          />
+        )}
+
+        {/* 🔒 Withdrawal Confirmation Screen */}
+        {workflowMode === "withdraw_confirmation" && selectedAsset && (
+          <WithdrawConfirmationView
+            asset={selectedAsset}
+            onGoBack={() => setWorkflowMode("withdraw_form")}
+            onSubmitWithdrawal={() => setWorkflowMode("withdraw_success")}
+          />
+        )}
+
+        {/* 🎉 Withdrawal Success Receipt Screen */}
+        {workflowMode === "withdraw_success" && selectedAsset && (
+          <WithdrawalSuccessView
+            asset={selectedAsset}
+            onViewTransaction={() => {
+              console.log("Navigating to transaction logs...");
+              setWorkflowMode("transaction_history"); // Go home
+            }}
+          />
+        )}
+
+        {/* 📜 Transaction History Screen */}
+        {workflowMode === "transaction_history" && (
+          <TransactionHistoryView
+            onSelectTx={(tx) => {
+              setSelectedTx(tx);
+              setWorkflowMode("transaction_details");
+            }}
+            onGoBack={() => setWorkflowMode("dashboard")}
+          />
+        )}
+
+        {/* 🔍 Transaction Details Screen */}
+        {workflowMode === "transaction_details" && selectedTx && (
+          <TransactionDetailsView
+            tx={selectedTx}
+            onGoBack={() => setWorkflowMode("transaction_history")}
+            onBackToWallet={() => setWorkflowMode("dashboard")}
           />
         )}
       </MySafeAreaView>

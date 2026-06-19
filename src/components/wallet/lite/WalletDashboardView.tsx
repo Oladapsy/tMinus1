@@ -26,6 +26,7 @@ interface WalletDashboardViewProps {
   onDepositPress?: () => void;
   onWithdrawPress?: () => void;
   onTradePress?: () => void;
+  onBalancePress?: () => void;
 }
 
 export default function WalletDashboardView({
@@ -35,6 +36,7 @@ export default function WalletDashboardView({
   onDepositPress,
   onWithdrawPress,
   onTradePress,
+  onBalancePress,
 }: WalletDashboardViewProps) {
   const [activeTab, setActiveTab] = useState<"deposit" | "withdraw" | "trade">("deposit");
 
@@ -67,6 +69,7 @@ export default function WalletDashboardView({
       <PortfolioValueCard
         totalValueString={totalBalance}
         percentageChangeString={trendText}
+        onPress={onBalancePress}
       />
 
       {/* 3. Interactive Horizontal Action Matrix */}

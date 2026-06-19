@@ -6,22 +6,24 @@ import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 
 interface BackHeaderProps {
   title: string;
-  paragraph?: string; // 🌟 Optional subtitle parameter
-  onBack: () => void;
+  paragraph?: string; 
+  onBack?: () => void; // 🌟 Made optional so we can hide it on success screens
 }
 
 export default function BackHeader({ title, paragraph, onBack }: BackHeaderProps) {
   return (
     <View style={styles.container}>
-      {/* 1. Structural Back Navigation Row Arrow */}
-      <View style={styles.navigationRow}>
-        <TouchableOpacity style={styles.backButton} onPress={onBack} activeOpacity={0.7}>
-          <ArrowLeft color={Colors.newWhite} width={16} height={16} />
-        </TouchableOpacity>
-      </View>
+      {/* 🌟 Only render the navigation row if an onBack function is provided */}
+      {onBack && (
+        <View style={styles.navigationRow}>
+          <TouchableOpacity style={styles.backButton} onPress={onBack} activeOpacity={0.7}>
+            <ArrowLeft color={Colors.newWhite} width={16} height={16} />
+          </TouchableOpacity>
+        </View>
+      )}
 
-      {/* 2. Descriptive Contextual Title Block using your component directly */}
-      <View style={styles.titleBlock}>
+      {/* Descriptive Contextual Title Block */}
+      <View style={[styles.titleBlock, !onBack && styles.titleBlockNoBack]}>
         <TitleAndParagraph
           title={title}
           paragraph={paragraph}
@@ -34,7 +36,7 @@ export default function BackHeader({ title, paragraph, onBack }: BackHeaderProps
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginBottom: 24, // Clean separation from whatever lists or cards follow below it
+    marginBottom: 24, 
   },
   navigationRow: {
     flexDirection: "row",
@@ -52,5 +54,8 @@ const styles = StyleSheet.create({
   },
   titleBlock: {
     marginTop: 12,
+  },
+  titleBlockNoBack: {
+    marginTop: 24, // 🌟 Adds extra top spacing if the back button row is gone
   },
 });
