@@ -14,6 +14,8 @@ import TransactionHistoryView from "@/src/components/wallet/lite/TransactionHist
 import TransactionDetailsView from "@/src/components/wallet/lite/TransactionDetailsView";
 import PortfolioHistoryView from "@/src/components/wallet/lite/PortfolioHistoryView";
 
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 type WorkflowMode =
   | "dashboard"
   | "portfolio_history"
@@ -76,6 +78,125 @@ export default function NewWalletScreen() {
     },
   ];
 
+  const globalPortfolioPayload = {
+    "1D": {
+      latestValueUsd: 4892.4,
+      data: [
+        {
+          time: "2026-06-19T00:00:00.000Z",
+          valueUsd: 4810.0,
+          value: 4450.0,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-19T04:00:00.000Z",
+          valueUsd: 4835.2,
+          value: 4472.1,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-19T08:00:00.000Z",
+          valueUsd: 4820.5,
+          value: 4460.3,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-19T12:00:00.000Z",
+          valueUsd: 4892.4,
+          value: 4520.9,
+          currency: "EUR",
+        },
+      ],
+    },
+    "1W": {
+      latestValueUsd: 4892.4,
+      data: [
+        {
+          time: "2026-06-13T12:00:00.000Z",
+          valueUsd: 4620.0,
+          value: 4280.0,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-15T12:00:00.000Z",
+          valueUsd: 4740.5,
+          value: 4390.2,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-17T12:00:00.000Z",
+          valueUsd: 4690.1,
+          value: 4345.0,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-19T12:00:00.000Z",
+          valueUsd: 4892.4,
+          value: 4520.9,
+          currency: "EUR",
+        },
+      ],
+    },
+    "1M": {
+      latestValueUsd: 4892.4,
+      data: [
+        {
+          time: "2026-05-20T12:00:00.000Z",
+          valueUsd: 4421.0,
+          value: 4120.5,
+          currency: "EUR",
+        },
+        {
+          time: "2026-05-27T12:00:00.000Z",
+          valueUsd: 4560.3,
+          value: 4230.1,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-05T12:00:00.000Z",
+          valueUsd: 4713.2,
+          value: 4390.1,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-19T12:00:00.000Z",
+          valueUsd: 4892.4,
+          value: 4520.9,
+          currency: "EUR",
+        },
+      ],
+    },
+    "1Y": {
+      latestValueUsd: 4892.4,
+      data: [
+        {
+          time: "2025-06-19T12:00:00.000Z",
+          valueUsd: 2900.0,
+          value: 2650.0,
+          currency: "EUR",
+        },
+        {
+          time: "2025-10-19T12:00:00.000Z",
+          valueUsd: 3500.5,
+          value: 3210.0,
+          currency: "EUR",
+        },
+        {
+          time: "2026-02-19T12:00:00.000Z",
+          valueUsd: 4100.0,
+          value: 3800.2,
+          currency: "EUR",
+        },
+        {
+          time: "2026-06-19T12:00:00.000Z",
+          valueUsd: 4892.4,
+          value: 4520.9,
+          currency: "EUR",
+        },
+      ],
+    },
+  };
+
   const handleDepositNavigation = () => {
     setWorkflowMode("deposit_selector");
   };
@@ -90,143 +211,148 @@ export default function NewWalletScreen() {
   };
 
   return (
-    <ImageBackground
-      source={require("@/assets/images/kyc/kycBg.png")}
-      style={styles.backgroundImageWrapper}
-      resizeMode="cover"
-    >
-      <MySafeAreaView
-        style={styles.safeContainer}
-        edges={["top", "bottom", "left", "right"]}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ImageBackground
+        source={require("@/assets/images/kyc/kycBg.png")}
+        style={styles.backgroundImageWrapper}
+        resizeMode="cover"
       >
-        {/* State Conditional Workflow Orchestrator Engine */}
-        {workflowMode === "dashboard" && (
-          <WalletDashboardView
-            totalBalance="$4,892.40"
-            trendText="+3.8% today"
-            assets={mockAssets}
-            onDepositPress={handleDepositNavigation}
-            onWithdrawPress={handleWithdrawNavigation}
-            onTradePress={handleTradeNavigation}
-            onBalancePress={() => setWorkflowMode("portfolio_history")}
-          />
-        )}
+        <MySafeAreaView
+          style={styles.safeContainer}
+          edges={["top", "bottom", "left", "right"]}
+        >
+          {/* State Conditional Workflow Orchestrator Engine */}
+          {workflowMode === "dashboard" && (
+            <WalletDashboardView
+              totalBalance="$4,892.40"
+              trendText="+3.8% today"
+              assets={mockAssets}
+              onDepositPress={handleDepositNavigation}
+              onWithdrawPress={handleWithdrawNavigation}
+              onTradePress={handleTradeNavigation}
+              onBalancePress={() => setWorkflowMode("portfolio_history")}
+            />
+          )}
 
-        {workflowMode === "portfolio_history" && (
-          <PortfolioHistoryView onGoBack={() => setWorkflowMode("dashboard")} />
-        )}
+          {workflowMode === "portfolio_history" && (
+            <PortfolioHistoryView
+              apiPayload={globalPortfolioPayload}
+              onGoBack={() => setWorkflowMode("dashboard")}
+            />
+          )}
 
-        {/* 📥 Deposit Selector Using The Reusable Component */}
-        {workflowMode === "deposit_selector" && (
-          <AssetSelectorView
-            title="Deposit"
-            assets={mockAssets}
-            onSelectAsset={(assetId) => {
-              const foundAsset = mockAssets.find((a) => a.id === assetId);
-              if (foundAsset) {
-                setSelectedAsset(foundAsset);
-                setWorkflowMode("crypto_deposit");
+          {/* 📥 Deposit Selector Using The Reusable Component */}
+          {workflowMode === "deposit_selector" && (
+            <AssetSelectorView
+              title="Deposit"
+              assets={mockAssets}
+              onSelectAsset={(assetId) => {
+                const foundAsset = mockAssets.find((a) => a.id === assetId);
+                if (foundAsset) {
+                  setSelectedAsset(foundAsset);
+                  setWorkflowMode("crypto_deposit");
+                }
+              }}
+              onCancel={() => setWorkflowMode("dashboard")}
+            />
+          )}
+
+          {/* 📤 Withdrawal Selector Using The Reusable Component */}
+          {workflowMode === "withdraw_selector" && (
+            <AssetSelectorView
+              title="Withdraw"
+              assets={mockAssets}
+              onSelectAsset={(assetId) => {
+                const foundAsset = mockAssets.find((a) => a.id === assetId);
+                if (foundAsset) {
+                  setSelectedAsset(foundAsset);
+                  setWorkflowMode("withdraw_form"); // 🚀 direct straight to form input layout
+                }
+              }}
+              onCancel={() => setWorkflowMode("dashboard")}
+            />
+          )}
+
+          {/* Dynamic Crypto Deposit Screen */}
+          {workflowMode === "crypto_deposit" && selectedAsset && (
+            <CryptoDepositQrView
+              asset={selectedAsset}
+              onCopyAddress={() =>
+                console.log(`${selectedAsset.symbol} address copied!`)
               }
-            }}
-            onCancel={() => setWorkflowMode("dashboard")}
-          />
-        )}
+              onSimulateDeposit={() => setWorkflowMode("simulate_deposit")}
+              onGoBack={() => setWorkflowMode("deposit_selector")}
+            />
+          )}
 
-        {/* 📤 Withdrawal Selector Using The Reusable Component */}
-        {workflowMode === "withdraw_selector" && (
-          <AssetSelectorView
-            title="Withdraw"
-            assets={mockAssets}
-            onSelectAsset={(assetId) => {
-              const foundAsset = mockAssets.find((a) => a.id === assetId);
-              if (foundAsset) {
-                setSelectedAsset(foundAsset);
-                setWorkflowMode("withdraw_form"); // 🚀 direct straight to form input layout
-              }
-            }}
-            onCancel={() => setWorkflowMode("dashboard")}
-          />
-        )}
+          {/* Dynamic Simulate Deposit Testing View Frame */}
+          {workflowMode === "simulate_deposit" && selectedAsset && (
+            <SimulateDepositView
+              asset={selectedAsset}
+              onGoBack={() => setWorkflowMode("crypto_deposit")}
+              onCreateDeposit={() => {
+                console.log("Creating pending sandbox deposit record...");
+                setWorkflowMode("dashboard");
+              }}
+            />
+          )}
 
-        {/* Dynamic Crypto Deposit Screen */}
-        {workflowMode === "crypto_deposit" && selectedAsset && (
-          <CryptoDepositQrView
-            asset={selectedAsset}
-            onCopyAddress={() =>
-              console.log(`${selectedAsset.symbol} address copied!`)
-            }
-            onSimulateDeposit={() => setWorkflowMode("simulate_deposit")}
-            onGoBack={() => setWorkflowMode("deposit_selector")}
-          />
-        )}
+          {/* 🌟 New Dynamic Withdrawal Input Form Panel View */}
+          {workflowMode === "withdraw_form" && selectedAsset && (
+            <WithdrawFormView
+              asset={selectedAsset}
+              onGoBack={() => setWorkflowMode("withdraw_selector")}
+              onPreviewWithdrawal={() => {
+                console.log(
+                  "Processing formal withdrawal confirmation preview layer...",
+                );
+                setWorkflowMode("withdraw_confirmation"); // Go back home on completion
+              }}
+            />
+          )}
 
-        {/* Dynamic Simulate Deposit Testing View Frame */}
-        {workflowMode === "simulate_deposit" && selectedAsset && (
-          <SimulateDepositView
-            asset={selectedAsset}
-            onGoBack={() => setWorkflowMode("crypto_deposit")}
-            onCreateDeposit={() => {
-              console.log("Creating pending sandbox deposit record...");
-              setWorkflowMode("dashboard");
-            }}
-          />
-        )}
+          {/* 🔒 Withdrawal Confirmation Screen */}
+          {workflowMode === "withdraw_confirmation" && selectedAsset && (
+            <WithdrawConfirmationView
+              asset={selectedAsset}
+              onGoBack={() => setWorkflowMode("withdraw_form")}
+              onSubmitWithdrawal={() => setWorkflowMode("withdraw_success")}
+            />
+          )}
 
-        {/* 🌟 New Dynamic Withdrawal Input Form Panel View */}
-        {workflowMode === "withdraw_form" && selectedAsset && (
-          <WithdrawFormView
-            asset={selectedAsset}
-            onGoBack={() => setWorkflowMode("withdraw_selector")}
-            onPreviewWithdrawal={() => {
-              console.log(
-                "Processing formal withdrawal confirmation preview layer...",
-              );
-              setWorkflowMode("withdraw_confirmation"); // Go back home on completion
-            }}
-          />
-        )}
+          {/* 🎉 Withdrawal Success Receipt Screen */}
+          {workflowMode === "withdraw_success" && selectedAsset && (
+            <WithdrawalSuccessView
+              asset={selectedAsset}
+              onViewTransaction={() => {
+                console.log("Navigating to transaction logs...");
+                setWorkflowMode("transaction_history"); // Go home
+              }}
+            />
+          )}
 
-        {/* 🔒 Withdrawal Confirmation Screen */}
-        {workflowMode === "withdraw_confirmation" && selectedAsset && (
-          <WithdrawConfirmationView
-            asset={selectedAsset}
-            onGoBack={() => setWorkflowMode("withdraw_form")}
-            onSubmitWithdrawal={() => setWorkflowMode("withdraw_success")}
-          />
-        )}
+          {/* 📜 Transaction History Screen */}
+          {workflowMode === "transaction_history" && (
+            <TransactionHistoryView
+              onSelectTx={(tx) => {
+                setSelectedTx(tx);
+                setWorkflowMode("transaction_details");
+              }}
+              onGoBack={() => setWorkflowMode("dashboard")}
+            />
+          )}
 
-        {/* 🎉 Withdrawal Success Receipt Screen */}
-        {workflowMode === "withdraw_success" && selectedAsset && (
-          <WithdrawalSuccessView
-            asset={selectedAsset}
-            onViewTransaction={() => {
-              console.log("Navigating to transaction logs...");
-              setWorkflowMode("transaction_history"); // Go home
-            }}
-          />
-        )}
-
-        {/* 📜 Transaction History Screen */}
-        {workflowMode === "transaction_history" && (
-          <TransactionHistoryView
-            onSelectTx={(tx) => {
-              setSelectedTx(tx);
-              setWorkflowMode("transaction_details");
-            }}
-            onGoBack={() => setWorkflowMode("dashboard")}
-          />
-        )}
-
-        {/* 🔍 Transaction Details Screen */}
-        {workflowMode === "transaction_details" && selectedTx && (
-          <TransactionDetailsView
-            tx={selectedTx}
-            onGoBack={() => setWorkflowMode("transaction_history")}
-            onBackToWallet={() => setWorkflowMode("dashboard")}
-          />
-        )}
-      </MySafeAreaView>
-    </ImageBackground>
+          {/* 🔍 Transaction Details Screen */}
+          {workflowMode === "transaction_details" && selectedTx && (
+            <TransactionDetailsView
+              tx={selectedTx}
+              onGoBack={() => setWorkflowMode("transaction_history")}
+              onBackToWallet={() => setWorkflowMode("dashboard")}
+            />
+          )}
+        </MySafeAreaView>
+      </ImageBackground>
+    </GestureHandlerRootView>
   );
 }
 
