@@ -43,7 +43,7 @@ export default function TradeDashboardView({
           <Title text="BTC / USDT" textAlign="left" size={14} />
           <Paragraph text="+2.1%" color={Colors.green} textAlign="right" />
         </View>
-        <Title text="64,200.50" size={26} fontFamily={FontFamily.bold}/>
+        <Title text="64,200.50" size={26} fontFamily={FontFamily.bold} />
 
         {/* Figure out this part and refactor */}
         <View style={styles.mockChartSpace}>

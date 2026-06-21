@@ -13,7 +13,7 @@ import TradeQuotePreviewView from "@/src/components/trades/lite/TradeQuotePrevie
 import TradeExecutionOverlay from "@/src/components/trades/lite/TradeExecutionOverlay";
 import TradeResultReceiptView from "@/src/components/trades/lite/TradeResultReceiptView";
 
-type TradeWorkflowMode = 
+type TradeWorkflowMode =
   | "dashboard"
   | "quote_form"
   | "quote_preview"
@@ -25,9 +25,14 @@ export default function TradesScreen() {
   const currentKycStatus = "APPROVED";
 
   // Flow Engine Workflow Management States
-  const [workflowMode, setWorkflowMode] = useState<TradeWorkflowMode>("dashboard");
-  const [activeAction, setActiveAction] = useState<"Buy" | "Sell" | "Swap" | null>(null);
-  const [receiptStatus, setReceiptStatus] = useState<"success" | "failed" | "expired">("success");
+  const [workflowMode, setWorkflowMode] =
+    useState<TradeWorkflowMode>("dashboard");
+  const [activeAction, setActiveAction] = useState<
+    "Buy" | "Sell" | "Swap" | null
+  >(null);
+  const [receiptStatus, setReceiptStatus] = useState<
+    "success" | "failed" | "expired"
+  >("success");
 
   return (
     <KycGateGuard status={currentKycStatus} gateType="trades">
@@ -37,11 +42,13 @@ export default function TradesScreen() {
           style={styles.background}
           resizeMode="cover"
         >
-          <MySafeAreaView style={styles.safeArea} edges={["top", "bottom", "left", "right"]}>
-            
+          <MySafeAreaView
+            style={styles.safeArea}
+            edges={["top", "bottom", "left", "right"]}
+          >
             {/* 📊 Main Landing Spot Ticker & Action Grid */}
             {workflowMode === "dashboard" && (
-              <TradeDashboardView 
+              <TradeDashboardView
                 onSelectAction={(action) => {
                   setActiveAction(action);
                   setWorkflowMode("quote_form");
@@ -51,16 +58,19 @@ export default function TradesScreen() {
 
             {/* 📝 Quote Input Form Panel (Buy / Sell / Swap Layouts) */}
             {workflowMode === "quote_form" && activeAction && (
-              <TradeQuoteFormView 
-                mode={activeAction}
+              <TradeQuoteFormView
+                initialMode={activeAction}
                 onGoBack={() => setWorkflowMode("dashboard")}
-                onRequestQuote={() => setWorkflowMode("quote_preview")}
+                onRequestQuote={(amount, asset, updatedMode) => {
+                  setActiveAction(updatedMode);
+                  setWorkflowMode("quote_preview");
+                }}
               />
             )}
 
             {/* ⏱️ Quote Preview Countdown Verification Window */}
             {workflowMode === "quote_preview" && (
-              <TradeQuotePreviewView 
+              <TradeQuotePreviewView
                 onGoBack={() => setWorkflowMode("quote_form")}
                 onConfirm={() => setWorkflowMode("execution_pin")}
                 onQuoteExpired={() => {
@@ -72,7 +82,7 @@ export default function TradesScreen() {
 
             {/* 🔒 Secure Transaction PIN Overlay & Simulator Hub */}
             {workflowMode === "execution_pin" && (
-              <TradeExecutionOverlay 
+              <TradeExecutionOverlay
                 onGoBack={() => setWorkflowMode("quote_preview")}
                 onFinalize={(status) => {
                   setReceiptStatus(status);
@@ -83,7 +93,7 @@ export default function TradesScreen() {
 
             {/* 🎉 Unified Result State Receipt Screen (Success / Fail / Expired) */}
             {workflowMode === "receipt" && (
-              <TradeResultReceiptView 
+              <TradeResultReceiptView
                 status={receiptStatus}
                 onPrimaryPress={() => {
                   if (receiptStatus === "failed") {
@@ -94,7 +104,6 @@ export default function TradesScreen() {
                 }}
               />
             )}
-
           </MySafeAreaView>
         </ImageBackground>
       </GestureHandlerRootView>
@@ -103,15 +112,15 @@ export default function TradesScreen() {
 }
 
 const styles = StyleSheet.create({
-  rootWrapper: { 
-    flex: 1 
+  rootWrapper: {
+    flex: 1,
   },
-  background: { 
-    flex: 1, 
-    backgroundColor: Colors.primary 
+  background: {
+    flex: 1,
+    backgroundColor: Colors.primary,
   },
-  safeArea: { 
-    flex: 1, 
-    backgroundColor: "transparent" 
-  }
+  safeArea: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
 });
