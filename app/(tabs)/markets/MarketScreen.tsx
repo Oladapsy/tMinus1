@@ -1,114 +1,104 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
+import { StyleSheet, ImageBackground } from "react-native";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
-import HeadIcons from "@/src/components/common/tab/HeadIcons";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
-import SpotContent from "@/src/components/market/SpotContent";
-import Paragraph from "@/src/components/common/Paragraph";
-import PlusIcon from "@/assets/icons/market/add-circle.svg";
+import { useState } from "react";
 
-const MarketScreen = () => {
-  const [activeTab, setActiveTab] = useState<
-    "Spot" | "Convert" | "Margin" | "Fiat"
-  >("Spot");
-  const [favorites, setFavorites] = useState<string[]>([]); //
+// Components
+import MarketDashboardView from "@/src/components/market/MarketDashboardView";
+import MarketOrderBook from "@/src/components/market/MarketOrderBook";
+import RecentTrades from "@/src/components/market/RescentTrades"; // 🌟 Fixed duplicate/mismatched import name
+import MarketWatchlist from "@/src/components/market/MarketWatchlist";
 
-  const handleAddFavorite = (coinCode: string) => {
-    if (!favorites.includes(coinCode)) {
-      setFavorites([...favorites, coinCode]);
-    }
-    console.log(favorites)
-  };
+type MarketWorkflowMode =
+  | "dashboard"
+  | "trending"
+  | "coin"
+  | "coinOrderBook"
+  | "recentTrades"
+  | "watchlist"
+  | "createalert"
+  | "alertcreated";
+
+export default function MarketScreen() {
+  const [workflowMode, setWorkflowMode] =
+    useState<MarketWorkflowMode>("dashboard");
+  const [activeSymbol, setActiveSymbol] = useState<string>("BTC");
 
   return (
-    <MySafeAreaView style={styles.container}>
-      <HeadIcons />
-
-      {/* Tabs || Spot | Convert | Margin | Fiat */}
-      <View style={styles.topTabs}>
-        {["Convert", "Spot", "Margin", "Fiat"].map((tab) => (
-          <PrimaryButton
-            key={tab}
-            text={tab}
-            fullWidth={false}
-            style={{ flex: 1, height: 38 }}
-            fontSize={14}
-            Bgcolor={activeTab === tab ? Colors.primary : Colors.tabDark}
-            textColor={activeTab === tab ? Colors.mediumGray : Colors.secondary}
-            onPress={() =>
-              setActiveTab(tab as "Spot" | "Convert" | "Margin" | "Fiat")
-            }
+    <ImageBackground
+      source={require("@/assets/images/kyc/kycBg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <MySafeAreaView
+        style={styles.safeArea}
+        edges={["top", "bottom", "left", "right"]}
+      >
+        {/* 📊 Screen 1: Market Dashboard View */}
+        {workflowMode === "dashboard" && (
+          <MarketDashboardView
+            onSelectAsset={(symbol) => {
+              setActiveSymbol(symbol);
+              setWorkflowMode("coinOrderBook"); // Deep dive screen testing path
+            }}
+            onNavigateToTrending={() => {
+              setWorkflowMode("watchlist"); // Takes user to Screen 2 layout
+            }}
+            onNavigateToWatchlist={() => {
+              setWorkflowMode("watchlist"); // Takes user to Watchlist.png layout
+            }}
           />
-        ))}
-      </View>
+        )}
 
-      {/* Render content based on active tab */}
-      <View style={styles.body}>
-        {activeTab === "Spot" && (
-          <View>
-            <SpotContent />
-            <TouchableOpacity
-              style={styles.addFavoriteBtn}
-              onPress={() => handleAddFavorite("BTC")}
-            >
-              <PlusIcon />
-              <Paragraph text="Add Favorite" size={18} />
-            </TouchableOpacity>
-          </View>
+        {/* Screen 2 will be here!!! */}
+        {/* {workflowMode === "trending" && (
+            <MarketTrendingView />
+        )} */}
+
+        {/* 🟢 Screen 4: Order Book Screen */}
+        {workflowMode === "coinOrderBook" && (
+          <MarketOrderBook
+            symbol={activeSymbol}
+            onGoBack={() => setWorkflowMode("dashboard")}
+            onTradeAction={(symbol) => {
+              console.log(`Open trade panel for ${symbol}`);
+            }}
+            // Toggles between internal tab panels seamlessly
+            onToggleView={() => setWorkflowMode("recentTrades")}
+          />
         )}
-        {activeTab === "Convert" && (
-          <View>
-            <PrimaryButton text="Convert content..." />
-          </View>
+
+        {/* 🔵 Screen 5: Recent Trades Screen */}
+        {workflowMode === "recentTrades" && (
+          <RecentTrades
+            onGoBack={() => setWorkflowMode("dashboard")}
+            onToggleView={() => setWorkflowMode("coinOrderBook")}
+          />
         )}
-        {activeTab === "Margin" && (
-          <View>
-            <PrimaryButton text="Margin content..." />
-          </View>
+
+        {/* 📊 Screen 6: Watchlist Screen */}
+        {workflowMode === "watchlist" && (
+          <MarketWatchlist
+            onGoBack={() => setWorkflowMode("dashboard")}
+            onExploreMarkets={() => setWorkflowMode("dashboard")}
+            onSelectAsset={(symbol) => {
+              setActiveSymbol(symbol);
+              setWorkflowMode("coinOrderBook"); // 🏃‍♂️ Deep dive into the order book for the selected coin!
+            }}
+          />
         )}
-        {activeTab === "Fiat" && (
-          <View>
-            <PrimaryButton text="Fiat content..." />
-          </View>
-        )}
-      </View>
-    </MySafeAreaView>
+      </MySafeAreaView>
+    </ImageBackground>
   );
-};
-
-export default MarketScreen;
+}
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
     backgroundColor: Colors.primary,
   },
-  topTabs: {
-    backgroundColor: Colors.tabDark,
-    height: 46,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginHorizontal: 24,
-    marginTop: 20,
-    marginBottom: 9,
-    borderRadius: 12,
-    padding: 4,
-  },
-  body: {
-    paddingHorizontal: 24,
-  },
-  addFavoriteBtn: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-    height: 60,
-    marginTop: 16,
-    alignItems: "center",
-    borderRadius: 12,
-    backgroundColor: Colors.favBg,
-    borderWidth: 2,
-    borderColor: Colors.favBorder,
-    borderStyle: 'dashed',
+  safeArea: {
+    flex: 1,
+    backgroundColor: "transparent",
   },
 });
