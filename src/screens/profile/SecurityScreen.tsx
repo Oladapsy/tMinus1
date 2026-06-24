@@ -1,7 +1,7 @@
+import BackHeader from "@/src/components/common/BackHeader";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
@@ -25,9 +25,12 @@ export default function SecurityScreen() {
         >
           {/* HEADER SECTOR */}
           <View style={styles.pageTitle}>
-            <TitleAndParagraph
+            <BackHeader
               title="Security"
               paragraph="Protect account access and sensitive actions."
+              onBack={() => {
+                router.back();
+              }}
             />
           </View>
 

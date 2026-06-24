@@ -140,11 +140,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 75,
   },
   actionButtonText: {
     color: Colors.primary,
-    fontSize: 15,
-    fontFamily: FontFamily.bold,
+    fontSize: 14,
+    fontFamily: FontFamily.medium,
   },
 });

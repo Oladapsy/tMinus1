@@ -2,7 +2,6 @@ import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import PriceAlertRow from "@/src/components/profile/PriceAlertRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
@@ -17,6 +16,12 @@ import {
   View,
 } from "react-native";
 
+// 🌟 Import your high-fidelity Alert Components directly!
+import CreatePriceAlert from "@/src/components/market/component/CreatePriceAlert";
+import AlertSuccessView from "@/src/components/market/component/AlertSuccessView";
+import BackHeader from "@/src/components/common/BackHeader";
+import { router } from "expo-router";
+
 interface PriceAlertItem {
   id: string;
   title: string;
@@ -24,8 +29,14 @@ interface PriceAlertItem {
   badgeText: "On" | "Off" | "Read";
 }
 
+// Internal navigation tracking view workflow states
+type LocalWorkflowState = "list" | "create" | "success";
+
 export default function PriceAlertsScreen() {
   const { showToast } = useToast();
+
+  // Local state flow controller
+  const [localStep, setLocalStep] = useState<LocalWorkflowState>("list");
 
   const [alerts, setAlerts] = useState<PriceAlertItem[]>([
     {
@@ -48,22 +59,21 @@ export default function PriceAlertsScreen() {
     },
   ]);
 
-  // Track state targets for interactive deletions safely
+  // Alert temporary creation cache state variable
+  const [createdAlertInfo, setCreatedAlertInfo] = useState({
+    symbol: "BTC",
+    direction: "Above" as "Above" | "Below",
+    targetPrice: "72,000",
+  });
+
   const [activeDeleteTarget, setActiveDeleteTarget] =
     useState<PriceAlertItem | null>(null);
 
-  const handleCreateAlert = () => {
-    // showToast("Opening alert creation panel...");
-    console.log("Opening alert creation panel...");
-  };
-
   // 1. Tapping an item switches its active states or prompts modal deletion
   const handleRowInteraction = (item: PriceAlertItem) => {
-    // If it's already triggered (Read), prompt the user to delete it
     if (item.badgeText === "Read") {
       setActiveDeleteTarget(item);
     } else {
-      // Otherwise, toggle its state between active (On) and paused (Off)
       setAlerts((prev) =>
         prev.map((alert) => {
           if (alert.id === item.id) {
@@ -85,16 +95,9 @@ export default function PriceAlertsScreen() {
   };
 
   const executeDeleteAction = () => {
-    // Safety guard clause: if there is no active delete target, stop immediately
     if (!activeDeleteTarget) return;
-
-    // Filter out the deleted alert from the list state
     setAlerts((prev) => prev.filter((a) => a.id !== activeDeleteTarget.id));
-
-    // Show a success toast message referencing the title
     showToast(`Removed "${activeDeleteTarget.title}" alert.`);
-
-    // Close the modal dialog box by resetting the state back to null
     setActiveDeleteTarget(null);
   };
 
@@ -105,77 +108,117 @@ export default function PriceAlertsScreen() {
       resizeMode="cover"
     >
       <MySafeAreaView style={styles.safeContainer}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.pageTitle}>
-            <TitleAndParagraph
-              title="Price alerts"
-              paragraph="Create, edit, pause, or delete market alerts."
-            />
-          </View>
-
-          <View style={styles.actionBtnWrapper}>
-            <PrimaryButton
-              text="Create alert"
-              Bgcolor={Colors.green}
-              textColor={Colors.newDark}
-              onPress={handleCreateAlert}
-              fontSize={15}
-              style={{ fontFamily: FontFamily.bold }}
-            />
-          </View>
-
-          {/* Interactive Stack Row mapping */}
-          <View style={styles.listWrapper}>
-            {alerts.map((alert) => (
-              <PriceAlertRow
-                key={alert.id}
-                item={alert}
-                onPress={() => handleRowInteraction(alert)} // Toggles On / Off on simple tap
-                onDeleteTrigger={() => setActiveDeleteTarget(alert)} // Opens the modal when the trash can is tapped!
+        {/* 📋 STEP 1: RENDER THE STANDARD INTERACTIVE ALERTS LIST VIEW */}
+        {localStep === "list" && (
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.pageTitle}>
+              <BackHeader
+                title="Price alerts"
+                paragraph="Create, edit, pause, or delete market alerts."
+                onBack={() => {router.back()}}
               />
-            ))}
-          </View>
-
-          {/* 3. DYNAMIC DELETE DIALOG: Only appears when a deletion target is active */}
-          {activeDeleteTarget && (
-            <View style={styles.deleteDialogBox}>
-              <Title
-                text="Delete alert?"
-                color={Colors.newWhite}
-                size={17}
-                fontFamily={FontFamily.bold}
-              />
-              <View style={styles.dialogDescMargin}>
-                <Paragraph
-                  text={`This removes the ${activeDeleteTarget.title} alert from your tracking dashboard.`}
-                  color={Colors.newSecondary}
-                  size={12.5}
-                  lineHeight={17}
-                  textAlign="left"
-                />
-              </View>
-
-              <View style={styles.dialogActionsRow}>
-                <Pressable
-                  style={styles.cancelActionBtn}
-                  onPress={() => setActiveDeleteTarget(null)}
-                >
-                  <Text style={styles.cancelBtnText}>Cancel</Text>
-                </Pressable>
-
-                <Pressable
-                  style={styles.deleteActionBtn}
-                  onPress={executeDeleteAction}
-                >
-                  <Text style={styles.deleteBtnText}>Delete</Text>
-                </Pressable>
-              </View>
             </View>
-          )}
-        </ScrollView>
+
+            <View style={styles.actionBtnWrapper}>
+              <PrimaryButton
+                text="Create alert"
+                Bgcolor={Colors.green}
+                textColor={Colors.newDark}
+                onPress={() => setLocalStep("create")} // 🌟 Step right into the creation engine!
+                fontSize={15}
+                style={{ fontFamily: FontFamily.bold }}
+              />
+            </View>
+
+            <View style={styles.listWrapper}>
+              {alerts.map((alert) => (
+                <PriceAlertRow
+                  key={alert.id}
+                  item={alert}
+                  onPress={() => handleRowInteraction(alert)}
+                  onDeleteTrigger={() => setActiveDeleteTarget(alert)}
+                />
+              ))}
+            </View>
+
+            {activeDeleteTarget && (
+              <View style={styles.deleteDialogBox}>
+                <Title
+                  text="Delete alert?"
+                  color={Colors.newWhite}
+                  size={17}
+                  fontFamily={FontFamily.bold}
+                />
+                <View style={styles.dialogDescMargin}>
+                  <Paragraph
+                    text={`This removes the ${activeDeleteTarget.title} alert from your tracking dashboard.`}
+                    color={Colors.newSecondary}
+                    size={12.5}
+                    lineHeight={17}
+                    textAlign="left"
+                  />
+                </View>
+
+                <View style={styles.dialogActionsRow}>
+                  <Pressable
+                    style={styles.cancelActionBtn}
+                    onPress={() => setActiveDeleteTarget(null)}
+                  >
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={styles.deleteActionBtn}
+                    onPress={executeDeleteAction}
+                  >
+                    <Text style={styles.deleteBtnText}>Delete</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+          </ScrollView>
+        )}
+
+        {/* 🔔 STEP 2: SCREEN 7 - CREATE PRICE ALERT INPUT PANEL */}
+        {localStep === "create" && (
+          <CreatePriceAlert
+            symbol="BTC"
+            currentPrice={64200.5}
+            onGoBack={() => setLocalStep("list")}
+            onAlertCreated={(payload) => {
+              // Cache data values safely
+              setCreatedAlertInfo({
+                symbol: payload.symbol,
+                direction: payload.direction,
+                targetPrice: payload.targetPrice,
+              });
+
+              // Dynamically append the new custom target item array placeholder into list memory state
+              const newAlertItem: PriceAlertItem = {
+                id: Date.now().toString(),
+                title: `${payload.symbol} ${payload.direction.toLowerCase()} $${Number(payload.targetPrice).toLocaleString()}`,
+                subtitle: "Active · push notification on",
+                badgeText: "On",
+              };
+              setAlerts((prev) => [newAlertItem, ...prev]);
+
+              // Advance directly forward to the success completion layout screen view
+              setLocalStep("success");
+            }}
+          />
+        )}
+
+        {/* 🎉 STEP 3: SCREEN 8 - ALERT SUCCESS CONFIRMATION PANEL */}
+        {localStep === "success" && (
+          <AlertSuccessView
+            symbol={createdAlertInfo.symbol}
+            direction={createdAlertInfo.direction}
+            targetPrice={createdAlertInfo.targetPrice}
+            onClose={() => setLocalStep("list")} // Loops nicely back to updated lists tracking menu
+          />
+        )}
       </MySafeAreaView>
     </ImageBackground>
   );

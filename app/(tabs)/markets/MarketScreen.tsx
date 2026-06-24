@@ -10,6 +10,8 @@ import RecentTrades from "@/src/components/market/RescentTrades"; // 🌟 Fixed 
 import MarketWatchlist from "@/src/components/market/MarketWatchlist";
 import AlertSuccessView from "@/src/components/market/component/AlertSuccessView";
 import CreatePriceAlert from "@/src/components/market/component/CreatePriceAlert";
+import MarketTrendingView from "@/src/components/market/MarketTrendingView";
+import MarketAssetDetails from "@/src/components/market/MarketAssetDetails";
 
 type MarketWorkflowMode =
   | "dashboard"
@@ -48,7 +50,7 @@ export default function MarketScreen() {
               setWorkflowMode("coinOrderBook"); // Deep dive screen testing path
             }}
             onNavigateToTrending={() => {
-              setWorkflowMode("watchlist"); // Takes user to Screen 2 layout
+              setWorkflowMode("trending"); // Takes user to Screen 2 layout
             }}
             onNavigateToWatchlist={() => {
               setWorkflowMode("watchlist"); // Takes user to Watchlist.png layout
@@ -56,10 +58,24 @@ export default function MarketScreen() {
           />
         )}
 
-        {/* Screen 2 will be here!!! */}
-        {/* {workflowMode === "trending" && (
-            <MarketTrendingView />
-        )} */}
+        {workflowMode === "trending" && (
+          <MarketTrendingView
+            onGoBack={() => setWorkflowMode("dashboard")}
+            onSelectAsset={(symbol) => {
+              setActiveSymbol(symbol);
+              setWorkflowMode("coin"); // Takes you to Screen 3 Asset Details layout!
+            }}
+          />
+        )}
+
+        {/* 💎 Screen 3: Asset Details Screen */}
+        {workflowMode === "coin" && (
+          <MarketAssetDetails
+            symbol={activeSymbol}
+            onGoBack={() => setWorkflowMode("dashboard")}
+            onNavigateToAlert={() => setWorkflowMode("createAlert")} // Takes you straight to Screen 7!
+          />
+        )}
 
         {/* 🟢 Screen 4: Order Book Screen */}
         {workflowMode === "coinOrderBook" && (
@@ -71,7 +87,6 @@ export default function MarketScreen() {
             }}
             // Toggles between internal tab panels seamlessly
             onToggleView={() => setWorkflowMode("recentTrades")}
-            
           />
         )}
 

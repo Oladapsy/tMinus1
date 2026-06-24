@@ -1,11 +1,12 @@
+import BackHeader from "@/src/components/common/BackHeader";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
 import PinInputField from "@/src/components/common/PinInputField"; // Import your new functional field!
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { ImageBackground, ScrollView, StyleSheet, View } from "react-native";
 
@@ -37,9 +38,10 @@ export default function TransactionPinScreen() {
         >
           {/* 1. TOP SECTION: Header Info */}
           <View style={styles.pageTitle}>
-            <TitleAndParagraph
+            <BackHeader
               title="Transaction PIN"
               paragraph="Update the PIN used for trade and withdrawal confirmations."
+              onBack={()=>{router.back()}}
             />
           </View>
 

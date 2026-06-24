@@ -1,23 +1,23 @@
+import BackHeader from "@/src/components/common/BackHeader";
 import MockFormInputCard from "@/src/components/common/MockFormInputCard";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
 import PinInputField from "@/src/components/common/PinInputField";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    ImageBackground,
-    Linking,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  ImageBackground,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 export default function TwoFactorSetupScreen() {
@@ -140,9 +140,12 @@ export default function TwoFactorSetupScreen() {
         >
           {/* HEADER SECTOR */}
           <View style={styles.pageTitle}>
-            <TitleAndParagraph
+            <BackHeader
               title="Authenticator app"
               paragraph="Link your account to an authenticator app for secure login verification."
+              onBack={() => {
+                router.back();
+              }}
             />
           </View>
 

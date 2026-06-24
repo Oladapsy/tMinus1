@@ -1,10 +1,11 @@
+import BackHeader from "@/src/components/common/BackHeader";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow"; // Reusing your beautiful custom row component!
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { router } from "expo-router";
 import React from "react";
 import { ImageBackground, ScrollView, StyleSheet, View } from "react-native";
 
@@ -44,9 +45,10 @@ export default function RegisteredDevicesScreen() {
         >
           {/* Header configuration matching screen image exactly */}
           <View style={styles.pageTitle}>
-            <TitleAndParagraph
+            <BackHeader
               title="Devices"
               paragraph="Registered devices for push notification and session awareness."
+              onBack={() => {router.back()}}
             />
           </View>
 
