@@ -15,6 +15,8 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 // linear gradient
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+// 🌟 Import AsyncStorage to store the completion flag permanently
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -31,16 +33,24 @@ export default function OnboardingScreen() {
     viewAreaCoveragePercentThreshold: 50,
   });
 
-  // the Next button
-  const handleNext = () => {
+  // 🌟 Modified to handle the asynchronous storage saving safely
+  const handleNext = async () => {
     if (currentIndex < onboardingSlides.length - 1) {
       flatListRef.current?.scrollToIndex({
         index: currentIndex + 1,
       });
     } else {
-      // final action
-      console.log("Go to auth");
-      router.push("/(auth)/signin");
+      try {
+        // 🌟 1. Permanently lock this flag so _layout.tsx skips onboarding next launch!
+        await AsyncStorage.setItem("HAS_LAUNCHED_BEFORE", "true");
+
+        // 🌟 2. Replace the layout route instead of pushing so they can't hardware back-button return here
+        router.replace("/(auth)/signin");
+      } catch (error) {
+        console.error("Failed to commit onboarding flag to memory:", error);
+        // Fallback redirection safely just in case storage fails
+        router.replace("/(auth)/signin");
+      }
     }
   };
 
@@ -106,7 +116,7 @@ export default function OnboardingScreen() {
       </View>
 
       <View style={styles.nextBtn}>
-        <PrimaryButton onPress={handleNext} text={"Next"} alignText="center"/>
+        <PrimaryButton onPress={handleNext} text={"Next"} alignText="center" />
       </View>
     </MySafeAreaView>
   );
@@ -150,7 +160,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 170,
   },
-
   dot: {
     width: 12.24,
     height: 12.24,

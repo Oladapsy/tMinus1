@@ -1,13 +1,18 @@
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import NavigateIconText from "@/src/components/common/NavigateIconText";
 import { Colors } from "@/src/constants/colors";
-import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import Cancel from "@/assets/icons/main/cancel.svg";
 import AuthTabs from "@/src/components/auth/AuthTabs";
 import { useState } from "react";
 import SignInForm from "@/src/components/auth/forms/SignInForm";
 import SignUpForm from "@/src/components/auth/forms/SignUpForm";
-import { router } from "expo-router";
 
 export default function SignInScreen() {
   const [activeTab, setActiveTab] = useState(0);
@@ -15,12 +20,15 @@ export default function SignInScreen() {
   return (
     <MySafeAreaView style={style.container}>
       {/* Keyboard Avoiding View prevents the software keyboard from overlapping inputs */}
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={style.flexContainer}
       >
         <View style={style.headerWrapper}>
-          <NavigateIconText icon={<Cancel color={Colors.secondary} />} onClickIcon={() => router.back()} />
+          <NavigateIconText
+            icon={<Cancel color={Colors.secondary} />}
+            onClickIcon={() => console.log("Can't go back")}
+          />
         </View>
 
         {/* The tab navigation */}
@@ -31,7 +39,7 @@ export default function SignInScreen() {
         />
 
         {/* 🌟 SCROLL VIEW ENGINE: Absorbs dynamic layout expansion gracefully */}
-        <ScrollView 
+        <ScrollView
           style={style.scrollEngine}
           contentContainerStyle={style.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -63,6 +71,6 @@ const style = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
-    flexGrow: 1,       
+    flexGrow: 1,
   },
 });
