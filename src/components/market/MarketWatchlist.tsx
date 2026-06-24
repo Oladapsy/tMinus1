@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   infoBox: {
     backgroundColor: Colors.newDark,

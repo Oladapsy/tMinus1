@@ -138,7 +138,13 @@ export default function MarketDashboardView({
               return false;
             return true;
           }).map((coin) => (
-            <MarketAssetRow key={coin.id} coin={coin} onPress={onSelectAsset} />
+            <View key={coin.id} style={styles.rowCardWrapper}>
+              <MarketAssetRow
+                key={coin.id}
+                coin={coin}
+                onPress={onSelectAsset}
+              />
+            </View>
           ))}
         </View>
       </ScrollView>
@@ -193,5 +199,12 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     gap: 16,
+  },
+  rowCardWrapper: {
+    backgroundColor: Colors.newDark,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginBottom: -6,
   },
 });

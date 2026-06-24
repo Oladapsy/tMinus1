@@ -8,6 +8,8 @@ import MarketDashboardView from "@/src/components/market/MarketDashboardView";
 import MarketOrderBook from "@/src/components/market/MarketOrderBook";
 import RecentTrades from "@/src/components/market/RescentTrades"; // 🌟 Fixed duplicate/mismatched import name
 import MarketWatchlist from "@/src/components/market/MarketWatchlist";
+import AlertSuccessView from "@/src/components/market/component/AlertSuccessView";
+import CreatePriceAlert from "@/src/components/market/component/CreatePriceAlert";
 
 type MarketWorkflowMode =
   | "dashboard"
@@ -16,13 +18,17 @@ type MarketWorkflowMode =
   | "coinOrderBook"
   | "recentTrades"
   | "watchlist"
-  | "createalert"
-  | "alertcreated";
+  | "createAlert"
+  | "alertSuccess";
 
 export default function MarketScreen() {
   const [workflowMode, setWorkflowMode] =
     useState<MarketWorkflowMode>("dashboard");
   const [activeSymbol, setActiveSymbol] = useState<string>("BTC");
+  const [alertData, setAlertData] = useState({
+    direction: "Above" as "Above" | "Below",
+    targetPrice: "72000",
+  });
 
   return (
     <ImageBackground
@@ -65,6 +71,7 @@ export default function MarketScreen() {
             }}
             // Toggles between internal tab panels seamlessly
             onToggleView={() => setWorkflowMode("recentTrades")}
+            
           />
         )}
 
@@ -85,6 +92,31 @@ export default function MarketScreen() {
               setActiveSymbol(symbol);
               setWorkflowMode("coinOrderBook"); // 🏃‍♂️ Deep dive into the order book for the selected coin!
             }}
+          />
+        )}
+
+        {/* Screen 7 */}
+        {workflowMode === "createAlert" && (
+          <CreatePriceAlert
+            symbol={activeSymbol}
+            currentPrice={64200.5}
+            onGoBack={() => setWorkflowMode("coinOrderBook")}
+            onAlertCreated={(payload) => {
+              setAlertData({
+                direction: payload.direction,
+                targetPrice: payload.targetPrice,
+              });
+              setWorkflowMode("alertSuccess");
+            }}
+          />
+        )}
+
+        {workflowMode === "alertSuccess" && (
+          <AlertSuccessView
+            symbol={activeSymbol}
+            direction={alertData.direction}
+            targetPrice={alertData.targetPrice}
+            onClose={() => setWorkflowMode("dashboard")}
           />
         )}
       </MySafeAreaView>
