@@ -8,6 +8,14 @@ import { ToastProvider } from "@/src/context/ToastContext";
 import { store, RootState } from "@/src/store/store";
 import ReauthOverlay from "@/src/components/auth/ReauthOverlay";
 
+
+// Prevent splash screen from auto-hiding until assets and flags are fully verified
+SplashScreen.preventAutoHideAsync();
+
+// for the onboarding screen
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 // 1. Inner wrapper that sits safely inside the Redux context
 function RootNavigationContent() {
   // Listen directly for session expiration flags
