@@ -188,7 +188,6 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     marginTop: 14,
-    marginBottom: -20,
   },
   headerCard: {
     flexDirection: "row",
