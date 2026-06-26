@@ -25,7 +25,7 @@ import {
   useUpdateProfileMutation,
 } from "@/src/services/profileApi";
 import { useToast } from "@/src/context/ToastContext";
-
+import AntDesign from "@expo/vector-icons/AntDesign";
 // 1. Zod Form Validation Rules matching our allowed fields
 const editProfileSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -85,7 +85,6 @@ export default function EditProfileScreen() {
   }, [profile, setValue]);
 
   // 3. Dispatch Updated Modifications Package to Server
-  // 3. Dispatch Updated Modifications Package to Server
   const onSaveProfile = async (data: EditProfileFormData) => {
     try {
       const payload = {
@@ -97,20 +96,19 @@ export default function EditProfileScreen() {
       await updateProfile(payload).unwrap();
 
       // 🌟 Change: Pass the string directly!
-      showToast?.("Profile updated successfully!");
+      showToast?.("Profile updated successfully!", "success");
       router.back();
     } catch (err: any) {
       const errMsg = err?.data?.message || "Failed to update profile changes.";
 
       // 🌟 Change: Pass the string directly!
-      showToast?.(errMsg);
+      showToast?.(errMsg, "error");
     }
   };
 
   // Mock Avatar selection framework logic wrapper
   const handlePickImage = () => {
-    // Perfect injection point for an image picking dependency later.
-    // For now, let's feed a high-quality temporary dynamic avatar image URL string:
+    // injection point for an image picking dependency later.
     const demoUrls = [
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=240&h=240&fit=crop",
       "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=240&h=240&fit=crop",
@@ -165,7 +163,7 @@ export default function EditProfileScreen() {
               )}
               {/* Camera Icon Overlay Badge Badge layout */}
               <View style={styles.cameraBadgeCircle}>
-                <Text style={styles.cameraIconText}>📸</Text>
+                <AntDesign name="camera" size={14} color={Colors.newBlack} />
               </View>
             </TouchableOpacity>
             <Text style={styles.avatarHelperText}>
@@ -254,11 +252,27 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: { flex: 1, width: "100%", height: "100%" },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
-  pageTitle: { marginTop: 14, marginBottom: -20 },
-  avatarPickerContainer: { alignItems: "center", marginVertical: 24 },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  pageTitle: {
+    marginTop: 14,
+    marginBottom: -20,
+  },
+  avatarPickerContainer: {
+    alignItems: "center",
+    marginVertical: 24,
+  },
   avatarWrapper: {
     position: "relative",
     width: 90,
@@ -266,7 +280,11 @@ const styles = StyleSheet.create({
     borderRadius: 45,
     elevation: 4,
   },
-  avatarImage: { width: 90, height: 90, borderRadius: 45 },
+  avatarImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+  },
   avatarCircleFallback: {
     width: 90,
     height: 90,
@@ -284,7 +302,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: Colors.tertiary,
+    backgroundColor: Colors.newSecondary,
     width: 28,
     height: 28,
     borderRadius: 14,
@@ -293,14 +311,16 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.newBlack,
   },
-  cameraIconText: { fontSize: 12 },
   avatarHelperText: {
     color: Colors.secondary,
     fontFamily: FontFamily.regular,
     fontSize: 12,
     marginTop: 10,
   },
-  formContainer: { gap: 4, marginTop: 10 },
+  formContainer: {
+    gap: 4,
+    marginTop: 10,
+  },
   input: {
     backgroundColor: Colors.tertiary,
     borderRadius: 10,
@@ -317,7 +337,10 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
     color: Colors.secondary,
   },
-  inputError: { borderWidth: 1, borderColor: Colors.red },
+  inputError: {
+    borderWidth: 1,
+    borderColor: Colors.red,
+  },
   errorText: {
     color: Colors.red,
     fontSize: 12,
@@ -331,11 +354,17 @@ const styles = StyleSheet.create({
     marginTop: -2,
     marginBottom: 12,
   },
-  footerSection: { marginTop: 40 },
+  footerSection: {
+    marginTop: 40,
+  },
   loaderContainer: {
     height: 54,
     justifyContent: "center",
     alignItems: "center",
   },
-  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

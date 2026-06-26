@@ -39,6 +39,7 @@ export default function LiteProfileScreen() {
 
   if (error || !profileResponse) {
     console.log("Profile Fetch Error Context:", error);
+
     return (
       <View
         style={[
