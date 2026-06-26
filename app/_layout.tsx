@@ -15,10 +15,14 @@ SplashScreen.preventAutoHideAsync();
 function RootNavigationContent({ isAppReady }: { isAppReady: boolean }) {
   const router = useRouter();
   const segments = useSegments();
-  
+
   // 🌟 Grab your high-fidelity session states perfectly aligned with authSlice.ts!
-  const isSessionExpired = useSelector((state: RootState) => state.auth.isSessionExpired);
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isSessionExpired = useSelector(
+    (state: RootState) => state.auth.isSessionExpired,
+  );
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated,
+  );
 
   useEffect(() => {
     if (!isAppReady) return;
