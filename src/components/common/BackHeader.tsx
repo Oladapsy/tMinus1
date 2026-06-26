@@ -24,7 +24,7 @@ export default function BackHeader({ title, paragraph, onBack, staright }: BackH
       )}
 
       {/* Descriptive Contextual Title Block */}
-      <View style={[styles.titleBlock, !onBack && styles.titleBlockNoBack]}>
+      <View style={[styles.titleBlock, !onBack && styles.titleBlockNoBack, staright && {marginTop: 18} ]}>
         <TitleAndParagraph
           title={title}
           paragraph={paragraph}
@@ -37,7 +37,7 @@ export default function BackHeader({ title, paragraph, onBack, staright }: BackH
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginBottom: 24, 
+    marginBottom: 2, 
   },
   navigationRow: {
     flexDirection: "row",
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   titleBlock: {
-    marginTop: 12,
+    marginTop: 1,
   },
   titleBlockNoBack: {
     marginTop: 24, // 🌟 Adds extra top spacing if the back button row is gone

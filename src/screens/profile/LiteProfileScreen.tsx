@@ -17,7 +17,7 @@ import {
 
 // 🌟 TEST IMPORTS ADDED
 import { useDispatch } from "react-redux";
-import { setSessionExpired } from "@/src/store/authSlice";
+import { setSessionExpired, logOut } from "@/src/store/authSlice";
 import BackHeader from "@/src/components/common/BackHeader";
 import { useGetProfileQuery } from "@/src/services/profileApi";
 
@@ -67,9 +67,10 @@ export default function LiteProfileScreen() {
     ? profile.fullName.charAt(0).toUpperCase()
     : "U";
 
-  // const isVerified = profile.kycStatus.toLowerCase() === "approved";
-  const isVerified = false;
-  const isUnVerified = true;
+  const isVerified = profile.kycStatus.toLowerCase() === "approved";
+  const isUnVerified = profile.kycStatus.toLowerCase() !== "approved";
+
+  // logout pipeline
 
   return (
     <ImageBackground
@@ -160,7 +161,8 @@ export default function LiteProfileScreen() {
               fontSize={14}
               style={{ fontFamily: FontFamily.bold }}
               onPress={() => {
-                console.log("logged out pressed");
+                console.log("Triggering reauth lock screen overlay state...");
+                dispatch(logOut());
               }}
             />
           </View>
