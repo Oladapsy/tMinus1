@@ -16,12 +16,17 @@ import EyeIcon from "@/assets/icons/wallet/eye-slash.svg";
 import EyeOpenIcon from "@/assets/icons/wallet/eye-open.svg";
 import PrimaryButton from "../../common/PrimaryButton";
 import Paragraph from "../../common/Paragraph";
-import { useLoginCustomerMutation, useRequestEmailOtpMutation } from "@/src/services/authApi";
+import {
+  useLoginCustomerMutation,
+  useRequestEmailOtpMutation,
+} from "@/src/services/authApi";
 import { router } from "expo-router";
-import { useToast } from "@/src/context/ToastContext";
+// import { useToast } from "@/src/context/ToastContext";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/src/store/authSlice";
 
 interface AuthFormProps {
-  fieldLabel: string; 
+  fieldLabel: string;
   fieldPlaceholder: string;
   fieldKeyboardType?: "email-address" | "phone-pad" | "default";
   toggleLinkText: string;
@@ -40,14 +45,18 @@ export default function AuthForm({
   buttonText,
 }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [backendError, setBackendError] = useState<string | null>(null); 
-  const [isUnverified, setIsUnverified] = useState(false); 
-  
-  // 🌟 Initialize your context provider hook handler
-  const { showToast } = useToast();
+  const [backendError, setBackendError] = useState<string | null>(null);
+  const [isUnverified, setIsUnverified] = useState(false);
+
+  // Initialize the Redux dispatch function tool wrapper
+  const dispatch = useDispatch();
+
+  // Initialize your context provider hook handler
+  // const { showToast } = useToast();
 
   const [loginCustomer, { isLoading }] = useLoginCustomerMutation();
-  const [requestOtp, { isLoading: isSendingOtp }] = useRequestEmailOtpMutation(); 
+  const [requestOtp, { isLoading: isSendingOtp }] =
+    useRequestEmailOtpMutation();
 
   const dynamicSchema = z.object({
     identifier: z
@@ -57,12 +66,18 @@ export default function AuthForm({
         if (fieldLabel === "Email") {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (!emailRegex.test(val)) {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please enter a valid email address" });
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Please enter a valid email address",
+            });
           }
         } else {
           const phoneRegex = /^\+?[0-9]{7,15}$/;
           if (!phoneRegex.test(val.replace(/\s+/g, ""))) {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please enter a valid phone number" });
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Please enter a valid phone number",
+            });
           }
         }
       }),
@@ -71,7 +86,13 @@ export default function AuthForm({
 
   type FormData = z.infer<typeof dynamicSchema>;
 
-  const { control, handleSubmit, setValue, getValues, formState: { errors } } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm<FormData>({
     resolver: zodResolver(dynamicSchema),
     defaultValues: { identifier: "", password: "" },
   });
@@ -79,62 +100,80 @@ export default function AuthForm({
   useEffect(() => {
     setValue("identifier", "");
     setBackendError(null);
-    setIsUnverified(false); 
+    setIsUnverified(false);
   }, [fieldLabel, setValue]);
 
   const onFormSubmit = async (data: FormData) => {
-    setBackendError(null); 
+    setBackendError(null);
     setIsUnverified(false);
 
     try {
       const payload = {
-        loginType: fieldLabel === "Email" ? ("email" as const) : ("phone" as const),
-        identifier: fieldLabel === "Email" ? data.identifier.trim().toLowerCase() : data.identifier.trim().replace(/\s+/g, ""), 
+        loginType:
+          fieldLabel === "Email" ? ("email" as const) : ("phone" as const),
+        identifier:
+          fieldLabel === "Email"
+            ? data.identifier.trim().toLowerCase()
+            : data.identifier.trim().replace(/\s+/g, ""),
         password: data.password,
       };
 
       const response = await loginCustomer(payload).unwrap();
-      if (response) {
-        router.replace("/(tabs)/home");
+
+      // 🌟 Commit response structure directly into state filing cabinet before shifting screens
+      if (response && response.data) {
+        dispatch(setCredentials(response.data));
       }
     } catch (err: any) {
-      const serverMessage = err?.data?.error?.message || err?.data?.message || "An unexpected connection error occurred.";
+      const serverMessage =
+        err?.data?.error?.message ||
+        err?.data?.message ||
+        "An unexpected connection error occurred.";
       setBackendError(serverMessage);
 
-      if (serverMessage.toLowerCase().includes("verify") || serverMessage.toLowerCase().includes("verification")) {
+      if (
+        serverMessage.toLowerCase().includes("verify") ||
+        serverMessage.toLowerCase().includes("verification")
+      ) {
         setIsUnverified(true);
       }
     }
   };
 
- const handleVerifyRedirect = async () => {
+  const handleVerifyRedirect = async () => {
     const currentIdentifier = getValues("identifier").trim();
     if (!currentIdentifier) return;
 
     try {
       setBackendError(null);
-      const emailToVerify = fieldLabel === "Email" ? currentIdentifier.toLowerCase() : currentIdentifier;
+      const emailToVerify =
+        fieldLabel === "Email"
+          ? currentIdentifier.toLowerCase()
+          : currentIdentifier;
 
       const response = await requestOtp({ email: emailToVerify }).unwrap();
       const liveDemoCode = response?.data?.demoCode || "123456";
 
-      // 🌟 Pass the live code forward via URL query parameters
+      // Pass the live code forward via URL query parameters
       router.push({
         pathname: "/(auth)/otp",
-        params: { 
+        params: {
           email: emailToVerify,
-          codeOnMount: liveDemoCode // 👈 Send it over safely
+          codeOnMount: liveDemoCode,
         },
       });
     } catch (err: any) {
-      const emailToVerify = fieldLabel === "Email" ? currentIdentifier.toLowerCase() : currentIdentifier;
-      
-      // Fallback fallback route params
+      const emailToVerify =
+        fieldLabel === "Email"
+          ? currentIdentifier.toLowerCase()
+          : currentIdentifier;
+
+      // Fallback route params
       router.push({
         pathname: "/(auth)/otp",
-        params: { 
+        params: {
           email: emailToVerify,
-          codeOnMount: "123456" 
+          codeOnMount: "123456",
         },
       });
     }
@@ -149,11 +188,17 @@ export default function AuthForm({
       )}
 
       {isUnverified && (
-        <TouchableOpacity style={styles.verifyLinkBox} onPress={handleVerifyRedirect} disabled={isSendingOtp}>
+        <TouchableOpacity
+          style={styles.verifyLinkBox}
+          onPress={handleVerifyRedirect}
+          disabled={isSendingOtp}
+        >
           {isSendingOtp ? (
             <ActivityIndicator size="small" color={Colors.green} />
           ) : (
-            <Text style={styles.verifyLinkText}>Click here to send an OTP and verify your account →</Text>
+            <Text style={styles.verifyLinkText}>
+              Click here to send an OTP and verify your account →
+            </Text>
           )}
         </TouchableOpacity>
       )}
@@ -177,8 +222,8 @@ export default function AuthForm({
             autoCapitalize="none"
             onBlur={onBlur}
             onChangeText={(text) => {
-              setBackendError(null); 
-              setIsUnverified(false); 
+              setBackendError(null);
+              setIsUnverified(false);
               onChange(text);
             }}
             value={value}
@@ -186,7 +231,11 @@ export default function AuthForm({
           />
         )}
       />
-      {errors.identifier && <Text style={styles.errorText}>{errors.identifier.message as string}</Text>}
+      {errors.identifier && (
+        <Text style={styles.errorText}>
+          {errors.identifier.message as string}
+        </Text>
+      )}
 
       <Paragraph text="Password" textAlign="left" />
       <View style={[styles.inputRow, errors.password && styles.inputRowError]}>
@@ -210,10 +259,16 @@ export default function AuthForm({
           )}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          {showPassword ? <EyeOpenIcon color={Colors.secondary} width={20} height={20} /> : <EyeIcon color={Colors.secondary} width={20} height={20} />}
+          {showPassword ? (
+            <EyeOpenIcon color={Colors.secondary} width={20} height={20} />
+          ) : (
+            <EyeIcon color={Colors.secondary} width={20} height={20} />
+          )}
         </TouchableOpacity>
       </View>
-      {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+      {errors.password && (
+        <Text style={styles.errorText}>{errors.password.message}</Text>
+      )}
 
       {showForgotPassword && (
         <TouchableOpacity disabled={isLoading || isSendingOtp}>
@@ -227,7 +282,13 @@ export default function AuthForm({
             <ActivityIndicator size="small" color={Colors.green} />
           </View>
         ) : (
-          <PrimaryButton text={buttonText} onPress={handleSubmit(onFormSubmit)} Bgcolor={Colors.green} textColor={Colors.darkText} disabled={isSendingOtp} />
+          <PrimaryButton
+            text={buttonText}
+            onPress={handleSubmit(onFormSubmit)}
+            Bgcolor={Colors.green}
+            textColor={Colors.darkText}
+            disabled={isSendingOtp}
+          />
         )}
       </View>
     </View>
@@ -236,19 +297,93 @@ export default function AuthForm({
 
 const styles = StyleSheet.create({
   container: { marginTop: 24, gap: 4 },
-  labelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6, marginTop: 8 },
-  toggleLink: { color: Colors.green, fontFamily: FontFamily.medium, fontSize: 14 },
-  input: { backgroundColor: Colors.tertiary, borderRadius: 10, padding: 14, color: "white", fontFamily: FontFamily.regular, fontSize: 14, height: 54 },
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+    marginTop: 8,
+  },
+  toggleLink: {
+    color: Colors.green,
+    fontFamily: FontFamily.medium,
+    fontSize: 14,
+  },
+  input: {
+    backgroundColor: Colors.tertiary,
+    borderRadius: 10,
+    padding: 14,
+    color: "white",
+    fontFamily: FontFamily.regular,
+    fontSize: 14,
+    height: 54,
+  },
   inputError: { borderWidth: 1, borderColor: Colors.red },
-  inputRow: { flexDirection: "row", alignItems: "center", backgroundColor: Colors.tertiary, borderRadius: 10, paddingHorizontal: 14, height: 54 },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.tertiary,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    height: 54,
+  },
   inputRowError: { borderWidth: 1, borderColor: Colors.red },
-  inputFlex: { flex: 1, paddingVertical: 14, color: "white", fontFamily: FontFamily.regular, fontSize: 14 },
-  errorText: { color: Colors.red, fontSize: 12, fontFamily: FontFamily.regular, marginTop: 2, marginBottom: 8, textAlign: "left" },
-  backendErrorBox: { backgroundColor: "rgba(255, 51, 51, 0.15)", borderColor: Colors.red, borderWidth: 1, borderRadius: 10, padding: 14, marginBottom: 10, marginTop: -16 },
-  backendErrorText: { color: Colors.red, fontFamily: FontFamily.medium, fontSize: 14, textAlign: "center" },
-  verifyLinkBox: { backgroundColor: "rgba(0, 230, 118, 0.1)", borderWidth: 1, borderColor: "rgba(0, 230, 118, 0.3)", borderRadius: 10, padding: 14, marginBottom: 14, alignItems: "center", justifyContent: "center" },
-  verifyLinkText: { color: Colors.green, fontFamily: FontFamily.bold, fontSize: 14, textAlign: "center" },
-  forgot: { color: Colors.green, fontFamily: FontFamily.medium, fontSize: 14, marginVertical: 12 },
+  inputFlex: {
+    flex: 1,
+    paddingVertical: 14,
+    color: "white",
+    fontFamily: FontFamily.regular,
+    fontSize: 14,
+  },
+  errorText: {
+    color: Colors.red,
+    fontSize: 12,
+    fontFamily: FontFamily.regular,
+    marginTop: 2,
+    marginBottom: 8,
+    textAlign: "left",
+  },
+  backendErrorBox: {
+    backgroundColor: "rgba(255, 51, 51, 0.15)",
+    borderColor: Colors.red,
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    marginTop: -16,
+  },
+  backendErrorText: {
+    color: Colors.red,
+    fontFamily: FontFamily.medium,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  verifyLinkBox: {
+    backgroundColor: "rgba(0, 230, 118, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(0, 230, 118, 0.3)",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  verifyLinkText: {
+    color: Colors.green,
+    fontFamily: FontFamily.bold,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  forgot: {
+    color: Colors.green,
+    fontFamily: FontFamily.medium,
+    fontSize: 14,
+    marginVertical: 12,
+  },
   btnWrapper: { marginTop: 16 },
-  loaderContainer: { height: 54, justifyContent: "center", alignItems: "center" },
+  loaderContainer: {
+    height: 54,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

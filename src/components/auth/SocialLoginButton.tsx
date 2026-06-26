@@ -32,7 +32,7 @@ export default function SocialLoginButton() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    gap: 16,
+    gap: 15,
     marginTop: 24,
     alignItems: "center",
     justifyContent: "center",

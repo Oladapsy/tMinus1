@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     backgroundColor: "white",
-    borderRadius: 16,
+    borderRadius: 20,
     height: 54,
     width: 173,
     alignItems: "center",
