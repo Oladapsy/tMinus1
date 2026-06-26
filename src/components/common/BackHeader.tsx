@@ -8,11 +8,12 @@ interface BackHeaderProps {
   title: string;
   paragraph?: string; 
   onBack?: () => void; // 🌟 Made optional so we can hide it on success screens
+  staright?: boolean;
 }
 
-export default function BackHeader({ title, paragraph, onBack }: BackHeaderProps) {
+export default function BackHeader({ title, paragraph, onBack, staright }: BackHeaderProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, staright && {flexDirection: "row", gap: 10, }]}>
       {/* 🌟 Only render the navigation row if an onBack function is provided */}
       {onBack && (
         <View style={styles.navigationRow}>

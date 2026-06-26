@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@/src/store/store";
-import { setSessionExpired, updateTokens } from "@/src/store/authSlice"; // 🌟 Imported actions
+import { setSessionExpired, updateTokens } from "@/src/store/authSlice"; // Imported actions
 import {
   BackendResponse,
   ValidateSignupRequest,

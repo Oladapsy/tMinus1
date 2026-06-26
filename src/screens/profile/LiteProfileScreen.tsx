@@ -7,21 +7,69 @@ import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 // 🌟 TEST IMPORTS ADDED
 import { useDispatch } from "react-redux";
 import { setSessionExpired } from "@/src/store/authSlice";
+import BackHeader from "@/src/components/common/BackHeader";
+import { useGetProfileQuery } from "@/src/services/profileApi";
 
 export default function LiteProfileScreen() {
   const router = useRouter();
   const dispatch = useDispatch(); // 🌟 Access the Redux action pipeline
-  const kycStatus = "APPROVED"; 
+
+  const { data: profileResponse, isLoading, error } = useGetProfileQuery();
+
+  if (isLoading) {
+    return (
+      <View
+        style={[styles.centerContainer, { backgroundColor: Colors.newBlack }]}
+      >
+        <ActivityIndicator size="large" color={Colors.green} />
+      </View>
+    );
+  }
+
+  if (error || !profileResponse) {
+    console.log("Profile Fetch Error Context:", error);
+    return (
+      <View
+        style={[
+          styles.centerContainer,
+          { backgroundColor: Colors.newBlack, padding: 24 },
+        ]}
+      >
+        <Text
+          style={{
+            color: Colors.red,
+            fontFamily: FontFamily.medium,
+            textAlign: "center",
+          }}
+        >
+          Failed to load profile details. Please pull down to retry or login
+          again.
+        </Text>
+      </View>
+    );
+  }
+
+  const profile = profileResponse.data;
+
+  // extract user initial badge
+  const avatarInitial = profile.fullName
+    ? profile.fullName.charAt(0).toUpperCase()
+    : "U";
+
+  // const isVerified = profile.kycStatus.toLowerCase() === "approved";
+  const isVerified = false;
+  const isUnVerified = true;
 
   return (
     <ImageBackground
@@ -35,26 +83,32 @@ export default function LiteProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.pageTitle}>
-            <TitleAndParagraph title="Profile" />
+            <BackHeader title="Profile" onBack={router.back} staright />
           </View>
 
           {/* USER HEADER CARD */}
           <View style={styles.headerCard}>
             <View style={styles.avatarCircle}>
-              <Text style={styles.avatarLetter}>A</Text>
+              <Text style={styles.avatarLetter}>{avatarInitial}</Text>
             </View>
 
             <View style={styles.userInfo}>
               <TitleAndParagraph
-                title="Ada Student"
+                title={profile.fullName}
                 titleSize={20}
                 paragraphSize={12}
-                paragraph="student@cryptoclass.test"
+                paragraph={profile.email}
               />
 
-              {kycStatus === "APPROVED" && (
+              {isVerified && (
                 <View style={styles.verifiedPill}>
                   <Text style={styles.verifiedText}>Verified</Text>
+                </View>
+              )}
+
+              {isUnVerified && (
+                <View style={styles.notVerifiedPill}>
+                  <Text style={styles.notVerifiedText}>Not Verified</Text>
                 </View>
               )}
             </View>
@@ -94,10 +148,7 @@ export default function LiteProfileScreen() {
               badgeText={2}
               onPress={() => router.push("/profile/notifications")}
             />
-            <ProfileOptionRow
-              title="Watchlist"
-              subtitle="BTC, ETH, SOL"
-            />
+            <ProfileOptionRow title="Watchlist" subtitle="BTC, ETH, SOL" />
           </View>
 
           {/* FOOTER DISMISS BUTTON */}
@@ -135,7 +186,7 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     marginTop: 14,
-    marginBottom: 20,
+    marginBottom: -20,
   },
   headerCard: {
     flexDirection: "row",
@@ -144,8 +195,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   avatarCircle: {
-    width: 74,
-    height: 74,
+    width: 60,
+    height: 60,
     borderRadius: 37,
     backgroundColor: Colors.green,
     justifyContent: "center",
@@ -172,13 +223,30 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: FontFamily.bold,
   },
+  notVerifiedPill: {
+    backgroundColor: "rgba(244, 41, 0, 0.12)",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 8,
+    marginTop: 9,
+  },
+  notVerifiedText: {
+    color: Colors.red,
+    fontSize: 10,
+    fontFamily: FontFamily.bold,
+  },
   menuSection: {
     width: "100%",
-    marginTop: 40,
+    marginTop: 20,
     gap: 12,
   },
   footerSection: {
     width: "100%",
     marginTop: 50,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
