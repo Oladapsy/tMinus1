@@ -45,4 +45,8 @@ export const profileApi = createApi({
   }),
 });
 
-export const { useGetProfileQuery, useUpdateProfileMutation } = profileApi;
+export const {
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+  useUpdatePinMutation,
+} = profileApi;
