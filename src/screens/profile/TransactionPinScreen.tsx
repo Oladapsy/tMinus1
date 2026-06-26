@@ -1,29 +1,81 @@
 import BackHeader from "@/src/components/common/BackHeader";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
-import PinInputField from "@/src/components/common/PinInputField"; // Import your new functional field!
+import PinInputField from "@/src/components/common/PinInputField";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { router } from "expo-router";
+import { useRouter } from "expo-router"; // 🌟 Use useRouter instance from route context hook
 import React, { useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, View } from "react-native";
+import {
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+} from "react-native";
+// 🌟 Hook up imports to bind data interactions to the network
+import { useUpdatePinMutation } from "@/src/services/profileApi";
+import { useToast } from "@/src/context/ToastContext";
 
 export default function TransactionPinScreen() {
+  const router = useRouter();
+  const { showToast } = useToast();
+
   // Local state tracking parameters
   const [currentPin, setCurrentPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
 
-  const handleUpdatePin = () => {
-    console.log("Submitting secure values:", {
-      currentPin,
-      newPin,
-      confirmPin,
-    });
-    // validation check logics or submit handling functions here!
+  // 🌟 Initialize our updatePin mutation hook tracking states
+  const [updatePin, { isLoading: isUpdating }] = useUpdatePinMutation();
+
+  const handleUpdatePin = async () => {
+    // 1. Basic length requirement guard validation checks
+    if (
+      currentPin.length !== 4 ||
+      newPin.length !== 4 ||
+      confirmPin.length !== 4
+    ) {
+      showToast?.("All PIN fields must be exactly 4 digits long.", "error");
+      return;
+    }
+
+    // 2. Matching confirmation validation constraint
+    if (newPin !== confirmPin) {
+      showToast?.("Your new PIN and confirmation PIN do not match.", "error");
+      return;
+    }
+
+    // 3. Prevent trivial identical sequential assignments check
+    if (currentPin === newPin) {
+      showToast?.(
+        "Your new PIN must be different from your current PIN.",
+        "error",
+      );
+      return;
+    }
+
+    try {
+      // 🚀 Fire network mutation tracking responses cleanly
+      await updatePin({
+        currentPin,
+        newPin,
+      }).unwrap();
+
+      showToast?.("Transaction PIN successfully updated!", "success");
+      router.back();
+    } catch (err: any) {
+      const errMsg =
+        err?.data?.message || "Failed to alter transaction security settings.";
+      showToast?.(errMsg, "error");
+    }
   };
+
+  // Dynamically control disabled button layout state context when input forms are incomplete
+  const isFormIncomplete =
+    currentPin.length < 4 || newPin.length < 4 || confirmPin.length < 4;
 
   return (
     <ImageBackground
@@ -35,13 +87,14 @@ export default function TransactionPinScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {/* 1. TOP SECTION: Header Info */}
           <View style={styles.pageTitle}>
             <BackHeader
               title="Transaction PIN"
               paragraph="Update the PIN used for trade and withdrawal confirmations."
-              onBack={()=>{router.back()}}
+              onBack={() => router.back()}
             />
           </View>
 
@@ -56,7 +109,7 @@ export default function TransactionPinScreen() {
               label="New PIN"
               value={newPin}
               onChangeText={setNewPin}
-              placeholder="Enter 4 digits" // Optional
+              placeholder="Enter 4 digits"
             />
             <PinInputField
               label="Confirm PIN"
@@ -86,14 +139,23 @@ export default function TransactionPinScreen() {
 
           {/* 4. FOOTER SECTION: Action Trigger Button */}
           <View style={styles.footerSection}>
-            <PrimaryButton
-              text="Update PIN"
-              Bgcolor={Colors.green}
-              textColor={Colors.newBlack}
-              fontSize={13}
-              style={{ fontFamily: FontFamily.bold }}
-              onPress={handleUpdatePin}
-            />
+            {isUpdating ? (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator size="small" color={Colors.green} />
+              </View>
+            ) : (
+              <PrimaryButton
+                text="Update PIN"
+                Bgcolor={isFormIncomplete ? Colors.newDark : Colors.green}
+                textColor={
+                  isFormIncomplete ? Colors.secondary : Colors.newBlack
+                }
+                fontSize={13}
+                style={{ fontFamily: FontFamily.bold }}
+                onPress={handleUpdatePin}
+                disabled={isFormIncomplete}
+              />
+            )}
           </View>
         </ScrollView>
       </MySafeAreaView>
@@ -136,6 +198,11 @@ const styles = StyleSheet.create({
   },
   footerSection: {
     width: "100%",
-    marginTop: 150,
+    marginTop: 100,
+  },
+  loaderContainer: {
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
