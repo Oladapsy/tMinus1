@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@/src/store/store";
-import { ProfileResponse, UpdateProfileRequest } from "../types/profile";
+import {
+  ProfileResponse,
+  UpdatePinRequest,
+  UpdatePinResponse,
+  UpdateProfileRequest,
+} from "../types/profile";
 
 export const profileApi = createApi({
   reducerPath: "profileApi",
@@ -26,6 +31,15 @@ export const profileApi = createApi({
         method: "PATCH",
         body,
       }),
+      invalidatesTags: ["UserProfile"],
+    }),
+    updatePin: builder.mutation<UpdatePinResponse, UpdatePinRequest>({
+      query: (body) => ({
+        url: "/me/pin",
+        method: "PATCH",
+        body, // Pass { currentPin, newPin }
+      }),
+      // This automatically asks useGetProfileQuery to update if needed 🔄
       invalidatesTags: ["UserProfile"],
     }),
   }),

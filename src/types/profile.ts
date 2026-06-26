@@ -49,3 +49,14 @@ export interface UpdateProfileRequest {
   phone?: string;
   avatarUrl?: string;
 }
+
+export interface UpdatePinRequest {
+  currentPin: string;
+  newPin: string;
+}
+
+export interface UpdatePinResponse {
+  data: {
+    updated: boolean;
+  };
+}

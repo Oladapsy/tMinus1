@@ -7,10 +7,36 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ImageBackground, ScrollView, StyleSheet, View } from "react-native";
+import {
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+} from "react-native";
+// 🌟 Import your active query cache hook
+import { useGetProfileQuery } from "@/src/services/profileApi";
 
 export default function SecurityScreen() {
   const router = useRouter();
+
+  // 🌟 Read current profile data (instant from RTK Query cache)
+  const { data: profileResponse, isLoading } = useGetProfileQuery();
+  const profile = profileResponse?.data;
+
+  if (isLoading) {
+    return (
+      <View
+        style={[styles.centerContainer, { backgroundColor: Colors.newBlack }]}
+      >
+        <ActivityIndicator size="large" color={Colors.green} />
+      </View>
+    );
+  }
+
+  // 🌟 Parse true system configurations from the server
+  const is2FaEnabled = profile?.twoFactorEnabled ?? false;
+  const isBiometricEnabled = profile?.settings?.biometricEnabled ?? false;
 
   return (
     <ImageBackground
@@ -28,9 +54,7 @@ export default function SecurityScreen() {
             <BackHeader
               title="Security"
               paragraph="Protect account access and sensitive actions."
-              onBack={() => {
-                router.back();
-              }}
+              onBack={() => router.back()}
             />
           </View>
 
@@ -39,21 +63,29 @@ export default function SecurityScreen() {
             <ProfileOptionRow
               title="Transaction PIN"
               subtitle="Required for trades and withdrawals"
-              badgeText="Set"
+              badgeText="Set" // Hardcoded for now until PIN endpoint is created
               onPress={() => router.push("/profile/security/pin")}
             />
+
             <ProfileOptionRow
               title="Authenticator app"
-              subtitle="Enabled for login protection"
-              badgeText="On"
+              // 🌟 Dynamic subtitle based on live backend state
+              subtitle={
+                is2FaEnabled
+                  ? "Enabled for login protection"
+                  : "Disabled · Tap to set up"
+              }
+              badgeText={is2FaEnabled ? "On" : "Off"}
               onPress={() => router.push("/profile/security/two-factor")}
             />
+
             <ProfileOptionRow
               title="Recovery codes"
               subtitle="8 backup codes remaining"
               badgeText="View"
               onPress={() => router.push("/profile/security/recovery-codes")}
             />
+
             <ProfileOptionRow
               title="Registered devices"
               subtitle="iPhone 15 Pro · push enabled"
@@ -62,11 +94,18 @@ export default function SecurityScreen() {
                 router.push("/profile/security/registered-devices")
               }
             />
+
             <ProfileOptionRow
               title="Biometric login"
-              subtitle="Face ID enabled on this device"
-              badgeText="On"
-              onPress={() => console.log("Toggle Biometrics")}
+              subtitle={
+                isBiometricEnabled
+                  ? "Face ID enabled on this device"
+                  : "Tap to enable biometrics"
+              }
+              badgeText={isBiometricEnabled ? "On" : "Off"}
+              onPress={() =>
+                console.log("Toggle Biometrics via client hardware hooks")
+              }
             />
           </View>
 
@@ -125,5 +164,10 @@ const styles = StyleSheet.create({
   warningDescMargin: {
     width: "100%",
     marginTop: 6,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
