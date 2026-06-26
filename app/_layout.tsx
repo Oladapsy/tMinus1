@@ -31,6 +31,7 @@ function RootNavigationContent({ isAppReady }: { isAppReady: boolean }) {
     const inTabsGroup = segments[0] === "(tabs)";
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
+    const inProfileGroup = segments[0] === "profile"; // 🌟 1. Detect if user is in profile section
 
     AsyncStorage.getItem("HAS_LAUNCHED_BEFORE").then((value) => {
       if (value === null) {
@@ -45,7 +46,7 @@ function RootNavigationContent({ isAppReady }: { isAppReady: boolean }) {
         }
       } else {
         // 🔓 ACCOUNT VERIFIED: Send user straight to their personalized dashboard tab grids
-        if (!inTabsGroup) {
+        if (!inTabsGroup && !inProfileGroup) {
           router.replace("/(tabs)/home");
         }
       }
