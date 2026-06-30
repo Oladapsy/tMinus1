@@ -15,14 +15,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 // 🌟 Import your active query cache hook
-import { useGetProfileQuery } from "@/src/services/profileApi";
+import { useGet2FaStatusQuery } from "@/src/services/authApi";
 
 export default function SecurityScreen() {
   const router = useRouter();
 
   // 🌟 Read current profile data (instant from RTK Query cache)
-  const { data: profileResponse, isLoading } = useGetProfileQuery();
-  const profile = profileResponse?.data;
+  const { data: securityData, isLoading } = useGet2FaStatusQuery();
 
   if (isLoading) {
     return (
@@ -35,8 +34,8 @@ export default function SecurityScreen() {
   }
 
   // 🌟 Parse true system configurations from the server
-  const is2FaEnabled = profile?.twoFactorEnabled ?? false;
-  const isBiometricEnabled = profile?.settings?.biometricEnabled ?? false;
+  const is2FaEnabled = securityData?.data?.twoFactorEnabled ?? false;
+  const isBiometricEnabled = false;
 
   return (
     <ImageBackground

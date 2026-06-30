@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "@/src/store/store";
-import { setSessionExpired, updateTokens } from "@/src/store/authSlice"; // Imported actions
+import { setSessionExpired, updateTokens } from "@/src/store/authSlice";
 import {
   BackendResponse,
   ValidateSignupRequest,
@@ -17,7 +17,6 @@ import {
   DisableTwoFaRequest,
 } from "@/src/types/auth";
 
-// 1. Moved original base configuration to a standalone variable
 const baseQuery = fetchBaseQuery({
   baseUrl: "https://crypto-api-guwm.onrender.com/auth/",
   prepareHeaders: (headers, { getState }) => {
@@ -29,26 +28,21 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// 2. Created the protective wrapper that manages token rotations
 const baseQueryWithReauth: typeof baseQuery = async (
   args,
   api,
   extraOptions,
 ) => {
-  // Fire off the regular request first
   let result = await baseQuery(args, api, extraOptions);
 
-  // If the server blocks it with a 401 Unauthorized status code
   if (result.error && result.error.status === 401) {
     const state = api.getState() as RootState;
     const currentRefreshToken = state.auth.refreshToken;
     const isAuthenticated = state.auth.isAuthenticated;
 
-    // Only try to fix it if the user is actively logged into the app
     if (isAuthenticated && currentRefreshToken) {
       console.log("Access token expired. Trying silent token refresh...");
 
-      // Hit the POST /auth/refresh endpoint secretly behind the scenes
       const refreshResult = await baseQuery(
         {
           url: "refresh",
@@ -59,7 +53,6 @@ const baseQueryWithReauth: typeof baseQuery = async (
         extraOptions,
       );
 
-      // If the backend hands us brand new tokens successfully!
       if (refreshResult.data) {
         const payload = (
           refreshResult.data as BackendResponse<LoginAndSessionResponse>
@@ -67,7 +60,6 @@ const baseQueryWithReauth: typeof baseQuery = async (
 
         console.log("Token refresh successful! Updating Redux store.");
 
-        // Save the shiny new tokens in memory
         api.dispatch(
           updateTokens({
             accessToken: payload.accessToken,
@@ -75,10 +67,8 @@ const baseQueryWithReauth: typeof baseQuery = async (
           }),
         );
 
-        // Retry the exact user request that failed a second ago, now with the new token
         result = await baseQuery(args, api, extraOptions);
       } else {
-        // If the refresh token is also dead, they must re-authenticate
         console.log("Refresh token invalid. Triggering lockscreen overlay.");
         api.dispatch(setSessionExpired(true));
       }
@@ -88,10 +78,11 @@ const baseQueryWithReauth: typeof baseQuery = async (
   return result;
 };
 
-// 3. Created main api wrapper utilizing the protective check
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: baseQueryWithReauth, // 🌟 Swapped for our new protective logic wrapper
+  baseQuery: baseQueryWithReauth,
+  // 🌟 Added tag type here so caching invalidates automatically when toggling states
+  tagTypes: ["UserSecurityStatus"],
   endpoints: (build) => ({
     validateSignup: build.mutation<
       BackendResponse<ValidateSignupResponse>,
@@ -115,19 +106,11 @@ export const authApi = createApi({
     }),
 
     requestEmailOtp: build.mutation<any, { email: string }>({
-      query: (body) => ({
-        url: "otp/request",
-        method: "POST",
-        body,
-      }),
+      query: (body) => ({ url: "otp/request", method: "POST", body }),
     }),
 
     verifyEmailOtp: build.mutation<any, { email: string; code: string }>({
-      query: (body) => ({
-        url: "otp/verify",
-        method: "POST",
-        body,
-      }),
+      query: (body) => ({ url: "otp/verify", method: "POST", body }),
     }),
 
     checkSession: build.query<BackendResponse<LoginAndSessionResponse>, void>({
@@ -142,15 +125,61 @@ export const authApi = createApi({
       BackendResponse<LoginAndSessionResponse>,
       { refreshToken: string }
     >({
+      query: (body) => ({ url: "refresh", method: "POST", body }),
+    }),
+
+    // 🌟 INJECTED 2FA ENDPOINTS DIRECTLY HERE 🌟
+    // Note: Since baseUrl already includes "/auth/", we remove "/auth" from the endpoint urls!
+    get2FaStatus: build.query<TwoFaStatusResponse, void>({
+      query: () => "2fa/status",
+      providesTags: ["UserSecurityStatus"],
+    }),
+
+    setup2Fa: build.mutation<TwoFaSetupResponse, void>({
+      query: () => ({
+        url: "2fa/setup",
+        method: "POST",
+      }),
+    }),
+
+    enable2Fa: build.mutation<EnableTwoFaResponse, EnableTwoFaRequest>({
       query: (body) => ({
-        url: "refresh",
+        url: "2fa/enable",
         method: "POST",
         body,
       }),
+      invalidatesTags: ["UserSecurityStatus"],
+    }),
+
+    disable2Fa: build.mutation<
+      { data: { enabled: boolean } },
+      DisableTwoFaRequest
+    >({
+      query: (body) => ({
+        url: "2fa/disable",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["UserSecurityStatus"],
+    }),
+    
+
+    regenerate2FaCodes: build.mutation<
+      { data: { recoveryCodes: string[]; recoveryCodeCount: number } },
+      { password?: string; code?: string }
+    >({
+      query: (body) => ({
+        url: "2fa/recovery-codes/regenerate",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["UserSecurityStatus"],
     }),
   }),
+  
 });
 
+// Export hooks safely out of our unified authApi module
 export const {
   useValidateSignupMutation,
   useRegisterCustomerMutation,
@@ -160,4 +189,11 @@ export const {
   useCheckSessionQuery,
   useLogoutCustomerMutation,
   useRefreshTokensMutation,
+
+  // 🌟 Exporting your new 2FA Hooks!
+  useGet2FaStatusQuery,
+  useSetup2FaMutation,
+  useEnable2FaMutation,
+  useDisable2FaMutation,
+  useRegenerate2FaCodesMutation,
 } = authApi;
