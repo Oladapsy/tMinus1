@@ -99,6 +99,9 @@ export interface LoginAndSessionResponse {
   expiresAt: string;
   expiresInSeconds: number;
   refreshTokenExpiresAt: string;
+// added this for auth 2fa
+  twoFactorRequired?: boolean;
+  challengeId?: string;
 }
 
 export interface LogoutResponse {

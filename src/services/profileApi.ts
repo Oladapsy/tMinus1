@@ -7,6 +7,24 @@ import {
   UpdateProfileRequest,
 } from "../types/profile";
 
+// 🌟 Import structural device schema definitions inline or via types folder
+export interface DeviceItem {
+  id: string;
+  userId: string;
+  expoPushToken: string;
+  platform: "ios" | "android" | "web" | string;
+  createdAt: string;
+  lastSeenAt: string;
+}
+
+export interface DevicesResponse {
+  data: DeviceItem[];
+  meta: {
+    count: number;
+    pushNotificationsEnabled: boolean;
+  };
+}
+
 export const profileApi = createApi({
   reducerPath: "profileApi",
   baseQuery: fetchBaseQuery({
@@ -19,7 +37,8 @@ export const profileApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["UserProfile"],
+  // 🌟 Added "UserDevices" to monitor local state mutations dynamically
+  tagTypes: ["UserProfile", "UserDevices"],
   endpoints: (builder) => ({
     getProfile: builder.query<ProfileResponse, void>({
       query: () => "/me",
@@ -37,10 +56,27 @@ export const profileApi = createApi({
       query: (body) => ({
         url: "/me/pin",
         method: "PATCH",
-        body, // Pass { currentPin, newPin }
+        body,
       }),
-      // This automatically asks useGetProfileQuery to update if needed 🔄
       invalidatesTags: ["UserProfile"],
+    }),
+
+    // 🔑 NEW: Read active device array list
+    getRegisteredDevices: builder.query<DevicesResponse, void>({
+      query: () => "/me/devices",
+      providesTags: ["UserDevices"],
+    }),
+
+    // 🔑 NEW: Delete structural session device item
+    removeDevice: builder.mutation<
+      { data: { deleted: boolean; deviceId: string } },
+      string
+    >({
+      query: (deviceId) => ({
+        url: `/me/devices/${deviceId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["UserDevices"],
     }),
   }),
 });
@@ -49,4 +85,7 @@ export const {
   useGetProfileQuery,
   useUpdateProfileMutation,
   useUpdatePinMutation,
+  // 🌟 Export the freshly minted live session hooks
+  useGetRegisteredDevicesQuery,
+  useRemoveDeviceMutation,
 } = profileApi;

@@ -14,28 +14,40 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-// 🌟 Import your active query cache hook
 import { useGet2FaStatusQuery } from "@/src/services/authApi";
+// 🌟 1. IMPORT YOUR NEW DEVICES HOOK
+import { useGetRegisteredDevicesQuery } from "@/src/services/profileApi";
 
 export default function SecurityScreen() {
   const router = useRouter();
 
-  // 🌟 Read current profile data (instant from RTK Query cache)
-  const { data: securityData, isLoading } = useGet2FaStatusQuery();
+  // Read current profile data (instant from RTK Query cache)
+  const { data: response, isLoading: isLoading2Fa } = useGet2FaStatusQuery();
+  
+  // 🌟 2. FETCH LIVE DEVICE STATUS FROM CACHE
+  const { data: devicesResponse, isLoading: isLoadingDevices } = useGetRegisteredDevicesQuery();
 
-  if (isLoading) {
+  if (isLoading2Fa || isLoadingDevices) {
     return (
       <View
-        style={[styles.centerContainer, { backgroundColor: Colors.newBlack }]}
+        style={[
+          styles.centerContainer,
+          { backgroundColor: Colors.newBlack || "#000" },
+        ]}
       >
         <ActivityIndicator size="large" color={Colors.green} />
       </View>
     );
   }
 
-  // 🌟 Parse true system configurations from the server
-  const is2FaEnabled = securityData?.data?.twoFactorEnabled ?? false;
+  // Parse true system configurations from the server
+  const statusData = (response?.data || response) as any;
+  const is2FaEnabled = statusData?.twoFactorEnabled ?? false;
+  const remainingCodes = statusData?.recoveryCodesRemaining ?? 0;
   const isBiometricEnabled = false;
+
+  // 🌟 3. PARSE DYNAMIC DEVICE METRICS
+  const registeredDevicesCount = devicesResponse?.data?.length || 1;
 
   return (
     <ImageBackground
@@ -62,33 +74,50 @@ export default function SecurityScreen() {
             <ProfileOptionRow
               title="Transaction PIN"
               subtitle="Required for trades and withdrawals"
-              badgeText="Set" // Hardcoded for now until PIN endpoint is created
+              badgeText="Set" 
               onPress={() => router.push("/profile/security/pin")}
             />
 
             <ProfileOptionRow
               title="Authenticator app"
-              // 🌟 Dynamic subtitle based on live backend state
               subtitle={
                 is2FaEnabled
                   ? "Enabled for login protection"
                   : "Disabled · Tap to set up"
               }
               badgeText={is2FaEnabled ? "On" : "Off"}
-              onPress={() => router.push("/profile/security/two-factor")}
+              onPress={() => {
+                if (!is2FaEnabled) {
+                  router.push("/profile/security/two-factor");
+                }
+              }}
             />
 
-            <ProfileOptionRow
-              title="Recovery codes"
-              subtitle="8 backup codes remaining"
-              badgeText="View"
-              onPress={() => router.push("/profile/security/recovery-codes")}
-            />
+            {is2FaEnabled && (
+              <ProfileOptionRow
+                title="Recovery codes vault"
+                subtitle={`${remainingCodes} active backups remaining`}
+                badgeText="View Status"
+                onPress={() =>
+                  router.push("/profile/security/recovery-codes-vault")
+                }
+              />
+            )}
 
+            {is2FaEnabled && (
+              <ProfileOptionRow
+                title="Disable Authenticator (2FA)"
+                subtitle="Remove multi-factor layout verification"
+                badgeText="Turn Off"
+                onPress={() => router.push("/profile/security/disable-2fa")}
+              />
+            )}
+
+            {/* 🌟 4. DYNAMIC LIVE REGISTERED DEVICES ROW */}
             <ProfileOptionRow
               title="Registered devices"
-              subtitle="iPhone 15 Pro · push enabled"
-              badgeText="2"
+              subtitle={`Authorized session platforms active`}
+              badgeText={String(registeredDevicesCount)} // Displays exact count from server!
               onPress={() =>
                 router.push("/profile/security/registered-devices")
               }
@@ -132,41 +161,12 @@ export default function SecurityScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  safeContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
-  },
-  scrollContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
-  },
-  pageTitle: {
-    marginTop: 14,
-    marginBottom: 28,
-  },
-  menuSection: {
-    width: "100%",
-    gap: 12,
-  },
-  warningBox: {
-    backgroundColor: Colors.newYellowSlim,
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 42,
-    width: "100%",
-  },
-  warningDescMargin: {
-    width: "100%",
-    marginTop: 6,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  backgroundImage: { flex: 1, width: "100%", height: "100%" },
+  safeContainer: { flex: 1, backgroundColor: "transparent" },
+  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
+  pageTitle: { marginTop: 14, marginBottom: 28 },
+  menuSection: { width: "100%", gap: 12 },
+  warningBox: { backgroundColor: Colors.newYellowSlim, borderRadius: 16, padding: 20, marginTop: 42, width: "100%" },
+  warningDescMargin: { width: "100%", marginTop: 6 },
+  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

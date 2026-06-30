@@ -120,9 +120,23 @@ export default function AuthForm({
 
       const response = await loginCustomer(payload).unwrap();
 
-      // 🌟 Commit response structure directly into state filing cabinet before shifting screens
+      // 💡 THE BRIDGE: Check if the user has 2FA enabled on their account
+      if (response?.data?.twoFactorRequired || response?.data?.challengeId) {
+        // Clear out the password field cleanly for security
+        setValue("password", "");
+
+        // Push straight to your folder-based verification view path and pass down the specific token id
+        router.push({
+          pathname: "/(auth)/two-factor-verify",
+          params: { challengeId: response.data.challengeId },
+        });
+        return; // 🛑 STOP execution here so they don't enter the main app tabs prematurely!
+      }
+
+      // 🔓 STANDARD FLOW: No 2FA active. Commit response structure directly into state filing cabinet before shifting screens
       if (response && response.data) {
         dispatch(setCredentials(response.data));
+        // Note: Make sure your setCredentials listener handles the home redirection or append router.replace("/(tabs)/home") if needed.
       }
     } catch (err: any) {
       const serverMessage =
@@ -163,6 +177,7 @@ export default function AuthForm({
         },
       });
     } catch (err: any) {
+      console.log(err);
       const emailToVerify =
         fieldLabel === "Email"
           ? currentIdentifier.toLowerCase()

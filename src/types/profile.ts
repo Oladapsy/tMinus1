@@ -60,3 +60,26 @@ export interface UpdatePinResponse {
     updated: boolean;
   };
 }
+
+// registered devices
+export interface DeviceItem {
+  id: string;
+  userId: string;
+  expoPushToken: string;
+  platform: "ios" | "android" | "web" | string;
+  createdAt: string;
+  lastSeenAt: string;
+}
+
+export interface DevicesResponse {
+  data: DeviceItem[];
+  meta: {
+    count: number;
+    pushNotificationsEnabled: boolean;
+  };
+}
+
+export interface RegisterDeviceRequest {
+  expoPushToken: string;
+  platform: "ios" | "android" | "web" | string;
+}
