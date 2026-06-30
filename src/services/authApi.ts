@@ -10,6 +10,11 @@ import {
   LoginRequest,
   LoginAndSessionResponse,
   LogoutResponse,
+  TwoFaStatusResponse,
+  TwoFaSetupResponse,
+  EnableTwoFaRequest,
+  EnableTwoFaResponse,
+  DisableTwoFaRequest,
 } from "@/src/types/auth";
 
 // 1. Moved original base configuration to a standalone variable
@@ -25,7 +30,11 @@ const baseQuery = fetchBaseQuery({
 });
 
 // 2. Created the protective wrapper that manages token rotations
-const baseQueryWithReauth: typeof baseQuery = async (args, api, extraOptions) => {
+const baseQueryWithReauth: typeof baseQuery = async (
+  args,
+  api,
+  extraOptions,
+) => {
   // Fire off the regular request first
   let result = await baseQuery(args, api, extraOptions);
 
@@ -47,20 +56,24 @@ const baseQueryWithReauth: typeof baseQuery = async (args, api, extraOptions) =>
           body: { refreshToken: currentRefreshToken },
         },
         api,
-        extraOptions
+        extraOptions,
       );
 
       // If the backend hands us brand new tokens successfully!
       if (refreshResult.data) {
-        const payload = (refreshResult.data as BackendResponse<LoginAndSessionResponse>).data;
-        
+        const payload = (
+          refreshResult.data as BackendResponse<LoginAndSessionResponse>
+        ).data;
+
         console.log("Token refresh successful! Updating Redux store.");
-        
+
         // Save the shiny new tokens in memory
-        api.dispatch(updateTokens({ 
-          accessToken: payload.accessToken, 
-          refreshToken: payload.refreshToken 
-        }));
+        api.dispatch(
+          updateTokens({
+            accessToken: payload.accessToken,
+            refreshToken: payload.refreshToken,
+          }),
+        );
 
         // Retry the exact user request that failed a second ago, now with the new token
         result = await baseQuery(args, api, extraOptions);
@@ -71,7 +84,7 @@ const baseQueryWithReauth: typeof baseQuery = async (args, api, extraOptions) =>
       }
     }
   }
-  
+
   return result;
 };
 
