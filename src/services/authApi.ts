@@ -81,7 +81,6 @@ const baseQueryWithReauth: typeof baseQuery = async (
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: baseQueryWithReauth,
-  // 🌟 Added tag type here so caching invalidates automatically when toggling states
   tagTypes: ["UserSecurityStatus"],
   endpoints: (build) => ({
     validateSignup: build.mutation<
@@ -128,8 +127,6 @@ export const authApi = createApi({
       query: (body) => ({ url: "refresh", method: "POST", body }),
     }),
 
-    // 🌟 INJECTED 2FA ENDPOINTS DIRECTLY HERE 🌟
-    // Note: Since baseUrl already includes "/auth/", we remove "/auth" from the endpoint urls!
     get2FaStatus: build.query<TwoFaStatusResponse, void>({
       query: () => "2fa/status",
       providesTags: ["UserSecurityStatus"],
@@ -151,6 +148,18 @@ export const authApi = createApi({
       invalidatesTags: ["UserSecurityStatus"],
     }),
 
+    // 🌟 INJECTED: Verify 2FA Login Challenge Matcher
+    verify2Fa: build.mutation<
+      BackendResponse<LoginAndSessionResponse>,
+      { challengeId: string; code?: string; recoveryCode?: string }
+    >({
+      query: (body) => ({
+        url: "2fa/verify",
+        method: "POST",
+        body,
+      }),
+    }),
+
     disable2Fa: build.mutation<
       { data: { enabled: boolean } },
       DisableTwoFaRequest
@@ -162,7 +171,6 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["UserSecurityStatus"],
     }),
-    
 
     regenerate2FaCodes: build.mutation<
       { data: { recoveryCodes: string[]; recoveryCodeCount: number } },
@@ -176,10 +184,8 @@ export const authApi = createApi({
       invalidatesTags: ["UserSecurityStatus"],
     }),
   }),
-  
 });
 
-// Export hooks safely out of our unified authApi module
 export const {
   useValidateSignupMutation,
   useRegisterCustomerMutation,
@@ -190,10 +196,11 @@ export const {
   useLogoutCustomerMutation,
   useRefreshTokensMutation,
 
-  // 🌟 Exporting your new 2FA Hooks!
   useGet2FaStatusQuery,
   useSetup2FaMutation,
   useEnable2FaMutation,
+  // 🌟 Cleanly exported hook ready for your Gatekeeper flow!
+  useVerify2FaMutation,
   useDisable2FaMutation,
   useRegenerate2FaCodesMutation,
 } = authApi;
