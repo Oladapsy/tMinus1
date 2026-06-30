@@ -109,3 +109,41 @@ export interface LogoutResponse {
 export interface BackendResponse<T> {
   data: T;
 }
+
+
+// 2FA auth
+// --- TYPES ---
+export interface TwoFaStatusResponse {
+  data: {
+    twoFactorEnabled: boolean;
+    twoFactorSetupStarted: boolean;
+    recoveryCodesConfigured: boolean;
+    recoveryCodesRemaining: number;
+  };
+}
+
+export interface TwoFaSetupResponse {
+  data: {
+    secret: string;
+    otpauthUri: string;
+    enabled: boolean;
+  };
+}
+
+export interface EnableTwoFaRequest {
+  code: string;
+}
+
+export interface EnableTwoFaResponse {
+  data: {
+    enabled: boolean;
+    recoveryCodes: string[];
+    recoveryCodeCount: number;
+  };
+}
+
+export interface DisableTwoFaRequest {
+  password?: string;
+  code?: string;
+  recoveryCode?: string;
+}
