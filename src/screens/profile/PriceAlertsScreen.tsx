@@ -14,52 +14,40 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from "react-native";
 
-// 🌟 Import your high-fidelity Alert Components directly!
 import CreatePriceAlert from "@/src/components/market/component/CreatePriceAlert";
 import AlertSuccessView from "@/src/components/market/component/AlertSuccessView";
 import BackHeader from "@/src/components/common/BackHeader";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 
-interface PriceAlertItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  badgeText: "On" | "Off" | "Read";
-}
+// 📡 Real API Connections
+import {
+  useGetPriceAlertsQuery,
+  useCreatePriceAlertMutation,
+  useUpdatePriceAlertMutation,
+  useDeletePriceAlertMutation,
+} from "@/src/services/profileApi";
+import { PriceAlertItem } from "@/src/types/alert";
 
-// Internal navigation tracking view workflow states
 type LocalWorkflowState = "list" | "create" | "success";
 
 export default function PriceAlertsScreen() {
+  const router = useRouter();
   const { showToast } = useToast();
-
-  // Local state flow controller
   const [localStep, setLocalStep] = useState<LocalWorkflowState>("list");
 
-  const [alerts, setAlerts] = useState<PriceAlertItem[]>([
-    {
-      id: "1",
-      title: "BTC above $72,000",
-      subtitle: "Active · push notification on",
-      badgeText: "On",
-    },
-    {
-      id: "2",
-      title: "ETH below $2,900",
-      subtitle: "Paused",
-      badgeText: "Off",
-    },
-    {
-      id: "3",
-      title: "SOL above $170",
-      subtitle: "Triggered today",
-      badgeText: "Read",
-    },
-  ]);
+  // 1. Live RTK Query Data Streams
+  const { data: apiResponse, isLoading: isQueryLoading } =
+    useGetPriceAlertsQuery();
+  const [createPriceAlert] = useCreatePriceAlertMutation();
+  const [updatePriceAlert] = useUpdatePriceAlertMutation();
+  const [deletePriceAlert, { isLoading: isDeleting }] =
+    useDeletePriceAlertMutation();
 
-  // Alert temporary creation cache state variable
+  const alerts = apiResponse?.data || [];
+
   const [createdAlertInfo, setCreatedAlertInfo] = useState({
     symbol: "BTC",
     direction: "Above" as "Above" | "Below",
@@ -69,37 +57,71 @@ export default function PriceAlertsScreen() {
   const [activeDeleteTarget, setActiveDeleteTarget] =
     useState<PriceAlertItem | null>(null);
 
-  // 1. Tapping an item switches its active states or prompts modal deletion
-  const handleRowInteraction = (item: PriceAlertItem) => {
-    if (item.badgeText === "Read") {
-      setActiveDeleteTarget(item);
-    } else {
-      setAlerts((prev) =>
-        prev.map((alert) => {
-          if (alert.id === item.id) {
-            const nextState = alert.badgeText === "On" ? "Off" : "On";
-            showToast(
-              `Alert set to ${nextState === "On" ? "Active" : "Paused"}`,
-            );
-            return {
-              ...alert,
-              badgeText: nextState,
-              subtitle:
-                nextState === "On" ? "Active · push notification on" : "Paused",
-            };
-          }
-          return alert;
-        }),
+  // 2. Toggle Active Status Mutation Handler
+  const handleRowInteraction = async (item: PriceAlertItem) => {
+    try {
+      const nextIsActive = !item.isActive;
+
+      await updatePriceAlert({
+        alertId: item.id,
+        isActive: nextIsActive,
+      }).unwrap();
+
+      showToast(
+        `Alert set to ${nextIsActive ? "Active" : "Paused"}`,
+        "success",
       );
+    } catch (err) {
+      showToast("Failed to modify alert state.", "error");
     }
   };
 
-  const executeDeleteAction = () => {
+  // 3. Delete Target Alert Item Entry
+  const executeDeleteAction = async () => {
     if (!activeDeleteTarget) return;
-    setAlerts((prev) => prev.filter((a) => a.id !== activeDeleteTarget.id));
-    showToast(`Removed "${activeDeleteTarget.title}" alert.`);
-    setActiveDeleteTarget(null);
+    try {
+      await deletePriceAlert(activeDeleteTarget.id).unwrap();
+      showToast(`Removed alert successfully.`, "success");
+      setActiveDeleteTarget(null);
+    } catch (err) {
+      showToast("Failed to remove active target asset.", "error");
+    }
   };
+
+  // 4. Create Alert API Sync Pipeline integration
+  const handleAlertCreationSubmit = async (payload: {
+    symbol: string;
+    direction: "Above" | "Below";
+    targetPrice: string;
+  }) => {
+    try {
+      const parsedPrice = parseFloat(payload.targetPrice.replace(/,/g, ""));
+
+      await createPriceAlert({
+        assetSymbol: payload.symbol,
+        direction: payload.direction.toLowerCase() as "above" | "below",
+        targetPriceUsd: parsedPrice,
+      }).unwrap();
+
+      setCreatedAlertInfo({
+        symbol: payload.symbol,
+        direction: payload.direction,
+        targetPrice: payload.targetPrice,
+      });
+
+      setLocalStep("success");
+    } catch (err) {
+      showToast("Failed to generate price point marker.", "error");
+    }
+  };
+
+  if (isQueryLoading) {
+    return (
+      <View style={[styles.centerWrapper, { backgroundColor: Colors.primary }]}>
+        <ActivityIndicator size="large" color={Colors.green} />
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -108,7 +130,7 @@ export default function PriceAlertsScreen() {
       resizeMode="cover"
     >
       <MySafeAreaView style={styles.safeContainer}>
-        {/* 📋 STEP 1: RENDER THE STANDARD INTERACTIVE ALERTS LIST VIEW */}
+        {/* 📋 STEP 1: RENDER THE LIVE INTERACTIVE ALERTS LIST VIEW */}
         {localStep === "list" && (
           <ScrollView
             contentContainerStyle={styles.scrollContainer}
@@ -118,7 +140,7 @@ export default function PriceAlertsScreen() {
               <BackHeader
                 title="Price alerts"
                 paragraph="Create, edit, pause, or delete market alerts."
-                onBack={() => {router.back()}}
+                onBack={() => router.back()}
               />
             </View>
 
@@ -127,21 +149,35 @@ export default function PriceAlertsScreen() {
                 text="Create alert"
                 Bgcolor={Colors.green}
                 textColor={Colors.newDark}
-                onPress={() => setLocalStep("create")} // 🌟 Step right into the creation engine!
+                onPress={() => setLocalStep("create")}
                 fontSize={15}
                 style={{ fontFamily: FontFamily.bold }}
               />
             </View>
 
             <View style={styles.listWrapper}>
-              {alerts.map((alert) => (
-                <PriceAlertRow
-                  key={alert.id}
-                  item={alert}
-                  onPress={() => handleRowInteraction(alert)}
-                  onDeleteTrigger={() => setActiveDeleteTarget(alert)}
-                />
-              ))}
+              {alerts.map((alert: PriceAlertItem) => {
+                const componentMappedItem = {
+                  id: alert.id,
+                  title: `${alert.assetSymbol} ${alert.direction} $${alert.targetPriceUsd.toLocaleString()}`,
+                  subtitle: alert.isActive
+                    ? "Active · push notification on"
+                    : "Paused",
+                  badgeText: (alert.isActive ? "On" : "Off") as
+                    | "On"
+                    | "Off"
+                    | "Read",
+                };
+
+                return (
+                  <PriceAlertRow
+                    key={alert.id}
+                    item={componentMappedItem}
+                    onPress={() => handleRowInteraction(alert)}
+                    onDeleteTrigger={() => setActiveDeleteTarget(alert)}
+                  />
+                );
+              })}
             </View>
 
             {activeDeleteTarget && (
@@ -154,7 +190,7 @@ export default function PriceAlertsScreen() {
                 />
                 <View style={styles.dialogDescMargin}>
                   <Paragraph
-                    text={`This removes the ${activeDeleteTarget.title} alert from your tracking dashboard.`}
+                    text="This removes the alert completely from your tracking dashboard parameters."
                     color={Colors.newSecondary}
                     size={12.5}
                     lineHeight={17}
@@ -166,14 +202,18 @@ export default function PriceAlertsScreen() {
                   <Pressable
                     style={styles.cancelActionBtn}
                     onPress={() => setActiveDeleteTarget(null)}
+                    disabled={isDeleting}
                   >
                     <Text style={styles.cancelBtnText}>Cancel</Text>
                   </Pressable>
                   <Pressable
                     style={styles.deleteActionBtn}
                     onPress={executeDeleteAction}
+                    disabled={isDeleting}
                   >
-                    <Text style={styles.deleteBtnText}>Delete</Text>
+                    <Text style={styles.deleteBtnText}>
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </Text>
                   </Pressable>
                 </View>
               </View>
@@ -181,42 +221,21 @@ export default function PriceAlertsScreen() {
           </ScrollView>
         )}
 
-        {/* 🔔 STEP 2: SCREEN 7 - CREATE PRICE ALERT INPUT PANEL */}
+        {/* 🔔 STEP 2: CREATE PRICE ALERT INPUT PANEL */}
         {localStep === "create" && (
           <CreatePriceAlert
-            symbol="BTC"
-            currentPrice={64200.5}
             onGoBack={() => setLocalStep("list")}
-            onAlertCreated={(payload) => {
-              // Cache data values safely
-              setCreatedAlertInfo({
-                symbol: payload.symbol,
-                direction: payload.direction,
-                targetPrice: payload.targetPrice,
-              });
-
-              // Dynamically append the new custom target item array placeholder into list memory state
-              const newAlertItem: PriceAlertItem = {
-                id: Date.now().toString(),
-                title: `${payload.symbol} ${payload.direction.toLowerCase()} $${Number(payload.targetPrice).toLocaleString()}`,
-                subtitle: "Active · push notification on",
-                badgeText: "On",
-              };
-              setAlerts((prev) => [newAlertItem, ...prev]);
-
-              // Advance directly forward to the success completion layout screen view
-              setLocalStep("success");
-            }}
+            onAlertCreated={handleAlertCreationSubmit}
           />
         )}
 
-        {/* 🎉 STEP 3: SCREEN 8 - ALERT SUCCESS CONFIRMATION PANEL */}
+        {/* 🎉 STEP 3: ALERT SUCCESS CONFIRMATION PANEL */}
         {localStep === "success" && (
           <AlertSuccessView
             symbol={createdAlertInfo.symbol}
             direction={createdAlertInfo.direction}
             targetPrice={createdAlertInfo.targetPrice}
-            onClose={() => setLocalStep("list")} // Loops nicely back to updated lists tracking menu
+            onClose={() => setLocalStep("list")}
           />
         )}
       </MySafeAreaView>
@@ -296,5 +315,10 @@ const styles = StyleSheet.create({
     color: Colors.newWhite,
     fontSize: 13,
     fontFamily: FontFamily.bold,
+  },
+  centerWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

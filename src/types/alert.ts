@@ -66,3 +66,24 @@ export interface NotificationsResponse {
   data: NotificationItem[];
   meta: NotificationsMeta;
 }
+
+// market assets
+export interface MarketAsset {
+  id: string;
+  symbol: string;
+  name: string;
+  network: string;
+  priceUsd: number;
+  change24h: number;
+  isActive: boolean;
+  minBuyUsd: number;
+  minSellUsd: number;
+  iconUrl: string; // 🖼️ Your image pointer string!
+}
+
+export interface MarketAssetsResponse {
+  data: MarketAsset[];
+  meta: {
+    count: number;
+  };
+}

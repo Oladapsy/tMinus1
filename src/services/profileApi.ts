@@ -13,6 +13,7 @@ import {
   UpdatePriceAlertRequest,
   NotificationsResponse,
   NotificationItem,
+  MarketAssetsResponse,
 } from "../types/alert";
 
 // 🌟 Import structural device schema definitions inline or via types folder
@@ -146,6 +147,15 @@ export const profileApi = createApi({
       }),
       invalidatesTags: ["Notifications"],
     }),
+
+   // 📊 MARKET ENDPOINT
+    getMarketAssets: builder.query<MarketAssetsResponse, void>({
+      query: () => "/market/assets",
+    }),
+   
+    getMarketPrices: builder.query<{ data: any[] }, void>({
+      query: () => "/market/prices",
+    }),
   }),
 });
 
@@ -162,4 +172,6 @@ export const {
   useGetNotificationsQuery,
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
+  useGetMarketAssetsQuery,
+  useGetMarketPricesQuery,
 } = profileApi;
