@@ -6,7 +6,7 @@ export interface ProfileLimits {
 }
 
 export interface ProfileVerification {
-  status: string;
+  status: "none" | "pending" | "approved" | "needs_attention"; // 🌟 Updated union type
   tier: string;
   level: number;
   label: string;
@@ -16,6 +16,32 @@ export interface ProfileVerification {
   canUseSandboxDeposits: boolean;
 }
 
+export interface ProfileData {
+  id: string;
+  role: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  twoFactorEnabled: boolean;
+  kycStatus: "none" | "pending" | "approved" | "needs_attention"; // 🌟 Updated union type
+  verification: ProfileVerification;
+  avatarUrl: string | null;
+  watchlist: string[];
+  settings: ProfileSettings;
+  createdAt: string;
+}
+
+// export interface ProfileVerification {
+//   status: string;
+//   tier: string;
+//   level: number;
+//   label: string;
+//   limits: ProfileLimits;
+//   canTrade: boolean;
+//   canWithdraw: boolean;
+//   canUseSandboxDeposits: boolean;
+// }
+
 export interface ProfileSettings {
   language: string;
   fiatCurrency: string;
@@ -24,20 +50,20 @@ export interface ProfileSettings {
   biometricEnabled: boolean;
 }
 
-export interface ProfileData {
-  id: string;
-  role: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  twoFactorEnabled: boolean;
-  kycStatus: "pending" | "approved" | "rejected";
-  verification: ProfileVerification;
-  avatarUrl: string | null;
-  watchlist: string[];
-  settings: ProfileSettings;
-  createdAt: string;
-}
+// export interface ProfileData {
+//   id: string;
+//   role: string;
+//   fullName: string;
+//   email: string;
+//   phone: string;
+//   twoFactorEnabled: boolean;
+//   kycStatus: "pending" | "approved" | "rejected";
+//   verification: ProfileVerification;
+//   avatarUrl: string | null;
+//   watchlist: string[];
+//   settings: ProfileSettings;
+//   createdAt: string;
+// }
 
 // Global API response envelopes ✉️
 export interface ProfileResponse {

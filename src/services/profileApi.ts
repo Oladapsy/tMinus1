@@ -148,13 +148,43 @@ export const profileApi = createApi({
       invalidatesTags: ["Notifications"],
     }),
 
-   // 📊 MARKET ENDPOINT
+    // 📊 MARKET ENDPOINT
     getMarketAssets: builder.query<MarketAssetsResponse, void>({
       query: () => "/market/assets",
     }),
-   
+
     getMarketPrices: builder.query<{ data: any[] }, void>({
       query: () => "/market/prices",
+    }),
+
+    // 📤 KYC FILE UPLOAD PIPELINE (Multipart form data for image assets)
+    uploadKycFile: builder.mutation<{ data: { publicUrl: string } }, FormData>({
+      query: (formData) => ({
+        url: "/auth/kyc/uploads",
+        method: "POST",
+        body: formData,
+      }),
+    }),
+
+    // 📝 KYC COMPLIANCE DISPATCH SHEET
+    submitKycPayload: builder.mutation<
+      any,
+      {
+        legalName: string;
+        country: string;
+        documentType: string;
+        documentNumber: string;
+        selfieImageUrl: string;
+        documentImageUrl: string;
+        documentBackImageUrl?: string | null;
+      }
+    >({
+      query: (body) => ({
+        url: "/auth/kyc",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["UserProfile"],
     }),
   }),
 });
@@ -174,4 +204,6 @@ export const {
   useMarkAllNotificationsReadMutation,
   useGetMarketAssetsQuery,
   useGetMarketPricesQuery,
+  useUploadKycFileMutation,
+  useSubmitKycPayloadMutation,
 } = profileApi;
