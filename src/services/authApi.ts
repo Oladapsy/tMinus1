@@ -17,8 +17,11 @@ import {
   DisableTwoFaRequest,
 } from "@/src/types/auth";
 
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://crypto-api-guwm.onrender.com/auth/",
+  baseUrl: `${BASE_URL}/auth/`,
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
     if (token) {

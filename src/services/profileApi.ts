@@ -34,10 +34,12 @@ export interface DevicesResponse {
   };
 }
 
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
 export const profileApi = createApi({
   reducerPath: "profileApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://crypto-api-guwm.onrender.com",
+    baseUrl: `${BASE_URL}`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).auth.accessToken;
       if (token) {

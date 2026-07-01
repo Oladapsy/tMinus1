@@ -10,10 +10,12 @@ import {
   WithdrawalResponse,
 } from "../types/wallet";
 
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
 export const walletApi = createApi({
   reducerPath: "walletApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://crypto-api-guwm.onrender.com/wallet",
+    baseUrl: `${BASE_URL}/wallet`,
   }),
   tagTypes: ["Wallet", "Transactions", "History"],
   endpoints: (builder) => ({
