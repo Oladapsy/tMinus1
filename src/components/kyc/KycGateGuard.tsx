@@ -6,7 +6,7 @@ import WalletPendingKyc from "../wallet/lite/WalletPendingKyc";
 interface KycGateGuardProps {
   status: GlobalKycStatus;
   gateType: "trades" | "wallets";
-  children: React.ReactNode; // The actual screen content if unlocked
+  children: React.ReactNode;
 }
 
 export default function KycGateGuard({
@@ -14,24 +14,34 @@ export default function KycGateGuard({
   gateType,
   children,
 }: KycGateGuardProps) {
-  // If user is completely verified and approved, show the actual underlying screen!
+  // 🟢 CASE 1: Completely verified and clear to go
   if (status === "APPROVED") {
     return <>{children}</>;
   }
 
-  // --- CASE A: HANDLES THE TRADES/BUY LOCKOUT
-  if (
-    gateType === "trades" &&
-    (status === "NOT_STARTED" || status === "REJECTED")
-  ) {
+  // 🟡 CASE 2: Pending review state (Locks both or specific views)
+  if (status === "PENDING") {
+    if (gateType === "wallets") {
+      return <WalletPendingKyc />;
+    }
+    // Optional: return the TradePendingKyc view
+    // Otherwise, it falls through to blocking them.
     return <TradeNoKyc />;
   }
 
-  // --- CASE B: HANDLES THE WALLETS PENDING REVIEW STATE
-  if (gateType === "wallets" && status === "PENDING") {
-    return <WalletPendingKyc />;
+  // 🔴 CASE 3: Not started, rejected, or needs attention
+  if (
+    status === "NOT_STARTED" ||
+    status === "REJECTED" ||
+    status === "NEEDS_ATTENTION"
+  ) {
+    if (gateType === "wallets") {
+      // 🌟 FIXED: Blocks unauthorized wallet access instead of slipping through to children
+      return <WalletPendingKyc />;
+    }
+    return <TradeNoKyc />;
   }
 
-  // Fallback default state handler container if conditions slip through
-  return <>{children}</>;
+  // 🔒 Safety Lock: If any unexpected status comes down, default block them out.
+  return <WalletPendingKyc />;
 }

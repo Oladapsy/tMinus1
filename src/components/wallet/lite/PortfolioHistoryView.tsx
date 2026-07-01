@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { LineChart } from "react-native-wagmi-charts";
 
@@ -14,59 +15,48 @@ import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+// 🟢 IMPORT FROM THE CORRECT CENTRAL TYPES PATH
+import { PortfolioHistoryResponse } from "@/src/types/wallet";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-interface ApiDataPoint {
-  time: string;
-  valueUsd: number;
-  value: number;
-  currency: string;
-}
-
-interface ApiPayload {
-  "1D": { data: ApiDataPoint[]; latestValueUsd: number };
-  "1W": { data: ApiDataPoint[]; latestValueUsd: number };
-  "1M": { data: ApiDataPoint[]; latestValueUsd: number };
-  "1Y": { data: ApiDataPoint[]; latestValueUsd: number };
-}
-
 interface PortfolioHistoryViewProps {
   onGoBack: () => void;
-  apiPayload: ApiPayload;
+  apiPayload: PortfolioHistoryResponse;
+  onRangeChange: (range: "1D" | "1W" | "1M" | "1Y") => void;
+  isLoading?: boolean;
 }
 
 export default function PortfolioHistoryView({
   onGoBack,
   apiPayload,
+  onRangeChange,
+  isLoading = false,
 }: PortfolioHistoryViewProps) {
-  const [activeTimeframe, setActiveTimeframe] = useState<
-    "1D" | "1W" | "1M" | "1Y"
-  >("1M");
+  const activeTimeframe = apiPayload?.meta?.range || "1M";
+  const latestValueUsd = apiPayload?.meta?.latestValueUsd || 0;
 
-  // 1. Get the dataset dynamically based on the selected tab
-  const activeDataset = useMemo(() => {
-    return apiPayload[activeTimeframe] || { data: [], latestValueUsd: 0 };
-  }, [apiPayload, activeTimeframe]);
-
-  // 2. Map the active API data points into Unix timestamps for the chart engine
+  // 📈 🟢 Fixed: Explicitly typed 'point' parameter
   const chartData = useMemo(() => {
-    if (!activeDataset.data || activeDataset.data.length === 0) {
+    if (!apiPayload?.data || apiPayload.data.length === 0) {
       return [{ timestamp: Date.now(), value: 0 }];
     }
-    return activeDataset.data.map((point) => ({
+    return apiPayload.data.map((point: { time: string; valueUsd: number }) => ({
       timestamp: new Date(point.time).getTime(),
       value: point.valueUsd,
     }));
-  }, [activeDataset]);
+  }, [apiPayload]);
 
-  // Dynamic label contextualizer for the recent history logs list below the chart
-  const periodLabelText = {
-    "1D": "Today",
-    "1W": "This Week",
-    "1M": "May 2026",
-    "1Y": "Year to Date",
-  }[activeTimeframe];
+  // 🟢 Fixed: Strictly typed the indexing map object
+  const periodLabelText =
+    (
+      {
+        "1D": "Today",
+        "1W": "This Week",
+        "1M": "This Month",
+        "1Y": "Year to Date",
+      } as Record<string, string>
+    )[activeTimeframe] || "History";
 
   return (
     <View style={styles.container}>
@@ -82,13 +72,13 @@ export default function PortfolioHistoryView({
       >
         <View style={styles.chartContainerCard}>
           <LineChart.Provider data={chartData}>
-            {/* Live Interactive Header Price Text Box */}
             <View style={styles.priceHeaderContainer}>
               <LineChart.PriceText
                 format={({ value }) => {
                   "worklet";
-                  if (!value)
-                    return `$${activeDataset.latestValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  if (!value) {
+                    return `$${latestValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  }
                   return `$${parseFloat(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                 }}
                 style={styles.livePriceText}
@@ -100,26 +90,28 @@ export default function PortfolioHistoryView({
               />
             </View>
 
-            {/* Canvas Chart Area Row */}
             <View style={styles.chartDrawingSpace}>
-              <LineChart width={SCREEN_WIDTH - 80} height={160}>
-                <LineChart.Path color={Colors.green} width={2.5}>
-                  <LineChart.Gradient color={`${Colors.green}15`} />
-                </LineChart.Path>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={Colors.green} />
+              ) : (
+                <LineChart width={SCREEN_WIDTH - 80} height={160}>
+                  <LineChart.Path color={Colors.green} width={2.5}>
+                    <LineChart.Gradient color={`${Colors.green}15`} />
+                  </LineChart.Path>
 
-                <LineChart.CursorCrosshair color={Colors.green}>
-                  <LineChart.Tooltip textStyle={styles.tooltipText} />
-                </LineChart.CursorCrosshair>
-              </LineChart>
+                  <LineChart.CursorCrosshair color={Colors.green}>
+                    <LineChart.Tooltip textStyle={styles.tooltipText} />
+                  </LineChart.CursorCrosshair>
+                </LineChart>
+              )}
             </View>
           </LineChart.Provider>
 
-          {/* Timeframe Filter Navigation Pills Row */}
           <View style={styles.timeframeRowBar}>
             {(["1D", "1W", "1M", "1Y"] as const).map((timeframe) => (
               <TouchableOpacity
                 key={timeframe}
-                onPress={() => setActiveTimeframe(timeframe)}
+                onPress={() => onRangeChange(timeframe)}
                 style={[
                   styles.timeframePill,
                   activeTimeframe === timeframe && styles.activeTimeframePill,
@@ -138,7 +130,6 @@ export default function PortfolioHistoryView({
           </View>
         </View>
 
-        {/* Dynamic Ledger Summary Item List */}
         <View style={styles.historyListGroup}>
           <View style={styles.logCard}>
             <View style={styles.leftMetaContainer}>
@@ -161,12 +152,12 @@ export default function PortfolioHistoryView({
 
             <View style={styles.rightMetricsContainer}>
               <Title
-                text={`$${activeDataset.latestValueUsd.toLocaleString()}`}
+                text={`$${latestValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 size={15}
                 textAlign="right"
               />
               <View style={{ marginTop: 2 }}>
-                <Text style={styles.trendText}>+3.8%</Text>
+                <Text style={styles.trendText}>Market Live</Text>
               </View>
             </View>
           </View>

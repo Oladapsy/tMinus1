@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/src/store/authSlice";
 import { authApi } from "@/src/services/authApi";
 import { profileApi } from "../services/profileApi";
+import { walletApi } from "../services/walletApi";
 
 export const store = configureStore({
   reducer: {
@@ -11,12 +12,16 @@ export const store = configureStore({
     // 2. Hook up my server API service slice drawer automatically
     [authApi.reducerPath]: authApi.reducer,
     [profileApi.reducerPath]: profileApi.reducer,
+    [walletApi.reducerPath]: walletApi.reducer,
   },
 
   // 3. Adding the api middleware enables caching, invalidation, polling,
   // and other useful automatic features of RTK Query.
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApi.middleware).concat(profileApi.middleware),
+    getDefaultMiddleware()
+      .concat(authApi.middleware)
+      .concat(profileApi.middleware)
+      .concat(walletApi.middleware),
 });
 
 // --- TypeScript Setup Types ---

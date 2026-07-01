@@ -3,7 +3,6 @@ import WalletDashboardView from "@/src/components/wallet/lite/WalletDashboardVie
 import { Colors } from "@/src/constants/colors";
 import React, { useState } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
-// 🌟 Updated selector import to use the new generic component
 import AssetSelectorView from "@/src/components/wallet/lite/AssetSelectorView";
 import CryptoDepositQrView from "@/src/components/wallet/lite/CryptoDepositQrView";
 import SimulateDepositView from "@/src/components/wallet/lite/SimulateDepositView";
@@ -14,6 +13,9 @@ import TransactionHistoryView from "@/src/components/wallet/lite/TransactionHist
 import TransactionDetailsView from "@/src/components/wallet/lite/TransactionDetailsView";
 import PortfolioHistoryView from "@/src/components/wallet/lite/PortfolioHistoryView";
 
+import { useGetPortfolioHistoryQuery } from "@/src/services/walletApi";
+// 🟢 IMPORT THE OFFICIAL SCHEMA TYPE SECTOR LIFTED DIRECTLY FROM CENTRAL STORAGE
+import { WalletResponse } from "@/src/types/wallet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 type WorkflowMode =
@@ -29,7 +31,7 @@ type WorkflowMode =
   | "transaction_history"
   | "transaction_details";
 
-interface AssetData {
+export interface AssetData {
   id: string;
   name: string;
   symbol: string;
@@ -38,177 +40,69 @@ interface AssetData {
   value: string;
   color: string;
   depositAddress: string;
+  qrPayload: string;
 }
 
-export default function NewWalletScreen() {
+interface NewWalletScreenProps {
+  // 🟢 Fixed: Direct compatibility connection map matching MainWalletScreen safely
+  walletData: WalletResponse["data"] | undefined;
+}
+
+const ASSET_THEME_MAP: Record<string, { name: string; color: string }> = {
+  BTC: { name: "Bitcoin", color: Colors.newCryptoYellow },
+  ETH: { name: "Ethereum", color: Colors.purple },
+  USDT: { name: "Tether", color: Colors.green },
+  USDC: { name: "USD Coin", color: "#2775CA" },
+  SOL: { name: "Solana", color: "#14F195" },
+};
+
+export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>("dashboard");
   const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
+  const [activeRange, setActiveRange] = useState<"1D" | "1W" | "1M" | "1Y">(
+    "1M",
+  );
 
-  const mockAssets: AssetData[] = [
-    {
-      id: "usdt",
-      name: "Tether",
-      symbol: "USDT",
-      network: "TRC20",
-      balance: "1,000.00 USDT",
-      value: "$2,450.00",
-      color: Colors.green,
-      depositAddress: "TXYZ5dirgMNYdQskfiP5zj39VYemXareK4C",
-    },
-    {
-      id: "btc",
-      name: "Bitcoin",
-      symbol: "BTC",
-      network: "Testnet",
-      balance: "0.0200 BTC",
-      value: "$1,284.00",
-      color: Colors.newCryptoYellow,
-      depositAddress: "tb1qrp33g0q5c2txzc97w784ttvthm",
-    },
-    {
-      id: "eth",
-      name: "Ethereum",
-      symbol: "ETH",
-      network: "Sepolia",
-      balance: "0.3400 ETH",
-      value: "$1,158.40",
-      color: Colors.purple,
-      depositAddress: "0x71C7656EC7ab88b098defB751B7401B5f",
-    },
-  ];
+  const { data: historyResponse, isLoading: isHistoryLoading } =
+    useGetPortfolioHistoryQuery({ range: activeRange });
 
-  const globalPortfolioPayload = {
-    "1D": {
-      latestValueUsd: 4892.4,
-      data: [
-        {
-          time: "2026-06-19T00:00:00.000Z",
-          valueUsd: 4810.0,
-          value: 4450.0,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-19T04:00:00.000Z",
-          valueUsd: 4835.2,
-          value: 4472.1,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-19T08:00:00.000Z",
-          valueUsd: 4820.5,
-          value: 4460.3,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-19T12:00:00.000Z",
-          valueUsd: 4892.4,
-          value: 4520.9,
-          currency: "EUR",
-        },
-      ],
-    },
-    "1W": {
-      latestValueUsd: 4892.4,
-      data: [
-        {
-          time: "2026-06-13T12:00:00.000Z",
-          valueUsd: 4620.0,
-          value: 4280.0,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-15T12:00:00.000Z",
-          valueUsd: 4740.5,
-          value: 4390.2,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-17T12:00:00.000Z",
-          valueUsd: 4690.1,
-          value: 4345.0,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-19T12:00:00.000Z",
-          valueUsd: 4892.4,
-          value: 4520.9,
-          currency: "EUR",
-        },
-      ],
-    },
-    "1M": {
-      latestValueUsd: 4892.4,
-      data: [
-        {
-          time: "2026-05-20T12:00:00.000Z",
-          valueUsd: 4421.0,
-          value: 4120.5,
-          currency: "EUR",
-        },
-        {
-          time: "2026-05-27T12:00:00.000Z",
-          valueUsd: 4560.3,
-          value: 4230.1,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-05T12:00:00.000Z",
-          valueUsd: 4713.2,
-          value: 4390.1,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-19T12:00:00.000Z",
-          valueUsd: 4892.4,
-          value: 4520.9,
-          currency: "EUR",
-        },
-      ],
-    },
-    "1Y": {
-      latestValueUsd: 4892.4,
-      data: [
-        {
-          time: "2025-06-19T12:00:00.000Z",
-          valueUsd: 2900.0,
-          value: 2650.0,
-          currency: "EUR",
-        },
-        {
-          time: "2025-10-19T12:00:00.000Z",
-          valueUsd: 3500.5,
-          value: 3210.0,
-          currency: "EUR",
-        },
-        {
-          time: "2026-02-19T12:00:00.000Z",
-          valueUsd: 4100.0,
-          value: 3800.2,
-          currency: "EUR",
-        },
-        {
-          time: "2026-06-19T12:00:00.000Z",
-          valueUsd: 4892.4,
-          value: 4520.9,
-          currency: "EUR",
-        },
-      ],
-    },
-  };
+  // 🔄 🟢 Fixed: Added strict inner array parameter definitions for loop passes
+  const mappedAssets: AssetData[] = (walletData?.wallet?.balances || []).map(
+    (bal: { assetSymbol: string; available: number }) => {
+      const assetMeta = ASSET_THEME_MAP[bal.assetSymbol] || {
+        name: bal.assetSymbol,
+        color: Colors.green,
+      };
+      const addressInfo = walletData?.wallet?.depositAddresses?.find(
+        (addr: {
+          assetSymbol: string;
+          network: string;
+          address: string;
+          qrPayload: string;
+        }) => addr.assetSymbol === bal.assetSymbol,
+      );
 
-  const handleDepositNavigation = () => {
-    setWorkflowMode("deposit_selector");
-  };
+      return {
+        id: bal.assetSymbol.toLowerCase(),
+        name: assetMeta.name,
+        symbol: bal.assetSymbol,
+        network: addressInfo?.network || "Network Layer Testnet",
+        balance: `${bal.available.toLocaleString()} ${bal.assetSymbol}`,
+        value:
+          bal.assetSymbol === "USDT" || bal.assetSymbol === "USDC"
+            ? `$${bal.available.toFixed(2)}`
+            : "Market Live",
+        color: assetMeta.color,
+        depositAddress: addressInfo?.address || "",
+        qrPayload: addressInfo?.qrPayload || "",
+      };
+    },
+  );
 
-  const handleWithdrawNavigation = () => {
-    // 🌟 Rerouted dashboard click event straight to our multi-mode selector
-    setWorkflowMode("withdraw_selector");
-  };
-
-  const handleTradeNavigation = () => {
-    console.log("Navigating to active Market trading module...");
-  };
+  const portfolioTotalString = walletData?.portfolioValueUsd
+    ? `$${walletData.portfolioValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    : "$0.00";
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -221,33 +115,46 @@ export default function NewWalletScreen() {
           style={styles.safeContainer}
           edges={["top", "bottom", "left", "right"]}
         >
-          {/* State Conditional Workflow Orchestrator Engine */}
           {workflowMode === "dashboard" && (
             <WalletDashboardView
-              totalBalance="$4,892.40"
+              totalBalance={portfolioTotalString}
               trendText="+3.8% today"
-              assets={mockAssets}
-              onDepositPress={handleDepositNavigation}
-              onWithdrawPress={handleWithdrawNavigation}
-              onTradePress={handleTradeNavigation}
+              assets={mappedAssets}
+              onDepositPress={() => setWorkflowMode("deposit_selector")}
+              onWithdrawPress={() => setWorkflowMode("withdraw_selector")}
+              onTradePress={() =>
+                console.log("Navigating to active Market trading module...")
+              }
               onBalancePress={() => setWorkflowMode("portfolio_history")}
             />
           )}
 
           {workflowMode === "portfolio_history" && (
             <PortfolioHistoryView
-              apiPayload={globalPortfolioPayload}
+              apiPayload={
+                historyResponse || {
+                  data: [],
+                  meta: {
+                    count: 0, // 🌟 FIXED: Added missing required API property
+                    range: activeRange,
+                    latestValueUsd: 0,
+                    latestValue: 0,
+                    currency: "USD",
+                  },
+                }
+              }
+              onRangeChange={(range) => setActiveRange(range)}
+              isLoading={isHistoryLoading}
               onGoBack={() => setWorkflowMode("dashboard")}
             />
           )}
 
-          {/* 📥 Deposit Selector Using The Reusable Component */}
           {workflowMode === "deposit_selector" && (
             <AssetSelectorView
               title="Deposit"
-              assets={mockAssets}
+              assets={mappedAssets}
               onSelectAsset={(assetId) => {
-                const foundAsset = mockAssets.find((a) => a.id === assetId);
+                const foundAsset = mappedAssets.find((a) => a.id === assetId);
                 if (foundAsset) {
                   setSelectedAsset(foundAsset);
                   setWorkflowMode("crypto_deposit");
@@ -257,23 +164,21 @@ export default function NewWalletScreen() {
             />
           )}
 
-          {/* 📤 Withdrawal Selector Using The Reusable Component */}
           {workflowMode === "withdraw_selector" && (
             <AssetSelectorView
               title="Withdraw"
-              assets={mockAssets}
+              assets={mappedAssets}
               onSelectAsset={(assetId) => {
-                const foundAsset = mockAssets.find((a) => a.id === assetId);
+                const foundAsset = mappedAssets.find((a) => a.id === assetId);
                 if (foundAsset) {
                   setSelectedAsset(foundAsset);
-                  setWorkflowMode("withdraw_form"); // 🚀 direct straight to form input layout
+                  setWorkflowMode("withdraw_form");
                 }
               }}
               onCancel={() => setWorkflowMode("dashboard")}
             />
           )}
 
-          {/* Dynamic Crypto Deposit Screen */}
           {workflowMode === "crypto_deposit" && selectedAsset && (
             <CryptoDepositQrView
               asset={selectedAsset}
@@ -285,33 +190,24 @@ export default function NewWalletScreen() {
             />
           )}
 
-          {/* Dynamic Simulate Deposit Testing View Frame */}
           {workflowMode === "simulate_deposit" && selectedAsset && (
             <SimulateDepositView
               asset={selectedAsset}
               onGoBack={() => setWorkflowMode("crypto_deposit")}
-              onCreateDeposit={() => {
-                console.log("Creating pending sandbox deposit record...");
-                setWorkflowMode("dashboard");
-              }}
+              onCreateDeposit={() => setWorkflowMode("dashboard")}
             />
           )}
 
-          {/* 🌟 New Dynamic Withdrawal Input Form Panel View */}
           {workflowMode === "withdraw_form" && selectedAsset && (
             <WithdrawFormView
               asset={selectedAsset}
               onGoBack={() => setWorkflowMode("withdraw_selector")}
-              onPreviewWithdrawal={() => {
-                console.log(
-                  "Processing formal withdrawal confirmation preview layer...",
-                );
-                setWorkflowMode("withdraw_confirmation"); // Go back home on completion
-              }}
+              onPreviewWithdrawal={() =>
+                setWorkflowMode("withdraw_confirmation")
+              }
             />
           )}
 
-          {/* 🔒 Withdrawal Confirmation Screen */}
           {workflowMode === "withdraw_confirmation" && selectedAsset && (
             <WithdrawConfirmationView
               asset={selectedAsset}
@@ -320,18 +216,13 @@ export default function NewWalletScreen() {
             />
           )}
 
-          {/* 🎉 Withdrawal Success Receipt Screen */}
           {workflowMode === "withdraw_success" && selectedAsset && (
             <WithdrawalSuccessView
               asset={selectedAsset}
-              onViewTransaction={() => {
-                console.log("Navigating to transaction logs...");
-                setWorkflowMode("transaction_history"); // Go home
-              }}
+              onViewTransaction={() => setWorkflowMode("transaction_history")}
             />
           )}
 
-          {/* 📜 Transaction History Screen */}
           {workflowMode === "transaction_history" && (
             <TransactionHistoryView
               onSelectTx={(tx) => {
@@ -342,7 +233,6 @@ export default function NewWalletScreen() {
             />
           )}
 
-          {/* 🔍 Transaction Details Screen */}
           {workflowMode === "transaction_details" && selectedTx && (
             <TransactionDetailsView
               tx={selectedTx}
@@ -357,12 +247,6 @@ export default function NewWalletScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImageWrapper: {
-    flex: 1,
-    backgroundColor: Colors.primary,
-  },
-  safeContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
-  },
+  backgroundImageWrapper: { flex: 1, backgroundColor: Colors.primary },
+  safeContainer: { flex: 1, backgroundColor: "transparent" },
 });
