@@ -4,14 +4,12 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import * as z from "zod";
-
 import KycStepTab from "@/src/components/kyc/KycStepTab";
 import MediaDropzone from "@/src/components/kyc/MediaDropzone";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import PrimaryButton from "../../common/PrimaryButton";
 
-// 1. FIX: Make selfieUri strictly compulsory
 const uploadSchema = z.object({
   frontUri: z.string().min(1, "The front image of your document is required"),
   backUri: z.string().optional(),
@@ -21,7 +19,15 @@ const uploadSchema = z.object({
 type UploadFormData = z.infer<typeof uploadSchema>;
 type TabType = "front" | "back" | "selfie";
 
-export default function KycScreen4({ onNext }: { onNext: () => void }) {
+interface KycScreen4Props {
+  onNext: (uris: {
+    frontUri: string;
+    backUri?: string;
+    selfieUri: string;
+  }) => void;
+}
+
+export default function KycScreen4({ onNext }: KycScreen4Props) {
   const [activeTab, setActiveTab] = useState<TabType>("front");
 
   const {
@@ -66,8 +72,6 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
   };
 
   const currentTab = getCurrentTabDetails();
-
-  // 2. FIX: Dynamic helper to know if the currently visible tab has a validation error
   const currentTabHasError =
     (activeTab === "front" && !!errors.frontUri) ||
     (activeTab === "selfie" && !!errors.selfieUri);
@@ -83,7 +87,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"], // 🌟 Fixed deprecation
       allowsEditing: true,
       quality: 0.8,
     });
@@ -104,6 +108,7 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
       );
       return;
     }
+
     try {
       const result = await ImagePicker.launchCameraAsync({
         cameraType: ImagePicker.CameraType.front,
@@ -117,18 +122,34 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
         });
         autoAdvanceTabs();
       }
-    } catch {
-      const galleryResult = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    } catch (cameraError) {
+      console.warn(
+        "Camera unavailable on simulator. Launching gallery picker fallback...",
+      );
+
+      // 🌟 FALLBACK ENGINE: Triggers local system folder gallery if camera hardware fails
+      const galleryPermission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!galleryPermission.granted) {
+        Alert.alert(
+          "Permission Denied",
+          "Permission to access gallery is required!",
+        );
+        return;
+      }
+
+      const fallbackResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
         allowsEditing: true,
         quality: 0.8,
       });
+
       if (
-        !galleryResult.canceled &&
-        galleryResult.assets &&
-        galleryResult.assets.length > 0
+        !fallbackResult.canceled &&
+        fallbackResult.assets &&
+        fallbackResult.assets.length > 0
       ) {
-        setValue(currentTab.field, galleryResult.assets[0].uri, {
+        setValue(currentTab.field, fallbackResult.assets[0].uri, {
           shouldValidate: true,
         });
         autoAdvanceTabs();
@@ -137,11 +158,8 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
   };
 
   const handleMediaCaptureAction = () => {
-    if (currentTab.mode === "camera") {
-      handleTakeSelfie();
-    } else {
-      handlePickFromGallery();
-    }
+    if (currentTab.mode === "camera") handleTakeSelfie();
+    else handlePickFromGallery();
   };
 
   const autoAdvanceTabs = () => {
@@ -149,22 +167,24 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
     else if (activeTab === "back") setActiveTab("selfie");
   };
 
-  const onSubmitForm = () => {
-    onNext();
+  const onSubmitForm = (data: UploadFormData) => {
+    onNext({
+      frontUri: data.frontUri,
+      backUri: data.backUri || undefined,
+      selfieUri: data.selfieUri,
+    });
   };
 
   return (
     <View style={styles.container}>
-      {/* 1. TOP CARDS STEP LAYOUT */}
       <View style={styles.tabsContainer}>
         <KycStepTab
           label="Front required"
           isActive={activeTab === "front"}
           isFilled={!!frontUri}
-          hasError={!!errors.frontUri} // Isolated to front field error state
+          hasError={!!errors.frontUri}
           onPress={() => setActiveTab("front")}
         />
-
         <KycStepTab
           label="Back optional"
           isActive={activeTab === "back"}
@@ -172,28 +192,25 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
           hasError={false}
           onPress={() => setActiveTab("back")}
         />
-
         <KycStepTab
           label="Selfie camera"
           isActive={activeTab === "selfie"}
           isFilled={!!selfieUri}
-          hasError={!!errors.selfieUri} // Isolated to selfie field error state
+          hasError={!!errors.selfieUri}
           onPress={() => setActiveTab("selfie")}
         />
       </View>
 
-      {/* 2. MEDIA DROPZONE CONTAINER */}
       <MediaDropzone
         control={control}
         fieldName={currentTab.field}
         currentUri={currentTab.currentUri}
         label={currentTab.label}
         mode={currentTab.mode}
-        hasError={currentTabHasError} // Evaluates current active view error state precisely
+        hasError={currentTabHasError}
         onPress={handleMediaCaptureAction}
       />
 
-      {/* 3. FIX: Display the correct targeted field error string dynamically */}
       {activeTab === "front" && errors.frontUri && (
         <Text style={styles.errorLabel}>{errors.frontUri.message}</Text>
       )}
@@ -201,13 +218,11 @@ export default function KycScreen4({ onNext }: { onNext: () => void }) {
         <Text style={styles.errorLabel}>{errors.selfieUri.message}</Text>
       )}
 
-      {/* 4. ACCEPTED FILE TYPES BAR */}
       <View style={styles.acceptedFilesBar}>
         <Text style={styles.acceptedTextLeft}>Accepted files</Text>
         <Text style={styles.acceptedTextRight}>JPG · PNG</Text>
       </View>
 
-      {/* 5. SUBMISSION ACTION CONTROL BUTTON */}
       <View style={styles.buttonContainer}>
         <PrimaryButton
           text="Upload and continue"
@@ -257,8 +272,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: FontFamily.bold,
   },
-  buttonContainer: {
-    paddingBottom: 24,
-    marginTop: 124,
-  },
+  buttonContainer: { paddingBottom: 24, marginTop: 48 },
 });

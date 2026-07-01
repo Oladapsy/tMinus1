@@ -2,22 +2,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import * as z from "zod";
-
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import KycFormInput from "@/src/components/kyc/KycFormInput";
 import KycNoteCard from "@/src/components/kyc/KycNoteCard";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
-// 1. Establish an explicit string enum pattern so Zod scales type matching flawlessly
 enum DocTypeEnum {
   national_id = "national_id",
   passport = "passport",
@@ -45,14 +43,15 @@ interface KycScreen3Props {
   onNext: (formData: {
     name: string;
     country: string;
-    docType: string;
+    docTypeKey: string;
+    docTypeLabel: string;
+    docNumber: string;
   }) => void;
 }
 
 export default function KycScreen3({ onNext }: KycScreen3Props) {
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Map backend keys to clean, user-friendly UI labels
   const docOptions = [
     { key: DocTypeEnum.national_id, label: "National ID" },
     { key: DocTypeEnum.passport, label: "Passport" },
@@ -70,31 +69,28 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
     defaultValues: {
       legalName: "",
       country: "Nigeria",
-      docType: undefined, // Start unselected so they are forced to choose
+      docType: undefined,
       docNumber: "",
     },
   });
 
-  // Watch the real-time value change of docType to display the correct label inside the field box
   const selectedDocType = watch("docType");
   const displayLabel =
     docOptions.find((o) => o.key === selectedDocType)?.label || "";
 
   const onSubmitForm = (data: KycFormData) => {
-    const humanReadableDocLabel =
-      docOptions.find((o) => o.key === data.docType)?.label || "National ID";
-
     onNext({
       name: data.legalName,
       country: data.country,
-      docType: humanReadableDocLabel,
+      docTypeKey: data.docType, // 🌟 Sends raw value like "national_id"
+      docTypeLabel: displayLabel, // 🌟 Sends display label like "National ID"
+      docNumber: data.docNumber,
     });
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.formWrapper}>
-        {/* LEGAL NAME */}
         <Controller
           control={control}
           name="legalName"
@@ -108,8 +104,6 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
             />
           )}
         />
-
-        {/* COUNTRY */}
         <Controller
           control={control}
           name="country"
@@ -123,8 +117,6 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
             />
           )}
         />
-
-        {/* DOCUMENT TYPE SELECTOR TRIGGER */}
         <Pressable onPress={() => setModalVisible(true)}>
           <View pointerEvents="none">
             <KycFormInput
@@ -135,8 +127,6 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
             />
           </View>
         </Pressable>
-
-        {/* DOCUMENT NUMBER */}
         <Controller
           control={control}
           name="docNumber"
@@ -169,7 +159,6 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
         />
       </View>
 
-      {/* SELECTION MODAL SHEET */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -182,7 +171,6 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Document Type</Text>
-
             {docOptions.map((option) => (
               <TouchableOpacity
                 key={option.key}
@@ -191,7 +179,6 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
                   selectedDocType === option.key && styles.optionButtonActive,
                 ]}
                 onPress={() => {
-                  // Using hook-form's native setValue instead of the missing onChange variable
                   setValue("docType", option.key, { shouldValidate: true });
                   setModalVisible(false);
                 }}
@@ -215,14 +202,8 @@ export default function KycScreen3({ onNext }: KycScreen3Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  formWrapper: {
-    marginTop: 34,
-    marginBottom: 56,
-    gap: 10,
-  },
-  button: {
-    marginTop: 94,
-  },
+  formWrapper: { marginTop: 34, marginBottom: 24, gap: 10 },
+  button: { marginTop: 48 },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -260,8 +241,5 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.medium,
     color: Colors.newSecondary,
   },
-  optionTextActive: {
-    color: Colors.green,
-    fontFamily: FontFamily.bold,
-  },
+  optionTextActive: { color: Colors.green, fontFamily: FontFamily.bold },
 });

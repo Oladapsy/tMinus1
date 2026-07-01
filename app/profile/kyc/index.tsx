@@ -1,5 +1,11 @@
-import { ImageBackground, StyleSheet, View, ScrollView } from "react-native";
-import React, { useState } from "react";
+import {
+  ImageBackground,
+  StyleSheet,
+  View,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import KycHeader, { KycScreenIndex } from "@/src/components/kyc/KycHeader";
@@ -10,43 +16,119 @@ import KycScreen4 from "@/src/components/kyc/screen/KycScreen4";
 import KycScreen5 from "@/src/components/kyc/screen/KycScreen5";
 import KycScreen6 from "@/src/components/kyc/screen/KycScreen6";
 import KycStatusScreen from "@/src/components/kyc/screen/KycStatusScreen";
+import {
+  useGetProfileQuery,
+  useUploadKycFileMutation,
+  useSubmitKycPayloadMutation,
+} from "@/src/services/profileApi";
+import { Colors } from "@/src/constants/colors";
 
 interface KycCollectedData {
-  name: string;
+  legalName: string;
   country: string;
-  docType: string;
+  documentTypeKey: string;
+  documentTypeLabel: string;
+  documentNumber: string;
+  frontUri: string;
+  backUri?: string;
+  selfieUri: string;
 }
 
 export default function Index() {
   const router = useRouter();
-  const [screenIndex, setScreenIndex] = useState<KycScreenIndex>(0);
 
-  // The central state bucket to hold data values safely across screen unmounts
+  // 📡 Live Server Sync Engine
+  const { data: profile, isLoading: isProfileLoading } = useGetProfileQuery();
+  const [uploadFile, { isLoading: isUploading }] = useUploadKycFileMutation();
+  const [submitKyc, { isLoading: isSubmitting }] =
+    useSubmitKycPayloadMutation();
+
+  const [screenIndex, setScreenIndex] = useState<KycScreenIndex>(0);
   const [kycData, setKycData] = useState<KycCollectedData>({
-    name: "",
-    country: "",
-    docType: "",
+    legalName: "",
+    country: "Nigeria",
+    documentTypeKey: "",
+    documentTypeLabel: "",
+    documentNumber: "",
+    frontUri: "",
+    backUri: "",
+    selfieUri: "",
   });
 
-  const handleBackNavigation = () => {
-    if (screenIndex === 0) {
-      // If we are at the very first step, exit the KYC section completely
-      router.back();
-    } else if (screenIndex === 6 || screenIndex === 7 || screenIndex === 8) {
-      // If they are viewing status results, back button takes them safely back to the review state
-      setScreenIndex(5);
-    } else {
-      // Standard backward step decrement
-      setScreenIndex((prev) => (prev - 1) as KycScreenIndex);
+  // 🔄 Intercept current profile verification state automatically on mount
+  useEffect(() => {
+    if (profile?.data?.kycStatus) {
+      const status = profile.data.kycStatus;
+      if (status === "pending") setScreenIndex(6);
+      else if (status === "approved") setScreenIndex(7);
+      else if (status === "needs_attention") setScreenIndex(8);
+    }
+  }, [profile]);
+
+  if (isProfileLoading) {
+    return (
+      <View
+        style={[
+          styles.root,
+          { justifyContent: "center", backgroundColor: Colors.newDark },
+        ]}
+      >
+        <ActivityIndicator size="large" color={Colors.green} />
+      </View>
+    );
+  }
+
+  // 📤 Form-Data pipeline processing transformation for image uploads
+  const uploadImageToBackend = async (localUri: string) => {
+    if (!localUri) return null;
+    const formData = new FormData();
+
+    formData.append("file", {
+      uri: localUri,
+      name: "kyc_upload.jpg",
+      type: "image/jpeg",
+    } as any);
+
+    const response = await uploadFile(formData).unwrap();
+    return response.data.publicUrl;
+  };
+
+  // 📝 Final structural submission payload pipeline dispatch execution
+  const handleFinalSubmission = async () => {
+    try {
+      const remoteFrontUrl = await uploadImageToBackend(kycData.frontUri);
+      const remoteBackUrl = kycData.backUri
+        ? await uploadImageToBackend(kycData.backUri)
+        : null;
+      const remoteSelfieUrl = await uploadImageToBackend(kycData.selfieUri);
+
+      await submitKyc({
+        legalName: kycData.legalName,
+        country: kycData.country,
+        documentType: kycData.documentTypeKey, // 🌟 Sends exact format required by backend
+        documentNumber: kycData.documentNumber,
+        documentImageUrl: remoteFrontUrl || "",
+        documentBackImageUrl: remoteBackUrl,
+        selfieImageUrl: remoteSelfieUrl || "",
+      }).unwrap();
+
+      setScreenIndex(6);
+    } catch (error) {
+      console.error("KYC execution processing sequence failure:", error);
     }
   };
 
-  // Calculates what step index layout value to visually feed the header dots
-  const getHeaderIndex = (): KycScreenIndex => {
-    if (screenIndex === 5) return 5; // Matches stepTracker 3, isSubmitted false (Review Active Ring)
-    if (screenIndex === 6 || screenIndex === 7) return 6; // Matches stepTracker 3, isSubmitted true (All Green)
-    if (screenIndex === 8) return 8; // Matches stepTracker 1, isSubmitted false (Rejected Reset State)
-    return screenIndex;
+  const handleBackNavigation = () => {
+    if (
+      screenIndex === 0 ||
+      screenIndex === 6 ||
+      screenIndex === 7 ||
+      screenIndex === 8
+    ) {
+      router.back();
+    } else {
+      setScreenIndex((prev) => (prev - 1) as KycScreenIndex);
+    }
   };
 
   return (
@@ -57,12 +139,12 @@ export default function Index() {
         resizeMode="cover"
       >
         <MySafeAreaView style={styles.safeContainer}>
-          <KycHeader
-            screenIndex={getHeaderIndex()}
-            onBack={handleBackNavigation}
-          />
+          <KycHeader screenIndex={screenIndex} onBack={handleBackNavigation} />
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
             {screenIndex === 0 && (
               <KycScreen1 onNext={() => setScreenIndex(1)} />
             )}
@@ -70,47 +152,67 @@ export default function Index() {
               <KycScreen2 onNext={() => setScreenIndex(2)} />
             )}
 
-            {/* SCREEN 3: Intercept form data here and i stored it, then advance index to 3 */}
             {screenIndex === 2 && (
               <KycScreen3
-                onNext={(formData) => {
-                  setKycData(formData);
+                onNext={(formFields) => {
+                  setKycData((prev) => ({
+                    ...prev,
+                    legalName: formFields.name,
+                    country: formFields.country,
+                    documentTypeKey: formFields.docTypeKey,
+                    documentTypeLabel: formFields.docTypeLabel,
+                    documentNumber: formFields.docNumber,
+                  }));
                   setScreenIndex(3);
                 }}
               />
             )}
 
             {screenIndex === 3 && (
-              <KycScreen4 onNext={() => setScreenIndex(4)} />
+              <KycScreen4
+                onNext={(uris) => {
+                  setKycData((prev) => ({ ...prev, ...uris }));
+                  setScreenIndex(4);
+                }}
+              />
             )}
+
             {screenIndex === 4 && (
               <KycScreen5 onNext={() => setScreenIndex(5)} />
             )}
 
-            {/* SCREEN 6: Feed the stored kycData directly into your review component rows */}
-            {screenIndex === 5 && (
-              <KycScreen6
-                userData={kycData}
-                onSubmit={() => setScreenIndex(6)}
-              />
-            )}
+            {screenIndex === 5 &&
+              (isUploading || isSubmitting ? (
+                <View style={styles.loaderContainer}>
+                  <ActivityIndicator size="large" color={Colors.green} />
+                </View>
+              ) : (
+                <KycScreen6
+                  userData={{
+                    name: kycData.legalName,
+                    country: kycData.country,
+                    docType: kycData.documentTypeLabel, // 🌟 UI gets pretty version
+                  }}
+                  onSubmit={handleFinalSubmission}
+                />
+              ))}
 
             {screenIndex === 6 && (
               <KycStatusScreen
                 status="pending"
-                onAction={() => setScreenIndex(7)} // Routes to SUCCESS screen status for testing
+                onAction={() => router.back()}
               />
             )}
             {screenIndex === 7 && (
               <KycStatusScreen
                 status="success"
-                onAction={() => setScreenIndex(8)} // Routes to REJECTED screen status for testing
+                onAction={() => router.back()}
               />
             )}
             {screenIndex === 8 && (
               <KycStatusScreen
                 status="rejected"
-                onAction={() => setScreenIndex(2)} // Loops back to Screen 3 form so they can resubmit!
+                onAction={() => setScreenIndex(2)}
               />
             )}
           </ScrollView>
@@ -127,5 +229,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent",
     paddingHorizontal: 18,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 80,
   },
 });
