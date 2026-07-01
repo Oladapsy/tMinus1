@@ -6,6 +6,14 @@ import {
   UpdatePinResponse,
   UpdateProfileRequest,
 } from "../types/profile";
+import {
+  PriceAlertsResponse,
+  PriceAlertItem,
+  CreatePriceAlertRequest,
+  UpdatePriceAlertRequest,
+  NotificationsResponse,
+  NotificationItem,
+} from "../types/alert";
 
 // 🌟 Import structural device schema definitions inline or via types folder
 export interface DeviceItem {
@@ -37,8 +45,7 @@ export const profileApi = createApi({
       return headers;
     },
   }),
-  // 🌟 Added "UserDevices" to monitor local state mutations dynamically
-  tagTypes: ["UserProfile", "UserDevices"],
+  tagTypes: ["UserProfile", "UserDevices", "PriceAlerts", "Notifications"],
   endpoints: (builder) => ({
     getProfile: builder.query<ProfileResponse, void>({
       query: () => "/me",
@@ -61,13 +68,11 @@ export const profileApi = createApi({
       invalidatesTags: ["UserProfile"],
     }),
 
-    // 🔑 NEW: Read active device array list
     getRegisteredDevices: builder.query<DevicesResponse, void>({
       query: () => "/me/devices",
       providesTags: ["UserDevices"],
     }),
 
-    // 🔑 NEW: Delete structural session device item
     removeDevice: builder.mutation<
       { data: { deleted: boolean; deviceId: string } },
       string
@@ -78,6 +83,69 @@ export const profileApi = createApi({
       }),
       invalidatesTags: ["UserDevices"],
     }),
+
+    // 🏷️ PRICE ALERTS ENDPOINTS
+    getPriceAlerts: builder.query<PriceAlertsResponse, void>({
+      query: () => "/me/price-alerts",
+      providesTags: ["PriceAlerts"],
+    }),
+
+    // 🌟 FIXED: Used CreatePriceAlertRequest here
+    createPriceAlert: builder.mutation<
+      { data: PriceAlertItem },
+      CreatePriceAlertRequest
+    >({
+      query: (body) => ({
+        url: "/me/price-alerts",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["PriceAlerts"],
+    }),
+
+    // 🌟 FIXED: Used UpdatePriceAlertRequest here
+    updatePriceAlert: builder.mutation<
+      { data: PriceAlertItem },
+      UpdatePriceAlertRequest
+    >({
+      query: ({ alertId, ...body }) => ({
+        url: `/me/price-alerts/${alertId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["PriceAlerts"],
+    }),
+
+    deletePriceAlert: builder.mutation<{ data: { deleted: boolean } }, string>({
+      query: (alertId) => ({
+        url: `/me/price-alerts/${alertId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["PriceAlerts"],
+    }),
+
+    // 📨 NOTIFICATIONS ENDPOINTS
+    getNotifications: builder.query<NotificationsResponse, void>({
+      query: () => "/me/notifications",
+      providesTags: ["Notifications"],
+    }),
+    markNotificationRead: builder.mutation<{ data: NotificationItem }, string>({
+      query: (notificationId) => ({
+        url: `/me/notifications/${notificationId}/read`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
+    markAllNotificationsRead: builder.mutation<
+      { data: { updated: boolean } },
+      void
+    >({
+      query: () => ({
+        url: "/me/notifications/read-all",
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
   }),
 });
 
@@ -85,7 +153,13 @@ export const {
   useGetProfileQuery,
   useUpdateProfileMutation,
   useUpdatePinMutation,
-  // 🌟 Export the freshly minted live session hooks
   useGetRegisteredDevicesQuery,
   useRemoveDeviceMutation,
+  useGetPriceAlertsQuery,
+  useCreatePriceAlertMutation,
+  useUpdatePriceAlertMutation,
+  useDeletePriceAlertMutation,
+  useGetNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
 } = profileApi;
