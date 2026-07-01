@@ -6,7 +6,7 @@ import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ImageBackground,
   ScrollView,
@@ -18,14 +18,65 @@ import { useGet2FaStatusQuery } from "@/src/services/authApi";
 // 🌟 1. IMPORT YOUR NEW DEVICES HOOK
 import { useGetRegisteredDevicesQuery } from "@/src/services/profileApi";
 
+// for biometrics
+import * as LocalAuthentication from "expo-local-authentication";
+import { getBiometricStatus, setBiometricStatus } from "@/src/utils/biometrics";
+import { useToast } from "@/src/context/ToastContext";
+
 export default function SecurityScreen() {
+  const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    getBiometricStatus().then(setIsBiometricEnabled);
+  }, []);
+
+  const handleToggleBiometrics = async () => {
+    try {
+      if (isBiometricEnabled) {
+        // If it's already on, simply turn it off
+        await setBiometricStatus(false);
+        setIsBiometricEnabled(false);
+        showToast?.("Biometric login disabled.", "success");
+        return;
+      }
+
+      // Verify hardware support before activating
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        showToast?.(
+          "Biometrics not configured or supported on this device.",
+          "error",
+        );
+        return;
+      }
+
+      // Trigger OS prompt challenge
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate to enable biometric login",
+        fallbackLabel: "Use Passcode",
+      });
+
+      if (result.success) {
+        await setBiometricStatus(true);
+        setIsBiometricEnabled(true);
+        showToast?.("Biometric login enabled successfully!", "success");
+      }
+    } catch (error) {
+      showToast?.("An error occurred during biometric setup.", "error");
+      console.error("Biometric setup error:", error);
+    }
+  };
   const router = useRouter();
 
   // Read current profile data (instant from RTK Query cache)
   const { data: response, isLoading: isLoading2Fa } = useGet2FaStatusQuery();
-  
+
   // 🌟 2. FETCH LIVE DEVICE STATUS FROM CACHE
-  const { data: devicesResponse, isLoading: isLoadingDevices } = useGetRegisteredDevicesQuery();
+  const { data: devicesResponse, isLoading: isLoadingDevices } =
+    useGetRegisteredDevicesQuery();
 
   if (isLoading2Fa || isLoadingDevices) {
     return (
@@ -44,7 +95,7 @@ export default function SecurityScreen() {
   const statusData = (response?.data || response) as any;
   const is2FaEnabled = statusData?.twoFactorEnabled ?? false;
   const remainingCodes = statusData?.recoveryCodesRemaining ?? 0;
-  const isBiometricEnabled = false;
+  // const isBiometricEnabled = false;
 
   // 🌟 3. PARSE DYNAMIC DEVICE METRICS
   const registeredDevicesCount = devicesResponse?.data?.length || 1;
@@ -74,7 +125,7 @@ export default function SecurityScreen() {
             <ProfileOptionRow
               title="Transaction PIN"
               subtitle="Required for trades and withdrawals"
-              badgeText="Set" 
+              badgeText="Set"
               onPress={() => router.push("/profile/security/pin")}
             />
 
@@ -127,13 +178,11 @@ export default function SecurityScreen() {
               title="Biometric login"
               subtitle={
                 isBiometricEnabled
-                  ? "Face ID enabled on this device"
+                  ? "Face ID / Touch ID enabled on this device"
                   : "Tap to enable biometrics"
               }
               badgeText={isBiometricEnabled ? "On" : "Off"}
-              onPress={() =>
-                console.log("Toggle Biometrics via client hardware hooks")
-              }
+              onPress={handleToggleBiometrics}
             />
           </View>
 
@@ -166,7 +215,13 @@ const styles = StyleSheet.create({
   scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
   pageTitle: { marginTop: 14, marginBottom: 28 },
   menuSection: { width: "100%", gap: 12 },
-  warningBox: { backgroundColor: Colors.newYellowSlim, borderRadius: 16, padding: 20, marginTop: 42, width: "100%" },
+  warningBox: {
+    backgroundColor: Colors.newYellowSlim,
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 42,
+    width: "100%",
+  },
   warningDescMargin: { width: "100%", marginTop: 6 },
   centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

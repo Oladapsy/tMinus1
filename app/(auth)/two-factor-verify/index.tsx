@@ -12,10 +12,15 @@ import {
   Text,
   View,
   TextInput,
+  KeyboardAvoidingView, // 🌟 Import KeyboardAvoidingView
+  Platform, // 🌟 Import Platform to adjust behaviors
+  TouchableWithoutFeedback, // 🌟 Optional: To dismiss keyboard by tapping outside
+  Keyboard,
 } from "react-native";
 import { useVerify2FaMutation } from "@/src/services/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/src/store/authSlice";
+import * as SecureStore from "expo-secure-store";
 
 export default function TwoFactorVerificationScreen() {
   const router = useRouter();
@@ -26,21 +31,23 @@ export default function TwoFactorVerificationScreen() {
   const [code, setCode] = useState("");
   const [isUsingRecovery, setIsUsingRecovery] = useState(false);
 
-  const dispatch = useDispatch(); // 🌟 Add this hook at the top of your component
+  const dispatch = useDispatch();
 
   const handleContinue = async () => {
     if (!code) return;
 
     try {
-      // Body shape changes based on mode matching POST /auth/2fa/verify
       const payload = isUsingRecovery
         ? { challengeId, recoveryCode: code }
         : { challengeId, code };
 
       const response = await verify2Fa(payload).unwrap();
 
-      // 💡 THE CRITICAL FIX: Save your tokens globally here!
       if (response && response.data) {
+        await SecureStore.setItemAsync(
+          "user_session",
+          JSON.stringify(response.data),
+        );
         dispatch(setCredentials(response.data));
       }
 
@@ -58,80 +65,96 @@ export default function TwoFactorVerificationScreen() {
       resizeMode="cover"
     >
       <MySafeAreaView style={styles.safeContainer}>
-        <BackHeader
-          title="Two-factor auth"
-          paragraph={
-            isUsingRecovery
-              ? "Enter one of your backup recovery codes."
-              : "Enter the code from your authenticator app."
-          }
-          onBack={() => router.back()}
-        />
+        {/* 🌟 KEYBOARD AVOIDING WRAPPER */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardAvoidContainer}
+        >
+          {/* Tapping layout space automatically dismisses input frame focus */}
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.innerContent}>
+              <View>
+                <BackHeader
+                  title="Two-factor auth"
+                  paragraph={
+                    isUsingRecovery
+                      ? "Enter one of your backup recovery codes."
+                      : "Enter the code from your authenticator app."
+                  }
+                  onBack={() => router.back()}
+                />
 
-        {/* Dynamic Abstract Visual Ring Segment */}
-        <View style={styles.visualContainer}>
-          <View style={styles.outerRing}>
-            <View style={styles.innerRing}>
-              <Text style={styles.dotPlaceholder}>••••••</Text>
+                {/* Dynamic Abstract Visual Ring Segment */}
+                <View style={styles.visualContainer}>
+                  <View style={styles.outerRing}>
+                    <View style={styles.innerRing}>
+                      <Text style={styles.dotPlaceholder}>••••••</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Input Block */}
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.customInput}
+                    value={code}
+                    onChangeText={setCode}
+                    placeholder={isUsingRecovery ? "XXXXX-XXXXX" : "Enter Code"}
+                    placeholderTextColor={Colors.newSecondary}
+                    keyboardType={isUsingRecovery ? "default" : "numeric"}
+                    maxLength={isUsingRecovery ? 11 : 6}
+                    autoCapitalize="characters"
+                  />
+                </View>
+              </View>
+
+              {/* Action Button Blocks */}
+              <View style={styles.footerSection}>
+                <PrimaryButton
+                  text={isLoading ? "Verifying..." : "Continue"}
+                  Bgcolor={code.length >= 6 ? Colors.green : Colors.newDark}
+                  textColor={
+                    code.length >= 6 ? Colors.newBlack : Colors.newSecondary
+                  }
+                  fontSize={13}
+                  style={{ fontFamily: FontFamily.bold, marginBottom: 12 }}
+                  onPress={handleContinue}
+                  disabled={!code || isLoading}
+                />
+
+                <PrimaryButton
+                  text={
+                    isUsingRecovery
+                      ? "Use authenticator app pin"
+                      : "Use recovery code"
+                  }
+                  Bgcolor="transparent"
+                  textColor={Colors.newSecondary}
+                  fontSize={13}
+                  style={styles.outlineBtn}
+                  onPress={() => {
+                    setCode("");
+                    setIsUsingRecovery(!isUsingRecovery);
+                  }}
+                />
+              </View>
+
+              {/* Bottom Banner Card Callout */}
+              <View style={styles.protectedCard}>
+                <View style={styles.checkCircle}>
+                  <Text style={styles.checkIcon}>✓</Text>
+                </View>
+                <View style={styles.protectedTextContent}>
+                  <Text style={styles.protectedTitle}>Protected account</Text>
+                  <Text style={styles.protectedSubtitle}>
+                    This extra step protects your trading balance and saved
+                    devices.
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
-
-        {/* Input Block */}
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.customInput}
-            value={code}
-            onChangeText={setCode}
-            placeholder={isUsingRecovery ? "XXXXX-XXXXX" : "Enter Code"}
-            placeholderTextColor={Colors.newSecondary}
-            keyboardType={isUsingRecovery ? "default" : "numeric"}
-            maxLength={isUsingRecovery ? 11 : 6}
-            autoCapitalize="characters"
-          />
-        </View>
-
-        {/* Action Button Blocks */}
-        <View style={styles.footerSection}>
-          <PrimaryButton
-            text={isLoading ? "Verifying..." : "Continue"}
-            Bgcolor={code.length >= 6 ? Colors.green : Colors.newDark}
-            textColor={code.length >= 6 ? Colors.newBlack : Colors.newSecondary}
-            fontSize={13}
-            style={{ fontFamily: FontFamily.bold, marginBottom: 12 }}
-            onPress={handleContinue}
-            disabled={!code || isLoading}
-          />
-
-          <PrimaryButton
-            text={
-              isUsingRecovery
-                ? "Use authenticator app pin"
-                : "Use recovery code"
-            }
-            Bgcolor="transparent"
-            textColor={Colors.newSecondary}
-            fontSize={13}
-            style={styles.outlineBtn}
-            onPress={() => {
-              setCode("");
-              setIsUsingRecovery(!isUsingRecovery);
-            }}
-          />
-        </View>
-
-        {/* Bottom Banner Card Callout */}
-        <View style={styles.protectedCard}>
-          <View style={styles.checkCircle}>
-            <Text style={styles.checkIcon}>✓</Text>
-          </View>
-          <View style={styles.protectedTextContent}>
-            <Text style={styles.protectedTitle}>Protected account</Text>
-            <Text style={styles.protectedSubtitle}>
-              This extra step protects your trading balance and saved devices.
-            </Text>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </MySafeAreaView>
     </ImageBackground>
   );
@@ -142,6 +165,12 @@ const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
     backgroundColor: "transparent",
+  },
+  keyboardAvoidContainer: {
+    flex: 1,
+  },
+  innerContent: {
+    flex: 1,
     paddingHorizontal: 24,
     justifyContent: "space-between",
     paddingBottom: 20,

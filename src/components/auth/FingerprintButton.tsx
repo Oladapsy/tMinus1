@@ -1,14 +1,60 @@
-import { StyleSheet, TouchableOpacity, Text } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, Alert } from "react-native";
 import React from "react";
+import * as LocalAuthentication from "expo-local-authentication";
+import * as SecureStore from "expo-secure-store"; // 🌟 Imported secure encryption store
 import FingerPrintIcon from "@/assets/icons/auth/Fingerprint.svg";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { getBiometricStatus } from "@/src/utils/biometrics";
+import { useToast } from "@/src/context/ToastContext";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/src/store/authSlice";
 
 const FingerprintButton = () => {
-  // this will be used in the future to add fingerprint authentication to the app.
-  // For now, it's just a placeholder button.
-  const handleFingerPrint = () => {
-    console.log("Fingerprint button pressed");
+  const { showToast } = useToast();
+  const dispatch = useDispatch(); // 🌟 Now actively used!
+
+  const handleFingerPrint = async () => {
+    try {
+      // 1. Check if biometrics are toggled ON in security settings
+      const isConfigured = await getBiometricStatus();
+      if (!isConfigured) {
+        Alert.alert(
+          "Biometrics Not Enabled",
+          "Please log in with your password first and turn on Biometric Login from your Security Settings screen."
+        );
+        return;
+      }
+
+      // 2. Fetch the encrypted session data
+      const savedSessionStr = await SecureStore.getItemAsync("user_session");
+      if (!savedSessionStr) {
+        Alert.alert(
+          "Session Expired",
+          "Please log in with your password once to establish a secure biometric key link."
+        );
+        return;
+      }
+
+      // 3. Fire up the native hardware scanner prompt
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Scan your fingerprint or face to sign in",
+        disableDeviceFallback: false,
+      });
+
+      if (result.success) {
+        // Parse the secure tokens back into an object
+        const sessionData = JSON.parse(savedSessionStr);
+        
+        // 🌟 THE FIX: Commit credentials to Redux to trigger your root layout redirect!
+        dispatch(setCredentials(sessionData));
+        
+        showToast?.("Welcome back!", "success");
+      }
+    } catch (error) {
+      showToast?.("Biometric authentication failed.", "error");
+      console.error("Fingerprint auth error:", error);
+    }
   };
 
   return (

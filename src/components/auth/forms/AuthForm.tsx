@@ -24,6 +24,7 @@ import { router } from "expo-router";
 // import { useToast } from "@/src/context/ToastContext";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/src/store/authSlice";
+import * as SecureStore from "expo-secure-store";
 
 interface AuthFormProps {
   fieldLabel: string;
@@ -103,7 +104,7 @@ export default function AuthForm({
     setIsUnverified(false);
   }, [fieldLabel, setValue]);
 
-  const onFormSubmit = async (data: FormData) => {
+const onFormSubmit = async (data: FormData) => {
     setBackendError(null);
     setIsUnverified(false);
 
@@ -125,6 +126,11 @@ export default function AuthForm({
         // Clear out the password field cleanly for security
         setValue("password", "");
 
+        // 🌟 PRE-CACHE OPTIONAL DATA: Save the initial challenge context if needed
+        if (response?.data) {
+          await SecureStore.setItemAsync("user_session", JSON.stringify(response.data));
+        }
+
         // Push straight to your folder-based verification view path and pass down the specific token id
         router.push({
           pathname: "/(auth)/two-factor-verify",
@@ -135,6 +141,9 @@ export default function AuthForm({
 
       // 🔓 STANDARD FLOW: No 2FA active. Commit response structure directly into state filing cabinet before shifting screens
       if (response && response.data) {
+        // 🌟 SAVE SECURELY FOR BIOMETRICS: Cache full session credentials locally
+        await SecureStore.setItemAsync("user_session", JSON.stringify(response.data));
+
         dispatch(setCredentials(response.data));
         // Note: Make sure your setCredentials listener handles the home redirection or append router.replace("/(tabs)/home") if needed.
       }
