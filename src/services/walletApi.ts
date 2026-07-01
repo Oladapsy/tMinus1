@@ -10,11 +10,11 @@ import {
   WithdrawalResponse,
 } from "../types/wallet";
 
-// Types matching your OpenAPI specification
-
 export const walletApi = createApi({
   reducerPath: "walletApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/wallet" }), // Replace with system base config wrapper
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://crypto-api-guwm.onrender.com/wallet",
+  }),
   tagTypes: ["Wallet", "Transactions", "History"],
   endpoints: (builder) => ({
     // 🏢 Wallet home interface metrics engine

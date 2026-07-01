@@ -9,7 +9,10 @@ export interface WalletItem {
 
 // new screen
 
-export type WalletWorkflowMode = "dashboard" | "deposit_selector" | "usdt_deposit";
+export type WalletWorkflowMode =
+  | "dashboard"
+  | "deposit_selector"
+  | "usdt_deposit";
 
 export interface CryptoAsset {
   id: string;
