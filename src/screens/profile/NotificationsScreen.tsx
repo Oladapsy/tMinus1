@@ -2,74 +2,64 @@ import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import Paragraph from "@/src/components/common/Paragraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useToast } from "@/src/context/ToastContext";
-import React, { useState } from "react";
-import { ImageBackground, ScrollView, StyleSheet, View } from "react-native";
+import React from "react";
+import { ImageBackground, ScrollView, StyleSheet, View, ActivityIndicator } from "react-native";
+import BackHeader from "@/src/components/common/BackHeader";
+import { useRouter } from "expo-router";
 
-interface API_NotificationItem {
-  id: string;
-  userId: string;
-  title: string;
-  body: string;
-  type: string;
-  isRead: boolean;
-  createdAt: string;
-}
+// 🌟 Import your real types and RTK query hooks
+import { 
+  useGetNotificationsQuery, 
+  useMarkNotificationReadMutation, 
+  useMarkAllNotificationsReadMutation 
+} from "@/src/services/profileApi";
+import { NotificationItem } from "@/src/types/alert";
 
 export default function NotificationsScreen() {
+  const router = useRouter();
   const { showToast } = useToast();
 
-  const [notifications, setNotifications] = useState<API_NotificationItem[]>([
-    {
-      id: "ntf_kyc",
-      userId: "usr_student",
-      title: "KYC approved",
-      body: "Your account is ready for sandbox trading.",
-      type: "kyc",
-      isRead: false,
-      createdAt: "2026-05-03T14:08:00.000Z",
-    },
-    {
-      id: "ntf_dep_01",
-      userId: "usr_student",
-      title: "USDT deposit completed",
-      body: "250 USDT added to wallet.",
-      type: "deposit",
-      isRead: false,
-      createdAt: "2026-06-01T10:30:00.000Z",
-    },
-    {
-      id: "ntf_alert_01",
-      userId: "usr_student",
-      title: "BTC price alert",
-      body: "BTC crossed your target threshold.",
-      type: "price_alert",
-      isRead: true,
-      createdAt: "2026-06-02T11:15:00.000Z",
-    },
-  ]);
+  // 📡 Connect live queries and mutation triggers
+  const { data: apiResponse, isLoading } = useGetNotificationsQuery();
+  const [markAsRead] = useMarkNotificationReadMutation();
+  const [markAllRead, { isLoading: isBulkUpdating }] = useMarkAllNotificationsReadMutation();
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
-    showToast("All notifications marked as read!");
-  };
+  const notifications = apiResponse?.data || [];
+  const unreadCount = apiResponse?.meta?.unread || 0;
+  const hasNotifications = notifications.length > 0;
 
-  const handleSelectNotification = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, isRead: true } : item)),
-    );
-
-    const target = notifications.find((n) => n.id === id);
-    if (target && !target.isRead) {
-      showToast(`Marked "${target.title}" as read`);
+  const handleMarkAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    try {
+      await markAllRead().unwrap();
+      showToast?.("All notifications marked as read!", "success");
+    } catch (err) {
+      showToast?.("Failed to clear notifications.", "error");
+      console.log("Failed to clear notifications context:", err);
     }
   };
 
-  const hasNotifications = notifications.length > 0;
+  const handleSelectNotification = async (item: NotificationItem) => {
+    if (item.isRead) return;
+    try {
+      await markAsRead(item.id).unwrap();
+      showToast?.(`Marked "${item.title}" as read`, "success");
+    } catch (err) {
+      console.log("Failed to clear notification index context:", err);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.centerContainer, { backgroundColor: Colors.newBlack }]}>
+        <ActivityIndicator size="large" color={Colors.green} />
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -84,22 +74,25 @@ export default function NotificationsScreen() {
         >
           {/* Top Title Section */}
           <View style={styles.pageTitle}>
-            <TitleAndParagraph
-              title="Notifications"
-              paragraph="Security, KYC, transaction, and alert messages."
+            <BackHeader 
+              title="Notifications" 
+              paragraph="Security, KYC, transaction, and alert messages." 
+              onBack={() => router.back()} 
+              staright
             />
           </View>
 
-          {/* 1. Only display "Mark all as read" button if there are active notifications available */}
-          {hasNotifications && (
+          {/* 1. Display mark all option if there are unread notifications available */}
+          {unreadCount > 0 && (
             <View style={styles.actionBtnWrapper}>
               <PrimaryButton
-                text="Mark all as read"
+                text={isBulkUpdating ? "Processing..." : "Mark all as read"}
                 Bgcolor={Colors.newDark}
                 textColor={Colors.newWhite}
                 onPress={handleMarkAllAsRead}
                 fontSize={14}
                 style={{ fontFamily: FontFamily.bold }}
+                disabled={isBulkUpdating}
               />
             </View>
           )}
@@ -107,18 +100,18 @@ export default function NotificationsScreen() {
           {/* 2. DYNAMIC CONDITIONAL VIEWPORT SWITCH */}
           {hasNotifications ? (
             <View style={styles.listWrapper}>
-              {notifications.map((item) => (
+              {notifications.map((item: NotificationItem) => (
                 <ProfileOptionRow
                   key={item.id}
                   title={item.title}
                   subtitle={item.body}
                   badgeText={item.isRead ? "Read" : "New"}
-                  onPress={() => handleSelectNotification(item.id)}
+                  onPress={() => handleSelectNotification(item)}
                 />
               ))}
             </View>
           ) : (
-            /* Empty State Container Panel: Only displays when notifications length === 0 */
+            /* Empty State Container Panel */
             <View style={styles.calmStateBox}>
               <Title
                 text="All caught up"
@@ -128,7 +121,7 @@ export default function NotificationsScreen() {
               />
               <View style={styles.calmDescMargin}>
                 <Paragraph
-                  text="WTou don't have any notification yet!!! Perform some activity and notification will appear here"
+                  text="You don't have any notifications yet. Perform some activity and notifications will appear here."
                   color={Colors.newSecondary}
                   size={12}
                   lineHeight={16}
@@ -180,4 +173,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   calmDescMargin: { width: "100%", marginTop: 6 },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

@@ -1,4 +1,10 @@
-import { View, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import React, { useState } from "react";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import HeadIcons from "@/src/components/common/tab/HeadIcons";
@@ -8,31 +14,75 @@ import { FontFamily } from "@/src/constants/fonts";
 import IconAndText from "@/src/components/common/tab/IconAndText";
 import Filter from "@/assets/icons/notification/Filter.svg";
 import NotificationCards from "@/src/components/notification/NotificationCards";
-import { NOTIFICATION_DATA } from "@/src/data/notification";
 import Paragraph from "@/src/components/common/Paragraph";
 import { NotificationFilterType } from "@/src/data/notificationFilters";
 import NotificationFilterDropdown from "@/src/components/notification/NotificationFilterDropdown";
 import EmptyNotification from "@/src/components/notification/EmptyNotification";
+import { useToast } from "@/src/context/ToastContext";
+import {
+  useGetNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
+} from "@/src/services/profileApi";
+import { NotificationItem } from "@/src/types/alert";
 
 export default function NotificationScreen() {
+  const { showToast } = useToast();
   const [showFilter, setShowFilter] = useState<boolean>(false);
   const [filter, setFilter] = useState<NotificationFilterType>("all");
 
-  // the filter logic
-  const filteredData = NOTIFICATION_DATA.data.filter((item) => {
+  // 1. Live RTK-Query Hook Stream Connections
+  const { data: apiResponse, isLoading } = useGetNotificationsQuery();
+  const [markAsRead] = useMarkNotificationReadMutation();
+  const [markAllRead, { isLoading: isBulkUpdating }] =
+    useMarkAllNotificationsReadMutation();
+
+  const rawNotificationsList = apiResponse?.data || [];
+  const unreadCount = apiResponse?.meta?.unread || 0;
+
+  // 2. Client Side Filters computed on active server responses
+  const filteredData = rawNotificationsList.filter((item: NotificationItem) => {
     if (filter === "all") return true;
     if (filter === "unread") return !item.isRead;
     return item.type === filter;
   });
 
+  const handleMarkAllRead = async () => {
+    if (unreadCount === 0) {
+      showToast("No unread items to clear.", "success");
+      return;
+    }
+    try {
+      await markAllRead().unwrap();
+      showToast("All notifications marked as read!", "success");
+    } catch (err) {
+      showToast("Failed to clear notifications.", "error");
+    }
+  };
+
+  const handleCardPress = async (item: NotificationItem) => {
+    if (item.isRead) return;
+    try {
+      await markAsRead(item.id).unwrap();
+    } catch (err) {
+      console.error("Failed to mark single row notification read:", err);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={[Styles.container, Styles.centerContainer]}>
+        <ActivityIndicator size="large" color={Colors.green} />
+      </View>
+    );
+  }
+
   return (
     <MySafeAreaView style={Styles.container}>
-      {/* The header */}
       <View>
         <HeadIcons />
       </View>
 
-      {/* notification optional text and filter icon that filters */}
       <View style={Styles.notification}>
         <View style={Styles.titleFilter}>
           <Title
@@ -43,7 +93,19 @@ export default function NotificationScreen() {
           />
 
           <View style={Styles.filterAndText}>
-            <Paragraph text="Mark Read All" size={14} />
+            {/* Mark All Text is now live! */}
+            <TouchableOpacity
+              onPress={handleMarkAllRead}
+              disabled={isBulkUpdating || unreadCount === 0}
+              activeOpacity={0.7}
+            >
+              <Paragraph
+                text={isBulkUpdating ? "Updating..." : "Mark Read All"}
+                size={14}
+                color={unreadCount === 0 ? Colors.newSecondary : Colors.green}
+              />
+            </TouchableOpacity>
+
             <View>
               <IconAndText
                 icon={<Filter />}
@@ -54,7 +116,7 @@ export default function NotificationScreen() {
                 <NotificationFilterDropdown
                   selected={filter}
                   onSelect={(value) => {
-                    setFilter(value);
+                    setFilter(value as NotificationFilterType);
                     setShowFilter(false);
                   }}
                 />
@@ -63,20 +125,27 @@ export default function NotificationScreen() {
           </View>
         </View>
 
-        {/* Notification */}
         <FlatList
           data={filteredData}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
           renderItem={({ item }) => (
-            <NotificationCards
-              title={item.title}
-              body={item.body}
-              type={item.type}
-              createdAt={item.createdAt}
-              isRead={item.isRead}
-            />
+            <TouchableOpacity
+              onPress={() => handleCardPress(item)}
+              activeOpacity={item.isRead ? 1 : 0.8}
+            >
+              <NotificationCards
+                title={item.title}
+                body={item.body}
+                // 🌟 THE FIX: Assert string type to match what the component expects
+                type={
+                  item.type as "deposit" | "kyc" | "security" | "withdrawal"
+                }
+                createdAt={item.createdAt}
+                isRead={item.isRead}
+              />
+            </TouchableOpacity>
           )}
           ListEmptyComponent={<EmptyNotification />}
         />
@@ -89,6 +158,10 @@ const Styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.primary,
     flex: 1,
+  },
+  centerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   notification: {
     paddingHorizontal: 24,
@@ -103,5 +176,6 @@ const Styles = StyleSheet.create({
   filterAndText: {
     flexDirection: "row",
     gap: 10,
+    alignItems: "center",
   },
 });

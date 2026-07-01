@@ -19,13 +19,25 @@ import {
 import { useDispatch } from "react-redux";
 import { setSessionExpired, logOut } from "@/src/store/authSlice";
 import BackHeader from "@/src/components/common/BackHeader";
-import { useGetProfileQuery } from "@/src/services/profileApi";
+import {
+  useGetProfileQuery,
+  useGetNotificationsQuery,
+} from "@/src/services/profileApi";
 
 export default function LiteProfileScreen() {
   const router = useRouter();
   const dispatch = useDispatch(); // 🌟 Access the Redux action pipeline
 
   const { data: profileResponse, isLoading, error } = useGetProfileQuery();
+
+  const { data: apiResponse } = useGetNotificationsQuery();
+  const unreadCount = apiResponse?.meta?.unread || 0;
+
+  // Dynamic text strings based on unread counts
+  const notificationSubtitle =
+    unreadCount > 0
+      ? `${unreadCount} unread message${unreadCount !== 1 ? "s" : ""}`
+      : "No unread messages";
 
   if (isLoading) {
     return (
@@ -127,7 +139,6 @@ export default function LiteProfileScreen() {
                 dispatch(setSessionExpired(true));
               }}
             />
-
             <ProfileOptionRow
               title="Edit profile"
               subtitle="Name, email, phone"
@@ -146,11 +157,17 @@ export default function LiteProfileScreen() {
             />
             <ProfileOptionRow
               title="Notifications"
-              subtitle="2 unread messages"
-              badgeText={2}
+              subtitle={notificationSubtitle}
+              // Only display a numerical badge if there's actually unread content, otherwise pass undefined or 0
+              badgeText={unreadCount > 0 ? unreadCount : undefined}
               onPress={() => router.push("/profile/notifications")}
+              // onPress={() => router.push("/(tabs)/home/NotificationScreen")}
             />
-            <ProfileOptionRow title="Watchlist" subtitle="BTC, ETH, SOL" />
+            <ProfileOptionRow
+              title="Watchlist"
+              subtitle="BTC, ETH, SOL"
+              onPress={() => console.log("Watchlist pressed")}
+            />
           </View>
 
           {/* FOOTER DISMISS BUTTON */}
