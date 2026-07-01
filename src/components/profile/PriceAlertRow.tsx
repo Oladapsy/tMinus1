@@ -1,10 +1,16 @@
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { Ionicons } from "@expo/vector-icons"; // Clean Expo core package bundle
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+} from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
-// import Swipeable from 'react-native-swipeable';
 
 interface PriceAlertRowProps {
   item: {
@@ -12,6 +18,7 @@ interface PriceAlertRowProps {
     title: string;
     subtitle: string;
     badgeText: "On" | "Off" | "Read";
+    symbol: string; // 🌟 e.g. 'btc', 'eth'
   };
   onPress: () => void;
   onDeleteTrigger: () => void;
@@ -23,7 +30,7 @@ export default function PriceAlertRow({
   onDeleteTrigger,
 }: PriceAlertRowProps) {
   const renderRightActions = (
-    _progressAnimatedValue: Animated.AnimatedInterpolation<number>, // Added leading underscore to silence the unused warning
+    _progressAnimatedValue: Animated.AnimatedInterpolation<number>,
     dragAnimatedValue: Animated.AnimatedInterpolation<number>,
   ) => {
     const scale = dragAnimatedValue.interpolate({
@@ -54,11 +61,9 @@ export default function PriceAlertRow({
       ? styles.badgeRed
       : styles.badgeMuted;
 
-  const dotStyle = isOn
-    ? styles.dotGreen
-    : isOff
-      ? styles.dotRed
-      : styles.dotMuted;
+  // 📡 Uses an image proxy to cleanly convert your server SVG file into an easily parseable image stream
+  const baseAssetUrl = `https://crypto-api-guwm.onrender.com/assets/${item.symbol}.svg`;
+  const secureProxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(baseAssetUrl)}&output=png&w=64&h=64`;
 
   return (
     <Swipeable
@@ -68,7 +73,11 @@ export default function PriceAlertRow({
     >
       <Pressable style={styles.rowContainer} onPress={onPress}>
         <View style={styles.leftContent}>
-          <View style={[styles.iconDot, dotStyle]} />
+          <Image
+            source={{ uri: secureProxyUrl }}
+            style={styles.logoFrame}
+            resizeMode="contain"
+          />
 
           <View style={styles.textColumn}>
             <Text style={styles.titleText}>{item.title}</Text>
@@ -95,23 +104,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
   },
-  leftContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
+  leftContent: { flexDirection: "row", alignItems: "center", gap: 16 },
+  logoFrame: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "transparent",
   },
-  iconDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-  },
-  dotGreen: { backgroundColor: Colors.green },
-  dotRed: { backgroundColor: Colors.newRed },
-  dotMuted: { backgroundColor: Colors.newSecondary },
-  textColumn: {
-    flexDirection: "column",
-    gap: 3,
-  },
+  textColumn: { flexDirection: "column", gap: 3 },
   titleText: {
     color: Colors.newWhite,
     fontSize: 14,
@@ -122,21 +122,15 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: FontFamily.regular,
   },
-  badgeContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontFamily: FontFamily.bold,
-  },
+  badgeContainer: { paddingHorizontal: 12, paddingVertical: 4 },
+  badgeText: { fontSize: 12, fontFamily: FontFamily.bold },
   badgeGreen: { color: Colors.green },
   badgeRed: { color: Colors.newRed },
   badgeMuted: { color: Colors.newSecondary },
   deleteSwipeButton: {
     backgroundColor: Colors.newRed,
-    justifyContent: "center", // Keeps your new basket centered perfectly vertically
-    alignItems: "center", // Keeps your new basket centered perfectly horizontally
+    justifyContent: "center",
+    alignItems: "center",
     width: 74,
     height: "100%",
     borderRadius: 16,

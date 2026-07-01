@@ -24,6 +24,7 @@ interface CreatePriceAlertProps {
     direction: "Above" | "Below";
     targetPrice: string;
   }) => void;
+  isSubmitting?: boolean;
 }
 
 const BASE_URL = "https://crypto-api-guwm.onrender.com";
@@ -31,6 +32,7 @@ const BASE_URL = "https://crypto-api-guwm.onrender.com";
 export default function CreatePriceAlert({
   onGoBack,
   onAlertCreated,
+  isSubmitting,
 }: CreatePriceAlertProps) {
   // 1. Single Live Hook Stream Connection
   const { data: assetsRes, isLoading } = useGetMarketAssetsQuery();
@@ -178,8 +180,19 @@ export default function CreatePriceAlert({
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.actionButton} onPress={handleCreate}>
-        <Text style={styles.actionButtonText}>Create alert</Text>
+      <TouchableOpacity
+        style={[
+          styles.actionButton,
+          isSubmitting && { backgroundColor: Colors.newGreen },
+        ]}
+        onPress={handleCreate}
+        disabled={isSubmitting} // 🔒 Disables button inputs instantly while running network queries
+      >
+        {isSubmitting ? (
+          <ActivityIndicator size="small" color={Colors.newGreen} />
+        ) : (
+          <Text style={styles.actionButtonText}>Create alert</Text>
+        )}
       </TouchableOpacity>
 
       {/* 🪙 ASSET SELECTOR MODAL */}
@@ -201,7 +214,9 @@ export default function CreatePriceAlert({
                 >
                   <View style={styles.leftRow}>
                     <Image
-                      source={{ uri: `${BASE_URL}${item.iconUrl}` }}
+                      source={{
+                        uri: `https://images.weserv.nl/?url=${encodeURIComponent(`${BASE_URL}${item.iconUrl}`)}&output=png&w=64&h=64`,
+                      }}
                       style={styles.avatarCircleSmall}
                       resizeMode="contain"
                     />

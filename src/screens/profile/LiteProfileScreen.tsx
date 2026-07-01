@@ -22,7 +22,9 @@ import BackHeader from "@/src/components/common/BackHeader";
 import {
   useGetProfileQuery,
   useGetNotificationsQuery,
+  useGetPriceAlertsQuery,
 } from "@/src/services/profileApi";
+import { PriceAlertItem } from "@/src/types/alert";
 
 export default function LiteProfileScreen() {
   const router = useRouter();
@@ -32,6 +34,20 @@ export default function LiteProfileScreen() {
 
   const { data: apiResponse } = useGetNotificationsQuery();
   const unreadCount = apiResponse?.meta?.unread || 0;
+
+  // price alert list
+  const { data: priceAlertsResponse } = useGetPriceAlertsQuery();
+
+  const activeAlertsCount =
+    priceAlertsResponse?.data?.filter((alert: PriceAlertItem) => alert.isActive)
+      .length || 0;
+
+  // Generate a dynamic, clean subtitle string
+  const alertSubtitle =
+    activeAlertsCount === 0
+      ? "No active alerts"
+      : `${activeAlertsCount} active alert${activeAlertsCount > 1 ? "s" : ""}`;
+  // end of price alert list
 
   // Dynamic text strings based on unread counts
   const notificationSubtitle =
@@ -151,8 +167,8 @@ export default function LiteProfileScreen() {
             />
             <ProfileOptionRow
               title="Price alerts"
-              subtitle="3 active alerts"
-              badgeText={3}
+              subtitle={alertSubtitle}
+              badgeText={activeAlertsCount}
               onPress={() => router.push("/profile/security/price-alerts")}
             />
             <ProfileOptionRow

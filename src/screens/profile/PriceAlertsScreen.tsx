@@ -41,7 +41,8 @@ export default function PriceAlertsScreen() {
   // 1. Live RTK Query Data Streams
   const { data: apiResponse, isLoading: isQueryLoading } =
     useGetPriceAlertsQuery();
-  const [createPriceAlert] = useCreatePriceAlertMutation();
+  const [createPriceAlert, { isLoading: isCreatingAlert }] =
+    useCreatePriceAlertMutation();
   const [updatePriceAlert] = useUpdatePriceAlertMutation();
   const [deletePriceAlert, { isLoading: isDeleting }] =
     useDeletePriceAlertMutation();
@@ -57,7 +58,7 @@ export default function PriceAlertsScreen() {
   const [activeDeleteTarget, setActiveDeleteTarget] =
     useState<PriceAlertItem | null>(null);
 
-  // 2. Toggle Active Status Mutation Handler
+  // 2. Toggle Active Status Mutation Handler (On-Click Turn On/Off)
   const handleRowInteraction = async (item: PriceAlertItem) => {
     try {
       const nextIsActive = !item.isActive;
@@ -157,22 +158,16 @@ export default function PriceAlertsScreen() {
 
             <View style={styles.listWrapper}>
               {alerts.map((alert: PriceAlertItem) => {
-                const componentMappedItem = {
-                  id: alert.id,
-                  title: `${alert.assetSymbol} ${alert.direction} $${alert.targetPriceUsd.toLocaleString()}`,
-                  subtitle: alert.isActive
-                    ? "Active · push notification on"
-                    : "Paused",
-                  badgeText: (alert.isActive ? "On" : "Off") as
-                    | "On"
-                    | "Off"
-                    | "Read",
-                };
-
                 return (
                   <PriceAlertRow
                     key={alert.id}
-                    item={componentMappedItem}
+                    item={{
+                      id: alert.id,
+                      title: `${alert.assetSymbol} · ${alert.direction.toUpperCase()}`,
+                      subtitle: `$${alert.targetPriceUsd.toLocaleString()} · ${alert.isActive ? "Notifications on" : "Paused"}`,
+                      badgeText: alert.isActive ? "On" : "Off",
+                      symbol: alert.assetSymbol.toLowerCase(), // 🌟 Lowercase token string ('btc', 'eth')
+                    }}
                     onPress={() => handleRowInteraction(alert)}
                     onDeleteTrigger={() => setActiveDeleteTarget(alert)}
                   />
@@ -226,6 +221,7 @@ export default function PriceAlertsScreen() {
           <CreatePriceAlert
             onGoBack={() => setLocalStep("list")}
             onAlertCreated={handleAlertCreationSubmit}
+            isSubmitting={isCreatingAlert} // 🌟 Pass the loading state straight down!
           />
         )}
 
