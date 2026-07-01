@@ -44,7 +44,6 @@ export interface AssetData {
 }
 
 interface NewWalletScreenProps {
-  // 🟢 Fixed: Direct compatibility connection map matching MainWalletScreen safely
   walletData: WalletResponse["data"] | undefined;
 }
 
@@ -53,7 +52,7 @@ const ASSET_THEME_MAP: Record<string, { name: string; color: string }> = {
   ETH: { name: "Ethereum", color: Colors.purple },
   USDT: { name: "Tether", color: Colors.green },
   USDC: { name: "USD Coin", color: "#2775CA" },
-  SOL: { name: "Solana", color: "#14F195" },
+  SOL: { name: "Solana", color: Colors.green },
 };
 
 export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
@@ -118,7 +117,7 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
           {workflowMode === "dashboard" && (
             <WalletDashboardView
               totalBalance={portfolioTotalString}
-              trendText="+3.8% today"
+              trendText="+0% today"
               assets={mappedAssets}
               onDepositPress={() => setWorkflowMode("deposit_selector")}
               onWithdrawPress={() => setWorkflowMode("withdraw_selector")}
@@ -247,6 +246,12 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  backgroundImageWrapper: { flex: 1, backgroundColor: Colors.primary },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
+  backgroundImageWrapper: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+  },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
 });

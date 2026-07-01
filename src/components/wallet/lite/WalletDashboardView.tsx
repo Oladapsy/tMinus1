@@ -21,7 +21,7 @@ interface AssetMockData {
 
 interface WalletDashboardViewProps {
   totalBalance: string;
-  trendText: string;
+  trendText?: string;
   assets: AssetMockData[];
   onDepositPress?: () => void;
   onWithdrawPress?: () => void;
@@ -68,7 +68,7 @@ export default function WalletDashboardView({
       {/* 2. Total Balance View Card */}
       <PortfolioValueCard
         totalValueString={totalBalance}
-        percentageChangeString={trendText}
+        percentageChangeString={trendText || ""}
         onPress={onBalancePress}
       />
 
@@ -120,6 +120,7 @@ export default function WalletDashboardView({
             disabled={true}
           />
         ))}
+        
       </View>
 
       {/* 5. Recent Transaction Module */}
