@@ -1,10 +1,7 @@
 import BackHeader from "@/src/components/common/BackHeader";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import Paragraph from "@/src/components/common/Paragraph";
-import Title from "@/src/components/common/Title";
 import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow";
 import { Colors } from "@/src/constants/colors";
-import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import {
@@ -185,24 +182,6 @@ export default function SecurityScreen() {
               onPress={handleToggleBiometrics}
             />
           </View>
-
-          {/* ADMIN CALLOUT WARNING BOX */}
-          <View style={styles.warningBox}>
-            <Title
-              text="Admin will never ask for codes"
-              size={13}
-              fontFamily={FontFamily.bold}
-            />
-            <View style={styles.warningDescMargin}>
-              <Paragraph
-                text="Keep recovery codes private and regenerate them if exposed."
-                color={Colors.newYellowWarning}
-                size={12}
-                lineHeight={17}
-                textAlign="left"
-              />
-            </View>
-          </View>
         </ScrollView>
       </MySafeAreaView>
     </ImageBackground>
@@ -210,18 +189,34 @@ export default function SecurityScreen() {
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: { flex: 1, width: "100%", height: "100%" },
-  safeContainer: { flex: 1, backgroundColor: "transparent" },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 40 },
-  pageTitle: { marginTop: 14, marginBottom: 28 },
-  menuSection: { width: "100%", gap: 12 },
-  warningBox: {
-    backgroundColor: Colors.newYellowSlim,
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 42,
+  backgroundImage: {
+    flex: 1,
     width: "100%",
+    height: "100%",
   },
-  warningDescMargin: { width: "100%", marginTop: 6 },
-  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  pageTitle: {
+    marginTop: 14,
+    marginBottom: 28,
+  },
+  menuSection: {
+    width: "100%",
+    gap: 12,
+  },
+  warningDescMargin: {
+    width: "100%",
+    marginTop: 6,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
