@@ -8,25 +8,19 @@ import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import PortfolioValueCard from "./PortfolioValueCard";
 import WalletAssetRow from "./WalletAssetRow";
-
-interface AssetMockData {
-  id: string;
-  name: string;
-  symbol: string;
-  network: string;
-  balance: string;
-  value: string;
-  color: string;
-}
+import { AssetData } from "@/src/screens/wallet/NewWalletScreen";
+import { Transaction } from "@/src/types/wallet";
+// 🟢 Import your explicit layout interface structure
 
 interface WalletDashboardViewProps {
   totalBalance: string;
   trendText?: string;
-  assets: AssetMockData[];
+  assets: AssetData[]; // 🟢 Uses the shared global AssetData model directly
   onDepositPress?: () => void;
   onWithdrawPress?: () => void;
   onTradePress?: () => void;
   onBalancePress?: () => void;
+  transactions: Transaction[];
 }
 
 export default function WalletDashboardView({
@@ -37,16 +31,21 @@ export default function WalletDashboardView({
   onWithdrawPress,
   onTradePress,
   onBalancePress,
+  transactions,
 }: WalletDashboardViewProps) {
-  const [activeTab, setActiveTab] = useState<"deposit" | "withdraw" | "trade">("deposit");
+  const [activeTab, setActiveTab] = useState<
+    "deposit" | "withdraw" | "trade" | null
+  >(null);
 
-  const handlePress = (tab: "deposit" | "withdraw" | "trade", callback?: () => void) => {
+  const handlePress = (
+    tab: "deposit" | "withdraw" | "trade",
+    callback?: () => void,
+  ) => {
     setActiveTab(tab);
-    
-    // Fire the navigation redirect layout trigger after a tiny delay so they see the color shift
     if (callback) {
       setTimeout(() => {
         callback();
+        setActiveTab(null); // Reset after action executes
       }, 150);
     }
   };
@@ -80,7 +79,9 @@ export default function WalletDashboardView({
             fontSize={13}
             fontFamily={FontFamily.medium}
             Bgcolor={activeTab === "deposit" ? Colors.green : Colors.dark}
-            textColor={activeTab === "deposit" ? Colors.darkText : Colors.newWhite}
+            textColor={
+              activeTab === "deposit" ? Colors.darkText : Colors.newWhite
+            }
             onPress={() => handlePress("deposit", onDepositPress)}
           />
         </View>
@@ -90,7 +91,9 @@ export default function WalletDashboardView({
             fontSize={14}
             fontFamily={FontFamily.medium}
             Bgcolor={activeTab === "withdraw" ? Colors.green : Colors.dark}
-            textColor={activeTab === "withdraw" ? Colors.darkText : Colors.newWhite}
+            textColor={
+              activeTab === "withdraw" ? Colors.darkText : Colors.newWhite
+            }
             onPress={() => handlePress("withdraw", onWithdrawPress)}
           />
         </View>
@@ -100,14 +103,15 @@ export default function WalletDashboardView({
             fontSize={14}
             fontFamily={FontFamily.medium}
             Bgcolor={activeTab === "trade" ? Colors.green : Colors.dark}
-            textColor={activeTab === "trade" ? Colors.darkText : Colors.newWhite}
+            textColor={
+              activeTab === "trade" ? Colors.darkText : Colors.newWhite
+            }
             onPress={() => handlePress("trade", onTradePress)}
           />
         </View>
       </View>
 
       {/* 4. Crypto Assets List Group */}
-
       <View style={styles.listSection}>
         {assets.map((asset) => (
           <WalletAssetRow
@@ -120,7 +124,6 @@ export default function WalletDashboardView({
             disabled={true}
           />
         ))}
-        
       </View>
 
       {/* 5. Recent Transaction Module */}
@@ -128,15 +131,40 @@ export default function WalletDashboardView({
         <Text style={styles.sectionTitleText}>Recent transactions</Text>
       </View>
 
-      <WalletAssetRow
-        name="Sandbox deposit"
-        symbol="USDT"
-        network="Completed"
-        balanceString="Today"
-        valueString="+$250.00"
-        dotColor={Colors.green}
-        disabled={true}
-      />
+      <View style={styles.listSection}>
+        {transactions.map((tx) => {
+          // 1. Safely handle optional transaction type string
+          const transactionType = tx.type ?? "Transaction";
+          const isDeposit = transactionType.toLowerCase() === "deposit";
+
+          // 2. Safely handle optional asset symbol string (e.g. "USDT")
+          const assetSymbol = tx.assetSymbol ?? "Crypto";
+
+          // 3. Safely handle optional status string
+          const currentStatus = tx.status ?? "Pending";
+
+          // 4. Safely parse date timestamp with a safety fallback to right now
+          const dateLabel = tx.createdAt
+            ? new Date(tx.createdAt).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+              })
+            : "Today";
+
+          return (
+            <WalletAssetRow
+              key={tx.id}
+              name={`${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)}`}
+              symbol={assetSymbol}
+              network={currentStatus} // 🟢 Guaranteed strict string
+              balanceString={dateLabel} // 🟢 Guaranteed strict string
+              valueString={`${isDeposit ? "+" : "-"}$${Number(tx.amount ?? 0).toFixed(2)}`}
+              dotColor={isDeposit ? Colors.green : Colors.newCryptoYellow}
+              disabled={true}
+            />
+          );
+        })}
+      </View>
     </ScrollView>
   );
 }

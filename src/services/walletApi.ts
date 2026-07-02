@@ -16,7 +16,15 @@ export const walletApi = createApi({
   reducerPath: "walletApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${BASE_URL}/wallet`,
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as any).auth.accessToken;
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+      return headers;
+    }
   }),
+  
   tagTypes: ["Wallet", "Transactions", "History"],
   endpoints: (builder) => ({
     // 🏢 Wallet home interface metrics engine
