@@ -53,7 +53,7 @@ const FingerprintButton = () => {
       }
     } catch (error) {
       showToast?.("Biometric authentication failed.", "error");
-      console.error("Fingerprint auth error:", error);
+      console.log("Fingerprint auth error:", error);
     }
   };
 

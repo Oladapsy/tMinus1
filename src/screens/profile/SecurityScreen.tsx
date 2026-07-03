@@ -63,7 +63,7 @@ export default function SecurityScreen() {
       }
     } catch (error) {
       showToast?.("An error occurred during biometric setup.", "error");
-      console.error("Biometric setup error:", error);
+      console.log("Biometric setup error:", error);
     }
   };
   const router = useRouter();

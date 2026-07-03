@@ -183,7 +183,7 @@ export default function NewWalletScreen({
       // Now safe to navigate to success panel since unwrap passed validation checks!
       setWorkflowMode("withdraw_success");
     } catch (error: any) {
-      console.error("Transaction Error Details:", error);
+      console.log("Transaction Error Details:", error);
       // 🟢 Dynamic fallback engine reads standard backend failure alerts accurately
       const errorMessage =
         error?.data?.message ||

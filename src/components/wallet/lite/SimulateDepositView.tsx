@@ -52,7 +52,7 @@ export default function SimulateDepositView({
 
       onCreateDeposit();
     } catch (error: any) {
-      console.error("Sandbox simulation failed:", error);
+      console.log("Sandbox simulation failed:", error);
 
       // 🟢 Dig deep into the API payload structure to extract the exact error text
       const errorMessage = 

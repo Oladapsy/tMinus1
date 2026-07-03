@@ -10,8 +10,7 @@ import {
   WithdrawalResponse,
 } from "../types/wallet";
 
-// 🟢 IMPORTANT: Import your auth slice actions here to update tokens or handle sessions
-// import { setCredentials, logout } from "../store/slices/authSlice";
+import { updateTokens, logOut } from "../store/authSlice";
 
 export interface TransferRequest {
   assetSymbol: string;
@@ -54,7 +53,6 @@ const baseQuery = fetchBaseQuery({
 });
 
 // 2️⃣ Interceptor logic to catch expired sessions and refresh automatically
-// 2️⃣ Interceptor logic to catch expired sessions and refresh automatically
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   let result = await baseQuery(args, api, extraOptions);
 
@@ -85,26 +83,59 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             );
 
             const newAccessToken = refreshData.data.accessToken;
+            const newRefreshToken =
+              refreshData.data.refreshToken || refreshToken;
 
-            // 🟢 Action Dispatch: Updates token credentials inside Redux memory structures
-            // Uncomment this once your slices are connected!
-            // api.dispatch(setCredentials({
-            //   accessToken: newAccessToken,
-            //   refreshToken: refreshData.data.refreshToken || refreshToken,
-            // }));
+            // 🟢 FIXED: Dispatches updateTokens with the correct structural parameters
+            api.dispatch(
+              updateTokens({
+                accessToken: newAccessToken,
+                refreshToken: newRefreshToken,
+              }),
+            );
 
-            // 🟢 FORCE HEADERS INJECTION FOR RETRY
-            // This bypasses the old state lookup for the replayed request execution
+            // 🟢 Safe header alteration matching RTK's query header transformations
             if (typeof args === "string") {
-              args = { 
-                url: args, 
-                headers: { "authorization": `Bearer ${newAccessToken}` } 
+              args = {
+                url: args,
+                headers: { authorization: `Bearer ${newAccessToken}` },
               };
             } else {
-              args.headers = {
-                ...args.headers,
-                "authorization": `Bearer ${newAccessToken}`,
-              };
+              if (!args.headers) {
+                args.headers = {};
+              }
+
+              // Checks if the headers collection matches Web API Header class instances
+              if (
+                args.headers instanceof Headers ||
+                typeof (args.headers as any).set === "function"
+              ) {
+                (args.headers as any).set(
+                  "authorization",
+                  `Bearer ${newAccessToken}`,
+                );
+              } else if (Array.isArray(args.headers)) {
+                const authIdx = (args.headers as [string, any][]).findIndex(
+                  ([k]) => k.toLowerCase() === "authorization",
+                );
+                if (authIdx !== -1) {
+                  args.headers[authIdx] = [
+                    "authorization",
+                    `Bearer ${newAccessToken}`,
+                  ];
+                } else {
+                  args.headers.push([
+                    "authorization",
+                    `Bearer ${newAccessToken}`,
+                  ]);
+                }
+              } else {
+                // Standard fallback literal key value block injection assignment mapping
+                args.headers = {
+                  ...args.headers,
+                  authorization: `Bearer ${newAccessToken}`,
+                };
+              }
             }
 
             // Retry the original query payload with the fresh authorization parameters
@@ -113,11 +144,13 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             console.log(
               "❌ Refresh token verification failed. Forcing session termination...",
             );
-            // api.dispatch(logout());
+            // 🟢 FIXED: Calls logOut matching your exact reducer declaration
+            api.dispatch(logOut());
           }
         } catch (error) {
-          console.error("🚨 Interceptor network refresh error caught:", error);
-          // api.dispatch(logout());
+          console.log("🚨 Interceptor network refresh error caught:", error);
+          // 🟢 FIXED: Safe logout fallback execution
+          api.dispatch(logOut());
         }
       } else {
         console.log(
@@ -133,17 +166,15 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 // 3️⃣ Main API Definition
 export const walletApi = createApi({
   reducerPath: "walletApi",
-  baseQuery: baseQueryWithReauth, // 👈 Hooked up the token auto-recovery layer here!
+  baseQuery: baseQueryWithReauth,
 
   tagTypes: ["Wallet", "Transactions", "History"],
   endpoints: (builder) => ({
-    // 🏢 Wallet home interface metrics engine
     getWallet: builder.query<WalletResponse, void>({
       query: () => "",
       providesTags: ["Wallet"],
     }),
 
-    // 📈 Portfolio tracking chart lines engine
     getPortfolioHistory: builder.query<
       PortfolioHistoryResponse,
       { range: "1D" | "1W" | "1M" | "1Y" }
@@ -152,7 +183,6 @@ export const walletApi = createApi({
       providesTags: ["History"],
     }),
 
-    // 🧾 Transact monitoring log stream
     getTransactions: builder.query<
       TransactionListResponse,
       { status?: string; type?: string; page?: number; limit?: number } | void
@@ -163,18 +193,16 @@ export const walletApi = createApi({
         if (params?.type) searchParams.append("type", params.type);
         if (params?.page) searchParams.append("page", String(params.page));
         if (params?.limit) searchParams.append("limit", String(params.limit));
-        searchParams.append("order", "desc"); // Default layout view sorting
+        searchParams.append("order", "desc");
         return `/transactions?${searchParams.toString()}`;
       },
       providesTags: ["Transactions"],
     }),
 
-    // 🔍 Individual validation record lookup
     getTransactionDetails: builder.query<{ data: Transaction }, string>({
       query: (id) => `/transactions/${id}`,
     }),
 
-    // 🧪 Sandbox testing mock deposit stream execution
     simulateDeposit: builder.mutation<
       SimulateDepositResponse,
       SimulateDepositRequest
@@ -188,7 +216,6 @@ export const walletApi = createApi({
       invalidatesTags: ["Wallet", "Transactions", "History"],
     }),
 
-    // 💸 Liquid asset external extraction ledger dispatch
     requestWithdrawal: builder.mutation<WithdrawalResponse, WithdrawalRequest>({
       query: (body) => ({
         url: "/withdrawals",
@@ -199,7 +226,6 @@ export const walletApi = createApi({
       invalidatesTags: ["Wallet", "Transactions", "History"],
     }),
 
-    // 🟢 3. Internal Transfer endpoint engine connecting to /wallet/transfers
     executeInternalTransfer: builder.mutation<
       TransferResponse,
       TransferRequest
@@ -210,7 +236,7 @@ export const walletApi = createApi({
         body,
         headers: { "Idempotency-Key": `int-trf-${Date.now()}` },
       }),
-      invalidatesTags: ["Wallet", "Transactions", "History"], // Instantly triggers balance & history recalculation redraws!
+      invalidatesTags: ["Wallet", "Transactions", "History"],
     }),
   }),
 });

@@ -114,7 +114,7 @@ export default function Index() {
 
       setScreenIndex(6);
     } catch (error) {
-      console.error("KYC execution processing sequence failure:", error);
+      console.log("KYC execution processing sequence failure:", error);
     }
   };
 

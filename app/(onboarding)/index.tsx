@@ -47,7 +47,7 @@ export default function OnboardingScreen() {
         // 🌟 2. Replace the layout route instead of pushing so they can't hardware back-button return here
         router.replace("/(auth)/signin");
       } catch (error) {
-        console.error("Failed to commit onboarding flag to memory:", error);
+        console.log("Failed to commit onboarding flag to memory:", error);
         // Fallback redirection safely just in case storage fails
         router.replace("/(auth)/signin");
       }

@@ -34,7 +34,7 @@ export default function RecoveryCodesScreen() {
       try {
         return JSON.parse(params.codes);
       } catch (e) {
-        console.error("Failed to parse codes:", e);
+        console.log("Failed to parse codes:", e);
       }
     }
     return [

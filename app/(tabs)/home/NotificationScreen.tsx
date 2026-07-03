@@ -65,7 +65,7 @@ export default function NotificationScreen() {
     try {
       await markAsRead(item.id).unwrap();
     } catch (err) {
-      console.error("Failed to mark single row notification read:", err);
+      console.log("Failed to mark single row notification read:", err);
     }
   };
 
