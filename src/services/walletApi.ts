@@ -54,6 +54,7 @@ const baseQuery = fetchBaseQuery({
 });
 
 // 2️⃣ Interceptor logic to catch expired sessions and refresh automatically
+// 2️⃣ Interceptor logic to catch expired sessions and refresh automatically
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   let result = await baseQuery(args, api, extraOptions);
 
@@ -83,11 +84,28 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
               "✅ Token successfully renewed! Re-trying context transaction branch...",
             );
 
+            const newAccessToken = refreshData.data.accessToken;
+
             // 🟢 Action Dispatch: Updates token credentials inside Redux memory structures
+            // Uncomment this once your slices are connected!
             // api.dispatch(setCredentials({
-            //   accessToken: refreshData.data.accessToken,
+            //   accessToken: newAccessToken,
             //   refreshToken: refreshData.data.refreshToken || refreshToken,
             // }));
+
+            // 🟢 FORCE HEADERS INJECTION FOR RETRY
+            // This bypasses the old state lookup for the replayed request execution
+            if (typeof args === "string") {
+              args = { 
+                url: args, 
+                headers: { "authorization": `Bearer ${newAccessToken}` } 
+              };
+            } else {
+              args.headers = {
+                ...args.headers,
+                "authorization": `Bearer ${newAccessToken}`,
+              };
+            }
 
             // Retry the original query payload with the fresh authorization parameters
             result = await baseQuery(args, api, extraOptions);
