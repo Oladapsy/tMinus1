@@ -17,13 +17,24 @@ import { useGetTransactionsQuery } from "@/src/services/walletApi";
 const ActivityScreen = () => {
   const router = useRouter();
 
-  // 🟢 Live state subscription monitoring backend data entries
-  const { data: txResponse, isLoading, refetch } = useGetTransactionsQuery();
+  // 🟢 Enhanced tracking parameter query to mirror exact maximum log capacity limits
+  const {
+    data: txResponse,
+    isLoading,
+    refetch,
+  } = useGetTransactionsQuery(
+    {
+      limit: 50,
+      page: 1,
+    },
+    {
+      // Forces clean query synchronization refetch logic when jumping between app screens
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
-  // 🟢 FIXED: Points directly to the root array return data structure
   const rawTransactions = txResponse?.data ?? [];
 
-  // Helper formatting function to convert backend date string gracefully
   const formatDate = (isoString: string) => {
     if (!isoString) return "";
     const date = new Date(isoString);
@@ -47,7 +58,6 @@ const ActivityScreen = () => {
             label="Deposit"
             value=""
             onPress={() => {
-              // Triggers instant wallet layout transition straight to deposit layout panel
               router.push({
                 pathname: "/(tabs)/wallets/MainWalletScreen",
                 params: { action: "open_deposit" },
@@ -60,7 +70,6 @@ const ActivityScreen = () => {
             label="Withdrawals"
             value=""
             onPress={() => {
-              // Extra clean helper routing directly to custom withdrawal flow states
               router.push({
                 pathname: "/(tabs)/wallets/MainWalletScreen",
                 params: { action: "open_withdraw" },
@@ -79,11 +88,10 @@ const ActivityScreen = () => {
           />
         </View>
 
-        {/* Activity Title section context header */}
         <Title text="Recent Activity" size={18} fontFamily={FontFamily.bold} />
       </View>
 
-      {/* Loading state rendering element spinner fallback */}
+      {/* Loading state spinner rendering */}
       {isLoading ? (
         <View style={Style.loaderContainer}>
           <ActivityIndicator size="small" color={Colors.green} />
@@ -98,14 +106,12 @@ const ActivityScreen = () => {
           refreshing={isLoading}
           onRefresh={refetch}
           renderItem={({ item }) => {
-            // 🟢 FIXED: Safe float parsing fallback pipeline to eliminate any potential NaN issues
             const cleanAmountString = String(
               item.amount ?? item.toAmount ?? item.fromAmount ?? "0",
             ).replace(/[^0-9.]/g, "");
             const numAmount = parseFloat(cleanAmountString);
             const safeAmount = isNaN(numAmount) ? 0 : numAmount;
 
-            // Normalize backend status codes into valid UI badge props
             let uiStatus: "Filled" | "Pending" | "Cancelled" = "Pending";
             if (
               item.status?.toLowerCase() === "completed" ||
@@ -116,7 +122,6 @@ const ActivityScreen = () => {
               uiStatus = "Cancelled";
             }
 
-            // Capitalize transaction type for display (e.g., DEPOSIT -> Deposit)
             const displayType = item.type
               ? item.type.charAt(0).toUpperCase() +
                 item.type.slice(1).toLowerCase()
