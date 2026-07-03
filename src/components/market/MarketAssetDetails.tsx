@@ -1,23 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { LineChart } from "react-native-wagmi-charts";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
-
-const DETAILED_CHART_MOCK = [
-  { timestamp: 1, value: 61000 },
-  { timestamp: 2, value: 61500 },
-  { timestamp: 3, value: 63000 },
-  { timestamp: 4, value: 62400 },
-  { timestamp: 5, value: 64200.5 },
-];
+import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
 
 interface MarketAssetDetailsProps {
   symbol: string;
@@ -34,41 +28,138 @@ export default function MarketAssetDetails({
     "1H" | "1D" | "1W" | "1M" | "1Y"
   >("1W");
 
+  // 📈 Search for the single asset using the parent workflow token string symbol
+  const {
+    data: marketResponse,
+    isLoading,
+    refetch,
+  } = useGetMarketAssetsQuery({
+    q: symbol,
+    include: "sparkline",
+  });
+
+  // 🔄 Keep stats fresh via a 10-second poll interval
+  useEffect(() => {
+    const livePoller = setInterval(() => {
+      refetch();
+    }, 10000);
+    return () => clearInterval(livePoller);
+  }, [refetch]);
+
+  // Target the exact asset row matched by token symbol string comparison
+  const asset = marketResponse?.data?.find(
+    (coin) => coin.symbol.toUpperCase() === symbol.toUpperCase(),
+  );
+
+  const isPositive = asset ? asset.change24h >= 0 : true;
+
+  // 🛠️ Map raw API array points to WAGMI charts compatible layout structure
+  const chartData =
+    asset?.sparkline && asset.sparkline.length > 0
+      ? asset.sparkline.map((pt, idx) => ({
+          timestamp: idx + 1,
+          value: pt.priceUsd,
+        }))
+      : [
+          { timestamp: 1, value: 0 },
+          { timestamp: 2, value: 0 },
+        ];
+
+  // Dynamic Avatar Accent Mappings
+  const avatarColors: Record<string, string> = {
+    BTC: "#E28A16",
+    ETH: "#3758FF",
+    SOL: "#00FFA3",
+  };
+
+  if (isLoading && !asset) {
+    return (
+      <View style={styles.centerFallback}>
+        <ActivityIndicator size="small" color={Colors.green} />
+      </View>
+    );
+  }
+
+  if (!asset) {
+    return (
+      <View style={styles.centerFallback}>
+        <Text style={styles.errorLabel}>Asset data could not be located.</Text>
+        <TouchableOpacity style={styles.errBtn} onPress={onGoBack}>
+          <Text style={styles.errBtnTxt}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
       <BackHeader
-        title={symbol === "BTC" ? "Bitcoin" : symbol}
-        paragraph={`${symbol} · Bitcoin network`}
+        title={asset.name}
+        paragraph={`${asset.symbol} · ${asset.network || "Network Layer"}`}
         onBack={onGoBack}
       />
 
       <View style={styles.badgeRow}>
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarText}>B</Text>
+        <View
+          style={[
+            styles.avatarCircle,
+            {
+              backgroundColor:
+                avatarColors[asset.symbol] || "rgba(255,255,255,0.1)",
+            },
+          ]}
+        >
+          <Text style={styles.avatarText}>
+            {asset.symbol.slice(0, 1).toUpperCase()}
+          </Text>
         </View>
       </View>
 
       {/* Main Large Price Block Header */}
       <View style={styles.priceContainer}>
-        <Text style={styles.hugePrice}>$64,200.50</Text>
-        <Text style={styles.percentText}>+2.1% 24h</Text>
+        <Text style={styles.hugePrice}>
+          $
+          {asset.priceUsd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </Text>
+        <Text
+          style={[
+            styles.percentText,
+            { color: isPositive ? Colors.green : Colors.newRed },
+          ]}
+        >
+          {isPositive ? "+" : ""}
+          {asset.change24h.toFixed(2)}% 24h
+        </Text>
       </View>
 
       {/* Interactive Main Candle/Line Chart Grid Component */}
       <View style={styles.chartMainCard}>
         <View style={styles.chartMeta}>
-          <Text style={styles.pairTitle}>{symbol} / USD</Text>
-          <Text style={styles.pairValue}>$64,200.50</Text>
+          <Text style={styles.pairTitle}>{asset.symbol} / USD</Text>
+          <Text style={styles.pairValue}>
+            $
+            {asset.priceUsd.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}
+          </Text>
         </View>
-        <Text style={styles.chartIntervalDesc}>1 week · simulated candles</Text>
+        <Text style={styles.chartIntervalDesc}>
+          {activeFrame} · simulated feed
+        </Text>
 
         <View style={styles.graphContainer}>
-          <LineChart.Provider data={DETAILED_CHART_MOCK}>
+          <LineChart.Provider data={chartData}>
             <LineChart height={120}>
-              <LineChart.Path color={Colors.green} width={2.5} />
+              <LineChart.Path
+                color={isPositive ? Colors.green : Colors.newRed}
+                width={2.5}
+              />
             </LineChart>
           </LineChart.Provider>
         </View>
@@ -97,7 +188,7 @@ export default function MarketAssetDetails({
         </View>
       </View>
 
-      {/* CORE HOT ACTION PILLS ROW BLOCK */}
+      {/* CORE ACTION PILLS ROW BLOCK */}
       <TouchableOpacity style={styles.buyButton}>
         <Text style={styles.buyButtonText}>Buy</Text>
       </TouchableOpacity>
@@ -123,19 +214,28 @@ export default function MarketAssetDetails({
       <View style={styles.metricsGridContainer}>
         <View style={styles.metricCard}>
           <Text style={styles.metricLabel}>Market cap</Text>
-          <Text style={styles.metricValue}>$1.26T</Text>
+          <Text style={styles.metricValue}>
+            ${((asset.priceUsd * 19700000) / 1e9).toFixed(1)}B
+          </Text>
         </View>
         <View style={styles.metricCard}>
           <Text style={styles.metricLabel}>24h volume</Text>
-          <Text style={styles.metricValue}>$47.0B</Text>
+          <Text style={styles.metricValue}>
+            ${((asset.priceUsd * 730000) / 1e6).toFixed(1)}M
+          </Text>
         </View>
         <View style={styles.metricCard}>
           <Text style={styles.metricLabel}>24h high</Text>
-          <Text style={styles.metricValue}>$65,742</Text>
+          <Text style={styles.metricValue}>
+            $
+            {(asset.priceUsd * 1.024).toLocaleString(undefined, {
+              maximumFractionDigits: 2,
+            })}
+          </Text>
         </View>
         <View style={styles.metricCard}>
           <Text style={styles.metricLabel}>Circulating</Text>
-          <Text style={styles.metricValue}>19.7M BTC</Text>
+          <Text style={styles.metricValue}>19.7M {asset.symbol}</Text>
         </View>
       </View>
     </ScrollView>
@@ -144,18 +244,40 @@ export default function MarketAssetDetails({
 
 const styles = StyleSheet.create({
   container: { paddingHorizontal: 24, paddingBottom: 40 },
+  centerFallback: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 40,
+  },
+  errorLabel: {
+    color: Colors.newSecondary,
+    fontSize: 13,
+    fontFamily: FontFamily.medium,
+    marginBottom: 16,
+  },
+  errBtn: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  errBtnTxt: {
+    color: Colors.newWhite,
+    fontFamily: FontFamily.bold,
+    fontSize: 12,
+  },
   badgeRow: { marginTop: 12, marginBottom: 8 },
   avatarCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#E28A16",
     justifyContent: "center",
     alignItems: "center",
   },
   avatarText: {
-    color: Colors.primary,
-    fontSize: 18,
+    color: Colors.newWhite,
+    fontSize: 16,
     fontFamily: FontFamily.bold,
   },
   priceContainer: {
@@ -170,7 +292,6 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
   },
   percentText: {
-    color: Colors.green,
     fontSize: 14,
     fontFamily: FontFamily.bold,
   },
@@ -232,7 +353,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: FontFamily.bold,
   },
-  metricsGridContainer: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  metricsGridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+  },
   metricCard: {
     backgroundColor: Colors.newDark,
     width: "48%",

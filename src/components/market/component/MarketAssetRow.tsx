@@ -3,32 +3,19 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import MarketMiniSparkline from "./MarketMiniSparkline";
-
-// Maps to the structure returned by GET /market/trending
-export interface TrendingAssetData {
-  id: string;
-  symbol: string;
-  name: string;
-  network: string;
-  priceUsd: number;
-  change24h: number;
-  isActive: boolean;
-  minBuyUsd: number;
-  minSellUsd: number;
-  iconUrl: string;
-  sparkline?: Array<{ time: string; priceUsd: number }>;
-}
+import { MarketAsset } from "@/src/types/market";
 
 interface MarketAssetRowProps {
-  coin: TrendingAssetData;
+  coin: MarketAsset;
   onPress: (symbol: string) => void;
 }
 
 export default function MarketAssetRow({ coin, onPress }: MarketAssetRowProps) {
   const isPositive = coin.change24h >= 0;
-  
-  // Custom initial avatar text selector logic fallback
-  const fallbackInitial = coin.symbol.slice(0, 1);
+
+  const fallbackInitial = coin.symbol
+    ? coin.symbol.slice(0, 1).toUpperCase()
+    : "";
   const avatarColors: Record<string, string> = {
     BTC: "#E28A16",
     ETH: "#3758FF",
@@ -36,9 +23,20 @@ export default function MarketAssetRow({ coin, onPress }: MarketAssetRowProps) {
   };
 
   return (
-    <TouchableOpacity style={styles.assetRow} onPress={() => onPress(coin.symbol)}>
+    <TouchableOpacity
+      style={styles.assetRow}
+      onPress={() => onPress(coin.symbol)}
+    >
       <View style={styles.leftMeta}>
-        <View style={[styles.avatarBadge, { backgroundColor: avatarColors[coin.symbol] || "rgba(255,255,255,0.08)" }]}>
+        <View
+          style={[
+            styles.avatarBadge,
+            {
+              backgroundColor:
+                avatarColors[coin.symbol] || "rgba(255,255,255,0.08)",
+            },
+          ]}
+        >
           <Text style={styles.avatarText}>{fallbackInitial}</Text>
         </View>
         <View>
@@ -47,21 +45,39 @@ export default function MarketAssetRow({ coin, onPress }: MarketAssetRowProps) {
         </View>
       </View>
 
-      {/* Render the dynamic sparkline engine */}
+      {/* Dynamic inline sparkline graph block */}
       <View style={styles.sparklineSpace}>
-        {coin.sparkline ? (
-          <MarketMiniSparkline points={coin.sparkline} isPositive={isPositive} />
+        {coin.sparkline && coin.sparkline.length > 0 ? (
+          <MarketMiniSparkline
+            points={coin.sparkline}
+            isPositive={isPositive}
+          />
         ) : (
-          <View style={[styles.fallbackTrendLine, { borderColor: isPositive ? Colors.green : Colors.newRed }]} />
+          <View
+            style={[
+              styles.fallbackTrendLine,
+              { borderColor: isPositive ? Colors.green : Colors.newRed },
+            ]}
+          />
         )}
       </View>
 
       <View style={styles.rightMeta}>
         <Text style={styles.priceValue}>
-          ${coin.priceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          $
+          {coin.priceUsd.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </Text>
-        <Text style={[styles.changeValue, { color: isPositive ? Colors.green : Colors.newRed }]}>
-          {isPositive ? "+" : ""}{coin.change24h}%
+        <Text
+          style={[
+            styles.changeValue,
+            { color: isPositive ? Colors.green : Colors.newRed },
+          ]}
+        >
+          {isPositive ? "+" : ""}
+          {coin.change24h.toFixed(2)}%
         </Text>
       </View>
     </TouchableOpacity>
@@ -69,15 +85,51 @@ export default function MarketAssetRow({ coin, onPress }: MarketAssetRowProps) {
 }
 
 const styles = StyleSheet.create({
-  assetRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  assetRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   leftMeta: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1.5 },
-  avatarBadge: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
-  avatarText: { color: Colors.newWhite, fontSize: 14, fontFamily: FontFamily.bold },
-  coinTitle: { color: Colors.newWhite, fontSize: 15, fontFamily: FontFamily.bold },
-  coinSub: { color: Colors.newSecondary, fontSize: 11, fontFamily: FontFamily.medium, marginTop: 2 },
-  sparklineSpace: { flex: 1, alignItems: "center", justifyContent: "center" },
-  fallbackTrendLine: { borderBottomWidth: 1.5, width: "60%", transform: [{ rotate: "-4deg" }] },
+  avatarBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    color: Colors.newWhite,
+    fontSize: 14,
+    fontFamily: FontFamily.bold,
+  },
+  coinTitle: {
+    color: Colors.newWhite,
+    fontSize: 15,
+    fontFamily: FontFamily.bold,
+  },
+  coinSub: {
+    color: Colors.newSecondary,
+    fontSize: 11,
+    fontFamily: FontFamily.medium,
+    marginTop: 2,
+  },
+  sparklineSpace: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  fallbackTrendLine: {
+    borderBottomWidth: 1.5,
+    width: "60%",
+    transform: [{ rotate: "-4deg" }],
+  },
   rightMeta: { alignItems: "flex-end", flex: 1.2 },
-  priceValue: { color: Colors.newWhite, fontSize: 15, fontFamily: FontFamily.bold },
+  priceValue: {
+    color: Colors.newWhite,
+    fontSize: 15,
+    fontFamily: FontFamily.bold,
+  },
   changeValue: { fontSize: 12, fontFamily: FontFamily.bold, marginTop: 2 },
 });

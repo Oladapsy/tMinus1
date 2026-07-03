@@ -47,13 +47,13 @@ export default function MarketScreen() {
           <MarketDashboardView
             onSelectAsset={(symbol) => {
               setActiveSymbol(symbol);
-              setWorkflowMode("coinOrderBook"); // Deep dive screen testing path
+              setWorkflowMode("coin"); // Modified to hit screen 3 asset details first!
             }}
             onNavigateToTrending={() => {
-              setWorkflowMode("trending"); // Takes user to Screen 2 layout
+              setWorkflowMode("trending");
             }}
             onNavigateToWatchlist={() => {
-              setWorkflowMode("watchlist"); // Takes user to Watchlist.png layout
+              setWorkflowMode("watchlist");
             }}
           />
         )}
@@ -93,6 +93,7 @@ export default function MarketScreen() {
         {/* 🔵 Screen 5: Recent Trades Screen */}
         {workflowMode === "recentTrades" && (
           <RecentTrades
+            symbol={activeSymbol} // 🌟 Passed active symbol down here!
             onGoBack={() => setWorkflowMode("dashboard")}
             onToggleView={() => setWorkflowMode("coinOrderBook")}
           />
@@ -113,8 +114,8 @@ export default function MarketScreen() {
         {/* Screen 7 */}
         {workflowMode === "createAlert" && (
           <CreatePriceAlert
-            symbol={activeSymbol}
-            currentPrice={64200.5}
+            // symbol={activeSymbol}
+            // currentPrice={64200.5}
             onGoBack={() => setWorkflowMode("coinOrderBook")}
             onAlertCreated={(payload) => {
               setAlertData({

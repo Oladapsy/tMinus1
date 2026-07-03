@@ -3,6 +3,7 @@ import authReducer from "@/src/store/authSlice";
 import { authApi } from "@/src/services/authApi";
 import { profileApi } from "../services/profileApi";
 import { walletApi } from "../services/walletApi";
+import { marketApi } from "../services/marketApi";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,8 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [profileApi.reducerPath]: profileApi.reducer,
     [walletApi.reducerPath]: walletApi.reducer,
+    [marketApi.reducerPath]: marketApi.reducer,
+
   },
 
   // 3. Adding the api middleware enables caching, invalidation, polling,
@@ -21,7 +24,8 @@ export const store = configureStore({
     getDefaultMiddleware()
       .concat(authApi.middleware)
       .concat(profileApi.middleware)
-      .concat(walletApi.middleware),
+      .concat(walletApi.middleware)
+      .concat(marketApi.middleware),
 });
 
 // --- TypeScript Setup Types ---

@@ -61,3 +61,39 @@ export interface AssetDetails {
   };
   chart: { time: string; priceUsd: number }[];
 }
+
+export interface OrderLevel {
+  priceUsd: number;
+  amount: number;
+  total: number;
+}
+
+export interface OrderBookData {
+  midPriceUsd: number;
+  spreadUsd: number;
+  bids: OrderLevel[];
+  asks: OrderLevel[];
+}
+
+export interface OrderBookMeta {
+  symbol: string;
+  levels: number;
+}
+
+export interface MarketOrderBookResponse {
+  data: OrderBookData;
+  meta: OrderBookMeta;
+}
+
+export interface TradeItemPayload {
+  id: string;
+  side: "buy" | "sell";
+  priceUsd: number;
+  amount: number;
+  totalUsd: number;
+  createdAt: string;
+}
+
+export interface RecentTradesResponse {
+  data: TradeItemPayload[];
+}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,61 +6,18 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import MarketAssetRow from "./component/MarketAssetRow";
-
-const MOCK_MARKETS = [
-  {
-    id: "asset_btc",
-    name: "Bitcoin",
-    symbol: "BTC",
-    network: "Bitcoin Testnet",
-    priceUsd: 64200.5,
-    change24h: 2.1,
-    isActive: true,
-    minBuyUsd: 10,
-    minSellUsd: 10,
-    iconUrl: "/assets/btc.svg",
-    initial: "B",
-    badgeBg: "#E28A16",
-  },
-  {
-    id: "asset_eth",
-    name: "Ethereum",
-    symbol: "ETH",
-    network: "Ethereum Sepolia",
-    priceUsd: 3420.0,
-    change24h: -1.1,
-    isActive: true,
-    minBuyUsd: 10,
-    minSellUsd: 10,
-    iconUrl: "/assets/eth.svg",
-    initial: "E",
-    badgeBg: "#3758FF",
-  },
-  {
-    id: "asset_sol",
-    name: "Solana",
-    symbol: "SOL",
-    network: "Solana Devnet",
-    priceUsd: 152.0,
-    change24h: 4.2,
-    isActive: true,
-    minBuyUsd: 10,
-    minSellUsd: 10,
-    iconUrl: "/assets/sol.svg",
-    initial: "S",
-    badgeBg: "#00FFA3",
-  },
-];
+import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
 
 interface MarketDashboardViewProps {
   onSelectAsset: (symbol: string) => void;
-  onNavigateToTrending: () => void; // 🌟 Made mandatory since it's wired to the "Gainers" pill
-  onNavigateToWatchlist: () => void; // 🌟 New mandatory callback to wire up the "Watchlist" pill
+  onNavigateToTrending: () => void;
+  onNavigateToWatchlist: () => void;
 }
 
 export default function MarketDashboardView({
@@ -70,12 +27,32 @@ export default function MarketDashboardView({
 }: MarketDashboardViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Handler for intercepts when clicking pills
+  // 📈 Fetch network catalog metrics directly with sparklines included
+  const {
+    data: assetResponse,
+    isLoading,
+    refetch,
+  } = useGetMarketAssetsQuery({
+    q: searchQuery || undefined,
+    include: "sparkline",
+  });
+
+  // 🔄 Automated 10-second poll engine routine
+  useEffect(() => {
+    const livePoller = setInterval(() => {
+      refetch();
+    }, 10000);
+
+    return () => clearInterval(livePoller);
+  }, [refetch]);
+
+  const activeAssets = assetResponse?.data ?? [];
+
   const handlePillPress = (filter: "All" | "Gainers" | "Watchlist") => {
     if (filter === "Gainers") {
-      onNavigateToTrending(); // 🏃‍♂️ Reroutes straight to Screen 2
+      onNavigateToTrending();
     } else if (filter === "Watchlist") {
-      onNavigateToWatchlist(); // 🏃‍♂️ Reroutes straight to Watchlist.png layout
+      onNavigateToWatchlist();
     }
   };
 
@@ -92,6 +69,7 @@ export default function MarketDashboardView({
           />
         </View>
 
+        {/* 🟢 FIXED: Spacing metrics redistributed onto text field directly to line up alignment */}
         <View style={styles.searchBar}>
           <TextInput
             style={styles.searchInput}
@@ -99,13 +77,15 @@ export default function MarketDashboardView({
             placeholderTextColor={Colors.newSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
         </View>
 
-        {/* Filter Row Acting as Screen Shortcuts */}
+        {/* Filter Row */}
         <View style={styles.filterRow}>
           {(["All", "Gainers", "Watchlist"] as const).map((filter) => {
-            const isSelected = filter === "All"; // Dashboard defaults visually to highlighting "All"
+            const isSelected = filter === "All";
             return (
               <TouchableOpacity
                 key={filter}
@@ -128,25 +108,26 @@ export default function MarketDashboardView({
           })}
         </View>
 
-        <View style={styles.listContainer}>
-          {MOCK_MARKETS.filter((item) => {
-            if (
-              searchQuery &&
-              !item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-              !item.symbol.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-              return false;
-            return true;
-          }).map((coin) => (
-            <View key={coin.id} style={styles.rowCardWrapper}>
-              <MarketAssetRow
-                key={coin.id}
-                coin={coin}
-                onPress={onSelectAsset}
-              />
-            </View>
-          ))}
-        </View>
+        {/* Dynamic Network Content State Mapping */}
+        {isLoading && activeAssets.length === 0 ? (
+          <View style={styles.centerLoader}>
+            <ActivityIndicator size="small" color={Colors.green} />
+          </View>
+        ) : (
+          <View style={styles.listContainer}>
+            {activeAssets.map((coin) => (
+              <View key={coin.id} style={styles.rowCardWrapper}>
+                <MarketAssetRow coin={coin} onPress={onSelectAsset} />
+              </View>
+            ))}
+
+            {!isLoading && activeAssets.length === 0 && (
+              <Text style={styles.emptyText}>
+                No matching crypto assets located.
+              </Text>
+            )}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -164,15 +145,14 @@ const styles = StyleSheet.create({
   searchBar: {
     backgroundColor: Colors.newDark,
     borderRadius: 14,
-    paddingHorizontal: 26,
-    paddingVertical: 17,
     marginBottom: 22,
   },
   searchInput: {
-    color: Colors.newSecondary,
-    fontSize: 12,
+    color: Colors.newWhite,
+    fontSize: 13,
     fontFamily: FontFamily.medium,
-    padding: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   filterRow: {
     flexDirection: "row",
@@ -206,5 +186,17 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     marginBottom: -6,
+  },
+  centerLoader: {
+    paddingVertical: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: Colors.newSecondary,
+    fontSize: 12,
+    fontFamily: FontFamily.medium,
+    textAlign: "center",
+    marginTop: 30,
   },
 });

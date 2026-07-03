@@ -14,7 +14,7 @@ import {
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../../common/BackHeader";
-import { useGetMarketAssetsQuery } from "@/src/services/profileApi";
+import { useGetMarketAssetsQuery } from "@/src/services/marketApi"; // 🌟 verified service query location
 import { MarketAsset } from "@/src/types/alert";
 
 interface CreatePriceAlertProps {
@@ -27,7 +27,7 @@ interface CreatePriceAlertProps {
   isSubmitting?: boolean;
 }
 
-const BASE_URL = "https://crypto-api-guwm.onrender.com";
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL
 
 export default function CreatePriceAlert({
   onGoBack,
@@ -36,7 +36,9 @@ export default function CreatePriceAlert({
 }: CreatePriceAlertProps) {
   // 1. Single Live Hook Stream Connection
   const { data: assetsRes, isLoading } = useGetMarketAssetsQuery();
-  const assetList = assetsRes?.data || [];
+  
+  // 🧠 Stable array fallback reference to prevent rendering thrash
+  const assetList = React.useMemo(() => assetsRes?.data || [], [assetsRes?.data]);
 
   // 2. Component States
   const [selectedAsset, setSelectedAsset] = useState<MarketAsset | null>(null);
@@ -44,30 +46,35 @@ export default function CreatePriceAlert({
   const [targetPrice, setTargetPrice] = useState("");
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
-  // Set the first item (Bitcoin) as default once the data loads
+  // Set the first item (Bitcoin) as default once the data loads stably
   useEffect(() => {
     if (assetList.length > 0 && !selectedAsset) {
-      setSelectedAsset(assetList[0]);
+      const fallbackSelection = assetList.find((a: any) => a.symbol === "BTC") || assetList[0];
+      setSelectedAsset(fallbackSelection as unknown as MarketAsset);
     }
-  }, [assetList]);
+  }, [assetList, selectedAsset]);
 
   const handleCreate = () => {
-    if (!targetPrice || !selectedAsset) return;
+    const cleanPrice = targetPrice.trim().replace(/,/g, "");
+    if (!cleanPrice || isNaN(Number(cleanPrice)) || !selectedAsset) return;
+    
     onAlertCreated({
       symbol: selectedAsset.symbol,
       direction,
-      targetPrice: targetPrice.replace(/,/g, ""),
+      targetPrice: cleanPrice,
     });
   };
 
   const formattedSummaryPrice = isNaN(Number(targetPrice.replace(/,/g, "")))
     ? targetPrice
-    : Number(targetPrice.replace(/,/g, "")).toLocaleString();
+    : Number(targetPrice.replace(/,/g, "")).toLocaleString(undefined, {
+        maximumFractionDigits: 6,
+      });
 
   if (isLoading || !selectedAsset) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={Colors.green} />
+        <ActivityIndicator size="small" color={Colors.green} />
       </View>
     );
   }
@@ -80,7 +87,7 @@ export default function CreatePriceAlert({
       >
         <BackHeader
           title="Create price alert"
-          paragraph={`Get notified when ${selectedAsset.symbol} crosses your target.`}
+          paragraph={`Get notified when ${selectedAsset.symbol.toUpperCase()} crosses your target.`}
           onBack={onGoBack}
         />
 
@@ -91,14 +98,15 @@ export default function CreatePriceAlert({
           activeOpacity={0.8}
         >
           <View style={styles.leftRow}>
-            {/* Live Server Icon Processing */}
-            <Image
-              source={{ uri: `${BASE_URL}${selectedAsset.iconUrl}` }}
-              style={styles.avatarCircle}
-              resizeMode="contain"
-            />
+            <View style={styles.avatarWrapper}>
+              <Image
+                source={{ uri: `${BASE_URL}${selectedAsset.iconUrl}` }}
+                style={styles.avatarCircle}
+                resizeMode="contain"
+              />
+            </View>
             <View>
-              <Text style={styles.symbolText}>{selectedAsset.symbol} ▾</Text>
+              <Text style={styles.symbolText}>{selectedAsset.symbol.toUpperCase()} ▾</Text>
               <Text style={styles.nameText}>{selectedAsset.name}</Text>
             </View>
           </View>
@@ -106,6 +114,7 @@ export default function CreatePriceAlert({
             $
             {selectedAsset.priceUsd.toLocaleString(undefined, {
               minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             })}
           </Text>
         </TouchableOpacity>
@@ -156,8 +165,8 @@ export default function CreatePriceAlert({
               value={targetPrice}
               onChangeText={setTargetPrice}
               keyboardType="numeric"
-              placeholder={selectedAsset.priceUsd.toString()}
-              placeholderTextColor="rgba(255,255,255,0.2)"
+              placeholder={selectedAsset.priceUsd.toFixed(2)}
+              placeholderTextColor="rgba(255,255,255,0.15)"
             />
             <Text style={styles.currencyLabel}>USD</Text>
           </View>
@@ -167,8 +176,8 @@ export default function CreatePriceAlert({
         <View style={styles.metaRow}>
           <Text style={styles.metaLabel}>Trigger</Text>
           <Text style={styles.metaValue}>
-            {selectedAsset.symbol} {direction.toLowerCase()} $
-            {formattedSummaryPrice || "0"}
+            {selectedAsset.symbol.toUpperCase()} {direction.toLowerCase()} $
+            {formattedSummaryPrice || "0.00"}
           </Text>
         </View>
 
@@ -183,13 +192,13 @@ export default function CreatePriceAlert({
       <TouchableOpacity
         style={[
           styles.actionButton,
-          isSubmitting && { backgroundColor: Colors.newGreen },
+          isSubmitting && styles.disabledActionButton,
         ]}
         onPress={handleCreate}
-        disabled={isSubmitting} // 🔒 Disables button inputs instantly while running network queries
+        disabled={isSubmitting}
       >
         {isSubmitting ? (
-          <ActivityIndicator size="small" color={Colors.newGreen} />
+          <ActivityIndicator size="small" color={Colors.primary} />
         ) : (
           <Text style={styles.actionButtonText}>Create alert</Text>
         )}
@@ -204,24 +213,27 @@ export default function CreatePriceAlert({
             <FlatList
               data={assetList}
               keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.assetSelectorItem}
                   onPress={() => {
-                    setSelectedAsset(item);
+                    setSelectedAsset(item as unknown as MarketAsset);
                     setIsSelectorOpen(false);
                   }}
                 >
                   <View style={styles.leftRow}>
-                    <Image
-                      source={{
-                        uri: `https://images.weserv.nl/?url=${encodeURIComponent(`${BASE_URL}${item.iconUrl}`)}&output=png&w=64&h=64`,
-                      }}
-                      style={styles.avatarCircleSmall}
-                      resizeMode="contain"
-                    />
+                    <View style={styles.avatarWrapperSmall}>
+                      <Image
+                        source={{
+                          uri: `https://images.weserv.nl/?url=${encodeURIComponent(`${BASE_URL}${item.iconUrl}`)}&output=png&w=64&h=64`,
+                        }}
+                        style={styles.avatarCircleSmall}
+                        resizeMode="contain"
+                      />
+                    </View>
                     <View>
-                      <Text style={styles.symbolText}>{item.symbol}</Text>
+                      <Text style={styles.symbolText}>{item.symbol.toUpperCase()}</Text>
                       <Text style={styles.nameText}>{item.name}</Text>
                     </View>
                   </View>
@@ -229,6 +241,7 @@ export default function CreatePriceAlert({
                     $
                     {item.priceUsd.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
                     })}
                   </Text>
                 </TouchableOpacity>
@@ -254,9 +267,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "transparent",
   },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 110 },
+  scrollContainer: { paddingHorizontal: 24, paddingBottom: 160 },
   assetPreviewCard: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -268,8 +280,22 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   leftRow: { flexDirection: "row", alignItems: "center", gap: 14 },
-  avatarCircle: { width: 40, height: 40, borderRadius: 20 },
-  avatarCircleSmall: { width: 32, height: 32, borderRadius: 16 },
+  avatarWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    overflow: "hidden",
+  },
+  avatarWrapperSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    overflow: "hidden",
+  },
+  avatarCircle: { width: "100%", height: "100%" },
+  avatarCircleSmall: { width: "100%", height: "100%" },
   symbolText: {
     color: Colors.newWhite,
     fontSize: 18,
@@ -350,18 +376,26 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     position: "absolute",
-    bottom: 75,
+    bottom: 40,
     left: 24,
     right: 24,
     backgroundColor: Colors.green,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  disabledActionButton: {
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   actionButtonText: {
     color: Colors.primary,
     fontSize: 15,
-    fontFamily: FontFamily.medium,
+    fontFamily: FontFamily.bold,
   },
   modalOverlay: {
     flex: 1,

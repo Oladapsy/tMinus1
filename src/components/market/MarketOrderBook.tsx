@@ -1,46 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import OrderBookRow, { OrderLevel } from "./component/OrderBookRow";
-
-const MOCK_ORDER_BOOK_PAYLOAD = {
-  data: {
-    midPriceUsd: 64200.5,
-    spreadUsd: 13.86,
-    bids: [
-      { priceUsd: 64193.57, amount: 0.03, total: 0.03 },
-      { priceUsd: 64192.56, amount: 0.0354, total: 0.0654 },
-      { priceUsd: 64191.55, amount: 0.0408, total: 0.1062 },
-      { priceUsd: 64190.54, amount: 0.0462, total: 0.1524 },
-      { priceUsd: 64189.53, amount: 0.0516, total: 0.204 },
-    ],
-    asks: [
-      { priceUsd: 64207.43, amount: 0.03, total: 0.03 },
-      { priceUsd: 64208.44, amount: 0.0354, total: 0.0654 },
-      { priceUsd: 64209.45, amount: 0.0408, total: 0.1062 },
-      { priceUsd: 64210.46, amount: 0.0462, total: 0.1524 },
-      { priceUsd: 64211.47, amount: 0.0516, total: 0.204 },
-    ],
-  },
-  meta: {
-    symbol: "BTC",
-    levels: 5,
-  },
-};
+import { useGetMarketOrderBookQuery } from "@/src/services/marketApi";
 
 interface MarketOrderBookProps {
   symbol: string;
   onGoBack: () => void;
   onTradeAction?: (symbol: string) => void;
-  onToggleView: () => void; // 🌟 Explicit property type registration
+  onToggleView: () => void;
 }
 
 export default function MarketOrderBook({
@@ -49,11 +26,24 @@ export default function MarketOrderBook({
   onTradeAction,
   onToggleView,
 }: MarketOrderBookProps) {
-  const orderBookData = MOCK_ORDER_BOOK_PAYLOAD.data;
-  const rowCount = Math.max(
-    orderBookData.bids.length,
-    orderBookData.asks.length,
-  );
+  // 📊 Hook directly into the automated order book API stream
+  const { data: orderBookResponse, isLoading, refetch } = useGetMarketOrderBookQuery({
+    symbol,
+  });
+
+  // 🔄 Setup active polling loops to refresh engine order weights every 10 seconds
+  useEffect(() => {
+    const bookPoller = setInterval(() => {
+      refetch();
+    }, 10000);
+    return () => clearInterval(bookPoller);
+  }, [refetch]);
+
+  const bookData = orderBookResponse?.data;
+  const bids = bookData?.bids ?? [];
+  const asks = bookData?.asks ?? [];
+  
+  const rowCount = Math.max(bids.length, asks.length);
   const rowsArray = Array.from({ length: rowCount });
 
   return (
@@ -63,7 +53,7 @@ export default function MarketOrderBook({
         contentContainerStyle={styles.scrollContainer}
       >
         <BackHeader
-          title={`${symbol} order book`}
+          title={`${symbol.toUpperCase()} order book`}
           paragraph="Bid and ask levels for the trade screen."
           onBack={onGoBack}
         />
@@ -72,7 +62,7 @@ export default function MarketOrderBook({
         <View style={styles.toggleBarContainer}>
           <TouchableOpacity
             style={[styles.togglePill, styles.activePill]}
-            onPress={() => {}} // Already active inside this component context
+            onPress={() => {}} 
           >
             <Text style={[styles.toggleText, styles.activeToggleText]}>
               Order book
@@ -81,53 +71,67 @@ export default function MarketOrderBook({
 
           <TouchableOpacity
             style={styles.togglePill}
-            onPress={onToggleView} // 🌟 Routes user cleanly over to Recent Trades
+            onPress={onToggleView} 
           >
             <Text style={styles.toggleText}>Trades</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Mid price</Text>
-          <Text style={styles.summaryValue}>
-            $
-            {orderBookData.midPriceUsd.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            })}
-          </Text>
-        </View>
+        {isLoading && !bookData ? (
+          <View style={styles.centerLoader}>
+            <ActivityIndicator size="small" color={Colors.green} />
+          </View>
+        ) : (
+          <>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryLabel}>Mid price</Text>
+              <Text style={styles.summaryValue}>
+                $
+                {(bookData?.midPriceUsd ?? 0).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Text>
+            </View>
 
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Spread</Text>
-          <Text style={styles.summaryValue}>
-            $
-            {orderBookData.spreadUsd.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            })}
-          </Text>
-        </View>
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryLabel}>Spread</Text>
+              <Text style={styles.summaryValue}>
+                $
+                {(bookData?.spreadUsd ?? 0).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Text>
+            </View>
 
-        <View style={styles.tableHeadRow}>
-          <Text style={[styles.headLabel, { color: Colors.green }]}>Bids</Text>
-          <Text style={[styles.headLabel, { color: Colors.newRed }]}>Asks</Text>
-        </View>
+            <View style={styles.tableHeadRow}>
+              <Text style={[styles.headLabel, { color: Colors.green }]}>Bids</Text>
+              <Text style={[styles.headLabel, { color: Colors.newRed, textAlign: "right" }]}>Asks</Text>
+            </View>
 
-        <View style={styles.listContainer}>
-          {rowsArray.map((_, index) => (
-            <OrderBookRow
-              key={index}
-              bid={orderBookData.bids[index] as OrderLevel}
-              ask={orderBookData.asks[index] as OrderLevel}
-            />
-          ))}
-        </View>
+            <View style={styles.listContainer}>
+              {rowsArray.map((_, index) => (
+                <OrderBookRow
+                  key={index}
+                  bid={bids[index] as OrderLevel}
+                  ask={asks[index] as OrderLevel}
+                />
+              ))}
+
+              {!isLoading && rowCount === 0 && (
+                <Text style={styles.emptyText}>No active orders on the book.</Text>
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
 
       <TouchableOpacity
         style={styles.actionButton}
         onPress={() => onTradeAction?.(symbol)}
       >
-        <Text style={styles.actionButtonText}>Trade {symbol}</Text>
+        <Text style={styles.actionButtonText}>Trade {symbol.toUpperCase()}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -139,7 +143,12 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 110,
+    paddingBottom: 160,
+  },
+  centerLoader: {
+    paddingVertical: 80,
+    justifyContent: "center",
+    alignItems: "center",
   },
   toggleBarContainer: {
     flexDirection: "row",
@@ -200,19 +209,31 @@ const styles = StyleSheet.create({
   listContainer: {
     marginTop: 4,
   },
+  emptyText: {
+    color: Colors.newSecondary,
+    fontSize: 12,
+    fontFamily: FontFamily.medium,
+    textAlign: "center",
+    marginTop: 40,
+  },
   actionButton: {
     position: "absolute",
-    bottom: 80,
+    bottom: 40,
     left: 24,
     right: 24,
     backgroundColor: Colors.green,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   actionButtonText: {
     color: Colors.primary,
     fontSize: 14,
-    fontFamily: FontFamily.medium,
+    fontFamily: FontFamily.bold,
   },
 });

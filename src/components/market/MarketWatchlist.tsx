@@ -1,80 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
-
-// 🌟 Import your existing, asset row component and its types
-import MarketAssetRow, {
-  TrendingAssetData,
-} from "@/src/components/market/component/MarketAssetRow";
-
-// Mock dataset mapping perfectly to your TrendingAssetData schema contract
-const MOCK_WATCHLIST_DATA: TrendingAssetData[] = [
-  {
-    id: "w1",
-    name: "Bitcoin",
-    symbol: "BTC",
-    network: "Bitcoin",
-    priceUsd: 64200.5,
-    change24h: 2.1,
-    isActive: true,
-    minBuyUsd: 10,
-    minSellUsd: 10,
-    iconUrl: "",
-    sparkline: [
-      { time: "1", priceUsd: 63000 },
-      { time: "2", priceUsd: 63400 },
-      { time: "3", priceUsd: 63200 },
-      { time: "4", priceUsd: 63900 },
-      { time: "5", priceUsd: 64200.5 },
-    ],
-  },
-  {
-    id: "w2",
-    name: "Ethereum",
-    symbol: "ETH",
-    network: "Ethereum",
-    priceUsd: 3420.0,
-    change24h: -1.1,
-    isActive: true,
-    minBuyUsd: 10,
-    minSellUsd: 10,
-    iconUrl: "",
-    sparkline: [
-      { time: "1", priceUsd: 3500 },
-      { time: "2", priceUsd: 3460 },
-      { time: "3", priceUsd: 3480 },
-      { time: "4", priceUsd: 3440 },
-      { time: "5", priceUsd: 3420.0 },
-    ],
-  },
-  {
-    id: "w3",
-    name: "Solana",
-    symbol: "SOL",
-    network: "Solana",
-    priceUsd: 152.0,
-    change24h: 4.2,
-    isActive: true,
-    minBuyUsd: 5,
-    minSellUsd: 5,
-    iconUrl: "",
-    sparkline: [
-      { time: "1", priceUsd: 142 },
-      { time: "2", priceUsd: 145 },
-      { time: "3", priceUsd: 148 },
-      { time: "4", priceUsd: 150 },
-      { time: "5", priceUsd: 152.0 },
-    ],
-  },
-];
+import MarketAssetRow from "@/src/components/market/component/MarketAssetRow";
+import { useGetWatchlistAssetsQuery } from "@/src/services/marketApi";
 
 interface MarketWatchlistProps {
   onGoBack: () => void;
@@ -87,27 +24,56 @@ export default function MarketWatchlist({
   onExploreMarkets,
   onSelectAsset,
 }: MarketWatchlistProps) {
+  // 📈 Stream custom watchlist positions straight from the network layer
+  const {
+    data: watchlistResponse,
+    isLoading,
+    refetch,
+  } = useGetWatchlistAssetsQuery({
+    include: "sparkline",
+  });
+
+  // ⏱️ Auto-refresh tickers loop engine
+  useEffect(() => {
+    const listPoller = setInterval(() => {
+      refetch();
+    }, 10000);
+    return () => clearInterval(listPoller);
+  }, [refetch]);
+
+  const watchlistData = watchlistResponse?.data ?? [];
+
   return (
     <View style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        {/* Dynamic Context Header Block */}
         <BackHeader
           title="Watchlist"
           paragraph="Assets you follow with row sparklines."
           onBack={onGoBack}
         />
 
-        {/* Watchlist Container wrapper adding layout spacing to match your designs */}
-        <View style={styles.listSection}>
-          {MOCK_WATCHLIST_DATA.map((coin) => (
-            <View key={coin.id} style={styles.rowCardWrapper}>
-              <MarketAssetRow coin={coin} onPress={onSelectAsset} />
-            </View>
-          ))}
-        </View>
+        {isLoading && watchlistData.length === 0 ? (
+          <View style={styles.centerLoader}>
+            <ActivityIndicator size="small" color={Colors.green} />
+          </View>
+        ) : (
+          <View style={styles.listSection}>
+            {watchlistData.map((coin) => (
+              <View key={coin.id} style={styles.rowCardWrapper}>
+                <MarketAssetRow coin={coin} onPress={onSelectAsset} />
+              </View>
+            ))}
+
+            {!isLoading && watchlistData.length === 0 && (
+              <Text style={styles.emptyText}>
+                Your watchlist is currently empty.
+              </Text>
+            )}
+          </View>
+        )}
 
         {/* "Add more assets" Callout Container Box */}
         <View style={styles.infoBox}>
@@ -132,7 +98,12 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 110,
+    paddingBottom: 160, // Boost padding to clear position: absolute buttons
+  },
+  centerLoader: {
+    paddingVertical: 60,
+    justifyContent: "center",
+    alignItems: "center",
   },
   listSection: {
     marginTop: 10,
@@ -163,19 +134,31 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.medium,
     lineHeight: 18,
   },
+  emptyText: {
+    color: Colors.newSecondary,
+    fontSize: 13,
+    fontFamily: FontFamily.medium,
+    textAlign: "center",
+    marginVertical: 30,
+  },
   actionButton: {
     position: "absolute",
-    bottom: 77,
+    bottom: 40,
     left: 24,
     right: 24,
     backgroundColor: Colors.green,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   actionButtonText: {
     color: Colors.primary,
     fontSize: 14,
-    fontFamily: FontFamily.medium,
+    fontFamily: FontFamily.bold,
   },
 });

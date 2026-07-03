@@ -17,9 +17,15 @@ export default function AlertSuccessView({
   targetPrice,
   onClose,
 }: AlertSuccessViewProps) {
-  const formattedPrice = isNaN(Number(targetPrice))
+  // 🧼 Handle numbers with proper localization support for small-cap fractions
+  const cleanPriceStr = targetPrice.replace(/,/g, "");
+  const formattedPrice = isNaN(Number(cleanPriceStr))
     ? targetPrice
-    : Number(targetPrice).toLocaleString();
+    : Number(cleanPriceStr).toLocaleString(undefined, {
+        maximumFractionDigits: 6,
+      });
+
+  const upperSymbol = symbol.toUpperCase();
 
   return (
     <View style={styles.container}>
@@ -47,7 +53,7 @@ export default function AlertSuccessView({
         </View>
 
         <Text style={styles.summaryTitle}>
-          {symbol} {direction.toLowerCase()} ${formattedPrice}
+          {upperSymbol} {direction.toLowerCase()} ${formattedPrice}
         </Text>
         <Text style={styles.summaryDescription}>
           This alert appears in Profile → Price Alerts and can be edited or
@@ -57,7 +63,7 @@ export default function AlertSuccessView({
         {/* Data Breakdown Table Block */}
         <View style={styles.tableRow}>
           <Text style={styles.tableLabel}>Asset</Text>
-          <Text style={styles.tableValue}>{symbol}</Text>
+          <Text style={styles.tableValue}>{upperSymbol}</Text>
         </View>
 
         <View style={styles.tableRow}>
@@ -140,11 +146,16 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
-    marginBottom: 75,
+    marginBottom: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   actionButtonText: {
     color: Colors.primary,
     fontSize: 14,
-    fontFamily: FontFamily.medium,
+    fontFamily: FontFamily.bold,
   },
 });

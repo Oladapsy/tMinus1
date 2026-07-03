@@ -3,6 +3,8 @@ import {
   MarketAssetListResponse,
   TrendingResponse,
   AssetDetails,
+  MarketOrderBookResponse,
+  RecentTradesResponse,
 } from "../types/market";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -19,7 +21,7 @@ export const marketApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Assets", "Trending"],
+  tagTypes: ["Assets", "Trending", "OrderBook"],
   endpoints: (builder) => ({
     getMarketAssets: builder.query<
       MarketAssetListResponse,
@@ -60,6 +62,25 @@ export const marketApi = createApi({
     getAssetDetails: builder.query<{ data: AssetDetails }, string>({
       query: (symbol) => `assets/${symbol.toUpperCase()}`,
     }),
+
+    // 📊 ADDED: Order book live feed query endpoint
+    getMarketOrderBook: builder.query<
+      MarketOrderBookResponse,
+      { symbol: string }
+    >({
+      query: ({ symbol }) => `order-book?symbol=${symbol.toUpperCase()}`,
+      providesTags: ["OrderBook"],
+    }),
+    getRecentTrades: builder.query<RecentTradesResponse, { symbol: string }>({
+      query: ({ symbol }) => `trades?symbol=${symbol.toUpperCase()}`,
+    }),
+    getWatchlistAssets: builder.query<
+      MarketAssetListResponse,
+      { include?: string } | void
+    >({
+      query: (params) => `watchlist?include=${params?.include || "sparkline"}`,
+      providesTags: ["Assets"],
+    }),
   }),
 });
 
@@ -67,4 +88,7 @@ export const {
   useGetMarketAssetsQuery,
   useGetTrendingAssetsQuery,
   useGetAssetDetailsQuery,
+  useGetMarketOrderBookQuery,
+  useGetRecentTradesQuery,
+  useGetWatchlistAssetsQuery,
 } = marketApi;

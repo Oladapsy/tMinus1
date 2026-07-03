@@ -1,107 +1,68 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
-import RecentTradeCard, { TradeItemPayload } from "./component/RecentTradeCard";
-
-const MOCK_TRADES_ARRAY: TradeItemPayload[] = [
-  {
-    id: "t1",
-    side: "buy",
-    priceUsd: 64206.1,
-    amount: 0.015,
-    totalUsd: 963.09,
-    createdAt: "2026-05-27T09:00:00.000Z",
-  },
-  {
-    id: "t2",
-    side: "sell",
-    priceUsd: 64194.2,
-    amount: 0.0201,
-    totalUsd: 1290.3,
-    createdAt: "2026-05-27T08:59:48.000Z",
-  },
-  {
-    id: "t3",
-    side: "buy",
-    priceUsd: 64211.0,
-    amount: 0.008,
-    totalUsd: 513.69,
-    createdAt: "2026-05-27T08:59:12.000Z",
-  },
-  {
-    id: "t4",
-    side: "buy",
-    priceUsd: 64203.44,
-    amount: 0.044,
-    totalUsd: 2824.95,
-    createdAt: "2026-05-27T08:58:30.000Z",
-  },
-  {
-    id: "t5",
-    side: "sell",
-    priceUsd: 64188.17,
-    amount: 0.019,
-    totalUsd: 1219.58,
-    createdAt: "2026-05-27T08:57:55.000Z",
-  },
-  {
-    id: "t6",
-    side: "buy",
-    priceUsd: 64218.25,
-    amount: 0.011,
-    totalUsd: 706.4,
-    createdAt: "2026-05-27T08:57:01.000Z",
-  },
-  {
-    id: "t7",
-    side: "sell",
-    priceUsd: 64182.9,
-    amount: 0.037,
-    totalUsd: 2374.77,
-    createdAt: "2026-05-27T08:56:44.000Z",
-  },
-];
+import RecentTradeCard from "./component/RecentTradeCard";
+import { useGetRecentTradesQuery } from "@/src/services/marketApi";
 
 interface RecentTradesProps {
+  symbol: string; // 🌟 Passed down from parent context
   onGoBack: () => void;
   onToggleView: () => void;
 }
 
 export default function RecentTrades({
+  symbol,
   onGoBack,
   onToggleView,
 }: RecentTradesProps) {
+  // 🔄 Hook into live transaction prints stream
+  const {
+    data: tradesResponse,
+    isLoading,
+    refetch,
+  } = useGetRecentTradesQuery({
+    symbol,
+  });
+
+  // ⏱️ Auto-poll every 10 seconds to catch live trade tape fills
+  useEffect(() => {
+    const tradePoller = setInterval(() => {
+      refetch();
+    }, 10000);
+    return () => clearInterval(tradePoller);
+  }, [refetch]);
+
+  const tradesList = tradesResponse?.data ?? [];
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scrollContainer}
     >
       <BackHeader
-        title="Recent trades"
+        title={`${symbol.toUpperCase()} recent trades`}
         paragraph="Latest simulated market prints."
         onBack={onGoBack}
       />
 
       {/* Styled Navigation Toggle Bar Component */}
       <View style={styles.toggleBarContainer}>
-        <TouchableOpacity
-          style={styles.togglePill}
-          onPress={onToggleView} // 🌟 Flips workflow state back over to Screen 4 orderbook
-        >
+        <TouchableOpacity style={styles.togglePill} onPress={onToggleView}>
           <Text style={styles.toggleText}>Order book</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.togglePill, styles.activePill]}
-          onPress={() => {}} // Keep active locally
+          onPress={() => {}}
         >
           <Text style={[styles.toggleText, styles.activeToggleText]}>
             Trades
@@ -109,11 +70,23 @@ export default function RecentTrades({
         </TouchableOpacity>
       </View>
 
-      <View style={styles.listSection}>
-        {MOCK_TRADES_ARRAY.map((item) => (
-          <RecentTradeCard key={item.id} trade={item} />
-        ))}
-      </View>
+      {isLoading && tradesList.length === 0 ? (
+        <View style={styles.centerLoader}>
+          <ActivityIndicator size="small" color={Colors.green} />
+        </View>
+      ) : (
+        <View style={styles.listSection}>
+          {tradesList.map((item) => (
+            <RecentTradeCard key={item.id} trade={item} />
+          ))}
+
+          {!isLoading && tradesList.length === 0 && (
+            <Text style={styles.emptyText}>
+              No transaction records found for this asset.
+            </Text>
+          )}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -122,6 +95,11 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingHorizontal: 24,
     paddingBottom: 40,
+  },
+  centerLoader: {
+    paddingVertical: 100,
+    justifyContent: "center",
+    alignItems: "center",
   },
   toggleBarContainer: {
     flexDirection: "row",
@@ -149,5 +127,12 @@ const styles = StyleSheet.create({
   },
   listSection: {
     marginTop: 4,
+  },
+  emptyText: {
+    color: Colors.newSecondary,
+    fontSize: 12,
+    fontFamily: FontFamily.medium,
+    textAlign: "center",
+    marginTop: 40,
   },
 });
