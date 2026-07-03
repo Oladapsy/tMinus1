@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,10 +13,10 @@ import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { useGetTransactionsQuery } from "@/src/services/walletApi"; // 🟢 Hook imported directly here
 import { Transaction } from "@/src/types/wallet";
 
 interface TransactionHistoryViewProps {
-  transactions: Transaction[]; // 🟢 Fed directly from RTK query response
   onSelectTx: (tx: Transaction) => void;
   onGoBack: () => void;
 }
@@ -29,7 +30,6 @@ const ASSET_COLORS: Record<string, string> = {
 };
 
 export default function TransactionHistoryView({
-  transactions = [],
   onSelectTx,
   onGoBack,
 }: TransactionHistoryViewProps) {
@@ -37,14 +37,26 @@ export default function TransactionHistoryView({
     "All" | "Deposits" | "Withdrawals"
   >("All");
 
-  // 🟢 Dynamically filter live backend transaction structures
-  const filteredTxList = transactions.filter((tx) => {
-    if (activeFilter === "Deposits")
-      return tx.type?.toLowerCase() === "deposit";
-    if (activeFilter === "Withdrawals")
-      return tx.type?.toLowerCase() === "withdrawal";
-    return true;
+  // 🟢 Fetches a large list (up to 50 items) completely isolated from the dashboard view
+  const { data: txResponse, isLoading } = useGetTransactionsQuery({
+    limit: 50,
+    page: 1,
   });
+  const transactions = txResponse?.data || [];
+
+ // 🟢 Dynamically filter live backend transaction structures securely
+const filteredTxList = transactions.filter((tx) => {
+  const typeStr = (tx.type || "").toLowerCase();
+  
+  if (activeFilter === "Deposits") {
+    return typeStr === "deposit" || typeStr === "buy";
+  }
+  if (activeFilter === "Withdrawals") {
+    // Catches external "withdrawal" strings as well as internal "transfer" actions
+    return typeStr === "withdrawal" || typeStr === "transfer" || typeStr === "withdraw";
+  }
+  return true;
+});
 
   return (
     <View style={styles.container}>
@@ -54,7 +66,6 @@ export default function TransactionHistoryView({
         onBack={onGoBack}
       />
 
-      {/* Categories Filter Selection Row */}
       <View style={styles.filterBar}>
         {(["All", "Deposits", "Withdrawals"] as const).map((filter) => (
           <TouchableOpacity
@@ -77,94 +88,108 @@ export default function TransactionHistoryView({
         ))}
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {filteredTxList.length === 0 ? (
-          <View style={{ marginTop: 40, alignItems: "center" }}>
-            <Paragraph
-              text="No transactions found matching this group."
-              color={Colors.newSecondary}
-            />
-          </View>
-        ) : (
-          filteredTxList.map((tx) => {
-            const isDeposit = tx.type?.toLowerCase() === "deposit";
-            const assetSymbol = tx.assetSymbol || "USDT";
-            const badgeBg = ASSET_COLORS[assetSymbol] || Colors.green;
-            const displayDate = tx.createdAt
-              ? new Date(tx.createdAt).toLocaleDateString()
-              : "Pending";
+      {isLoading ? (
+        <ActivityIndicator
+          size="small"
+          color={Colors.green}
+          style={{ marginTop: 40 }}
+        />
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* 🟢 Handles empty notification state dynamically */}
+          {filteredTxList.length === 0 ? (
+            <View style={{ marginTop: 40, alignItems: "center" }}>
+              <Paragraph
+                text="No transactions found matching this group."
+                color={Colors.newSecondary}
+              />
+            </View>
+          ) : (
+            filteredTxList.map((tx) => {
+              const transactionType = tx.type ?? "Transaction";
+              const isDeposit =
+                transactionType.toLowerCase() === "deposit" ||
+                transactionType.toLowerCase() === "buy";
 
-            return (
-              <TouchableOpacity
-                key={tx.id}
-                style={styles.txCard}
-                activeOpacity={0.7}
-                onPress={() => onSelectTx(tx)}
-              >
-                <View style={styles.leftContent}>
-                  <View style={[styles.avatar, { backgroundColor: badgeBg }]}>
-                    <Text style={styles.avatarText}>
-                      {assetSymbol.charAt(0)}
-                    </Text>
+              const assetSymbol =
+                tx.assetSymbol || tx.toAsset || tx.fromAsset || "USDT";
+              const badgeBg = ASSET_COLORS[assetSymbol] || Colors.green;
+              const displayDate = tx.createdAt
+                ? new Date(tx.createdAt).toLocaleDateString()
+                : "Pending";
+
+              const rawAmount = tx.amount ?? tx.toAmount ?? tx.fromAmount ?? 0;
+              const parsedAmount = isNaN(Number(rawAmount))
+                ? 0
+                : Number(rawAmount);
+
+              return (
+                <TouchableOpacity
+                  key={tx.id}
+                  style={styles.txCard}
+                  activeOpacity={0.7}
+                  onPress={() => onSelectTx(tx)}
+                >
+                  <View style={styles.leftContent}>
+                    <View style={[styles.avatar, { backgroundColor: badgeBg }]}>
+                      <Text style={styles.avatarText}>
+                        {assetSymbol.charAt(0)}
+                      </Text>
+                    </View>
+                    <View style={styles.meta}>
+                      <Title
+                        text={`${assetSymbol} ${transactionType}`}
+                        size={15}
+                        textAlign="left"
+                      />
+                      <View style={{ marginTop: 2 }}>
+                        <Paragraph
+                          text={tx.status || "Processing"}
+                          color={
+                            tx.status === "completed"
+                              ? Colors.green
+                              : Colors.newCryptoYellow
+                          }
+                          size={12}
+                          textAlign="left"
+                        />
+                      </View>
+                    </View>
                   </View>
-                  <View style={styles.meta}>
+
+                  <View style={styles.rightContent}>
                     <Title
-                      text={`${assetSymbol} ${tx.type || "Transaction"}`}
+                      text={`${isDeposit ? "+" : "-"}${parsedAmount.toLocaleString(undefined, { maximumFractionDigits: 6 })}`}
                       size={15}
-                      textAlign="left"
+                      textAlign="right"
                     />
                     <View style={{ marginTop: 2 }}>
                       <Paragraph
-                        text={tx.status || "Processing"}
-                        color={
-                          tx.status === "completed"
-                            ? Colors.green
-                            : Colors.newCryptoYellow
-                        }
+                        text={displayDate}
+                        color={Colors.newSecondary}
                         size={12}
-                        textAlign="left"
+                        textAlign="right"
                       />
                     </View>
                   </View>
-                </View>
-
-                <View style={styles.rightContent}>
-                  <Title
-                    text={`${isDeposit ? "+" : "-"}${Number(tx.amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}`}
-                    size={15}
-                    textAlign="right"
-                  />
-                  <View style={{ marginTop: 2 }}>
-                    <Paragraph
-                      text={displayDate}
-                      color={Colors.newSecondary}
-                      size={12}
-                      textAlign="right"
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </ScrollView>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 }
 
+// Keep your existing styles exactly as they are down below...
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 24 },
   scrollContent: { paddingBottom: 40 },
-  filterBar: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 24,
-    marginTop: 16,
-    justifyContent: "flex-start",
-  },
+  filterBar: { flexDirection: "row", gap: 8, marginBottom: 24 },
   filterTab: {
     paddingVertical: 8,
     paddingHorizontal: 16,

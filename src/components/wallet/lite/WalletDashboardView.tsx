@@ -16,6 +16,7 @@ import PortfolioValueCard from "./PortfolioValueCard";
 import WalletAssetRow from "./WalletAssetRow";
 import { AssetData } from "@/src/screens/wallet/NewWalletScreen";
 import { Transaction } from "@/src/types/wallet";
+import Paragraph from "../../common/Paragraph";
 // 🟢 Import your explicit layout interface structure
 
 interface WalletDashboardViewProps {
@@ -153,41 +154,52 @@ export default function WalletDashboardView({
       </TouchableOpacity>
 
       <View style={styles.listSection}>
-        {transactions.map((tx) => {
-          const transactionType = tx.type ?? "Transaction";
-          const isDeposit =
-            transactionType.toLowerCase() === "deposit" ||
-            transactionType.toLowerCase() === "buy";
-
-          // 🟢 Extract the correct symbol fallback if tx.assetSymbol is blank
-          const assetSymbol =
-            tx.assetSymbol || tx.toAsset || tx.fromAsset || "USDT";
-
-          const currentStatus = tx.status ?? "Pending";
-
-          const dateLabel = tx.createdAt
-            ? new Date(tx.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              })
-            : "Today";
-
-          // 🟢 Fallback chain to catch the correct numerical value from the server payload
-          const resolvedAmount = tx.amount ?? tx.toAmount ?? tx.fromAmount ?? 0;
-
-          return (
-            <WalletAssetRow
-              key={tx.id}
-              name={`${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)}`}
-              symbol={assetSymbol}
-              network={currentStatus}
-              balanceString={dateLabel}
-              valueString={`${isDeposit ? "+" : "-"}$${Number(resolvedAmount).toFixed(2)}`}
-              dotColor={isDeposit ? Colors.green : Colors.newCryptoYellow}
-              disabled={true}
+        {transactions.length === 0 ? (
+          <View style={{ paddingVertical: 20, alignItems: "center" }}>
+            <Paragraph
+              text="No recent transaction events."
+              color={Colors.newSecondary}
+              size={13}
             />
-          );
-        })}
+          </View>
+        ) : (
+          transactions.map((tx) => {
+            const transactionType = tx.type ?? "Transaction";
+            const isDeposit =
+              transactionType.toLowerCase() === "deposit" ||
+              transactionType.toLowerCase() === "buy";
+
+            const assetSymbol =
+              tx.assetSymbol || tx.toAsset || tx.fromAsset || "USDT";
+            const currentStatus = tx.status ?? "Pending";
+
+            const dateLabel = tx.createdAt
+              ? new Date(tx.createdAt).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })
+              : "Today";
+
+            // 🟢 Safe number parsing to prevent any -NaN rendering glitches
+            const rawAmount = tx.amount ?? tx.toAmount ?? tx.fromAmount ?? 0;
+            const parsedAmount = isNaN(Number(rawAmount))
+              ? 0
+              : Number(rawAmount);
+
+            return (
+              <WalletAssetRow
+                key={tx.id}
+                name={`${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)}`}
+                symbol={assetSymbol}
+                network={currentStatus}
+                balanceString={dateLabel}
+                valueString={`${isDeposit ? "+" : "-"}$${parsedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                dotColor={isDeposit ? Colors.green : Colors.newCryptoYellow}
+                disabled={true}
+              />
+            );
+          })
+        )}
       </View>
     </ScrollView>
   );

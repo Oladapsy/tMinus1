@@ -10,7 +10,7 @@ import { FontFamily } from "@/src/constants/fonts";
 import { Transaction } from "@/src/types/wallet";
 
 interface TransactionDetailsViewProps {
-  tx: Transaction; // 🟢 Strong typed directly to the schema
+  tx: Transaction;
   onGoBack: () => void;
   onBackToWallet: () => void;
 }
@@ -20,11 +20,15 @@ export default function TransactionDetailsView({
   onGoBack,
   onBackToWallet,
 }: TransactionDetailsViewProps) {
-  const isDeposit = tx.type?.toLowerCase() === "deposit";
-  const displayAsset = tx.assetSymbol || "---";
+  const transactionType = tx.type ?? "Transaction";
+  const isDeposit =
+    transactionType.toLowerCase() === "deposit" ||
+    transactionType.toLowerCase() === "buy";
+
+  const displayAsset = tx.assetSymbol || tx.toAsset || tx.fromAsset || "USDT";
 
   const formatDate = (rawStr?: string) => {
-    if (!rawStr) return "---";
+    if (!rawStr) return "Just now";
     return new Date(rawStr).toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
@@ -33,6 +37,10 @@ export default function TransactionDetailsView({
       minute: "2-digit",
     });
   };
+
+  // 🟢 Exact same parsing defense used on the dashboard to eradicate -NaN instances permanently
+  const rawAmount = tx.amount ?? tx.toAmount ?? tx.fromAmount ?? 0;
+  const parsedAmount = isNaN(Number(rawAmount)) ? 0 : Number(rawAmount);
 
   return (
     <View style={styles.container}>
@@ -49,14 +57,14 @@ export default function TransactionDetailsView({
         {/* Highlighted Banner Status Header Card */}
         <View style={styles.statusBannerCard}>
           <Paragraph
-            text={`${tx.type?.toUpperCase() || "TRANSACTION"}`}
+            text={`${transactionType.toUpperCase()}`}
             color={Colors.newWhite}
             size={13}
             textAlign="left"
           />
           <View style={{ marginTop: 8, marginBottom: 4 }}>
             <Title
-              text={`${isDeposit ? "+" : "-"}${Number(tx.amount).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${displayAsset}`}
+              text={`${isDeposit ? "+" : "-"}${parsedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })} ${displayAsset}`}
               color={isDeposit ? Colors.green : Colors.newWhite}
               size={26}
               fontFamily={FontFamily.bold}
@@ -64,8 +72,10 @@ export default function TransactionDetailsView({
             />
           </View>
           <Title
-            text={tx.status ? tx.status.toUpperCase() : "PROCESSING"}
-            color={tx.status === "completed" ? Colors.green : Colors.newCryptoYellow}
+            text={(tx.status || "PROCESSING").toUpperCase()}
+            color={
+              tx.status === "completed" ? Colors.green : Colors.newCryptoYellow
+            }
             size={12}
             fontFamily={FontFamily.bold}
             textAlign="left"
@@ -75,8 +85,16 @@ export default function TransactionDetailsView({
         {/* Breakdown Receipt Card Meta list */}
         <View style={styles.detailsCard}>
           <View style={styles.row}>
-            <Paragraph text="Reference Code" color={Colors.newSecondary} size={14} />
-            <Title text={tx.id} size={12} fontFamily={FontFamily.bold} />
+            <Paragraph
+              text="Reference Code"
+              color={Colors.newSecondary}
+              size={14}
+            />
+            <Title
+              text={tx.id || "---"}
+              size={12}
+              fontFamily={FontFamily.bold}
+            />
           </View>
 
           <View style={styles.row}>
@@ -85,13 +103,27 @@ export default function TransactionDetailsView({
           </View>
 
           <View style={styles.row}>
-            <Paragraph text="Fee Charge" color={Colors.newSecondary} size={14} />
-            <Title text={`${tx.feeAmount ?? 0} ${displayAsset}`} size={14} fontFamily={FontFamily.bold} />
+            <Paragraph
+              text="Fee Charge"
+              color={Colors.newSecondary}
+              size={14}
+            />
+            <Title
+              text={`${tx.feeAmount ?? 0} ${displayAsset}`}
+              size={14}
+              fontFamily={FontFamily.bold}
+            />
           </View>
 
-          <View style={[styles.row, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+          <View
+            style={[styles.row, { borderBottomWidth: 0, paddingBottom: 0 }]}
+          >
             <Paragraph text="Timestamp" color={Colors.newSecondary} size={14} />
-            <Title text={formatDate(tx.createdAt)} size={13} fontFamily={FontFamily.bold} />
+            <Title
+              text={formatDate(tx.createdAt)}
+              size={13}
+              fontFamily={FontFamily.bold}
+            />
           </View>
         </View>
 

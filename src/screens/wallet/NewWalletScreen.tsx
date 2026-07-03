@@ -323,7 +323,6 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
 
           {workflowMode === "transaction_history" && (
             <TransactionHistoryView
-              transactions={transactions} // 🟢 Pass down the query array
               onSelectTx={(tx) => {
                 setSelectedTx(tx);
                 setWorkflowMode("transaction_details");
