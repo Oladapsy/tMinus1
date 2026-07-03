@@ -7,9 +7,10 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { Transaction } from "@/src/types/wallet";
 
 interface TransactionDetailsViewProps {
-  tx: { title: string; amount: string; status: string };
+  tx: Transaction; // 🟢 Strong typed directly to the schema
   onGoBack: () => void;
   onBackToWallet: () => void;
 }
@@ -19,11 +20,25 @@ export default function TransactionDetailsView({
   onGoBack,
   onBackToWallet,
 }: TransactionDetailsViewProps) {
+  const isDeposit = tx.type?.toLowerCase() === "deposit";
+  const displayAsset = tx.assetSymbol || "---";
+
+  const formatDate = (rawStr?: string) => {
+    if (!rawStr) return "---";
+    return new Date(rawStr).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <View style={styles.container}>
       <BackHeader
         title="Transaction details"
-        paragraph="A single ledger entry with status and reference."
+        paragraph="Detailed ledger audit view for your account balance updates."
         onBack={onGoBack}
       />
 
@@ -34,25 +49,25 @@ export default function TransactionDetailsView({
         {/* Highlighted Banner Status Header Card */}
         <View style={styles.statusBannerCard}>
           <Paragraph
-            text={`Sandbox ${tx.title}`}
+            text={`${tx.type?.toUpperCase() || "TRANSACTION"}`}
             color={Colors.newWhite}
-            size={15}
+            size={13}
             textAlign="left"
           />
           <View style={{ marginTop: 8, marginBottom: 4 }}>
             <Title
-              text={`${tx.amount} USDT`}
-              color={Colors.green}
-              size={32}
+              text={`${isDeposit ? "+" : "-"}${Number(tx.amount).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${displayAsset}`}
+              color={isDeposit ? Colors.green : Colors.newWhite}
+              size={26}
               fontFamily={FontFamily.bold}
               textAlign="left"
             />
           </View>
-          <Paragraph
-            text={tx.status}
-            color={Colors.green}
-            size={14}
-            fontFamily={FontFamily.medium}
+          <Title
+            text={tx.status ? tx.status.toUpperCase() : "PROCESSING"}
+            color={tx.status === "completed" ? Colors.green : Colors.newCryptoYellow}
+            size={12}
+            fontFamily={FontFamily.bold}
             textAlign="left"
           />
         </View>
@@ -60,35 +75,23 @@ export default function TransactionDetailsView({
         {/* Breakdown Receipt Card Meta list */}
         <View style={styles.detailsCard}>
           <View style={styles.row}>
-            <Paragraph text="Reference" color={Colors.newSecondary} size={14} />
-            <Title text="txn_193e61b9" size={14} fontFamily={FontFamily.bold} />
+            <Paragraph text="Reference Code" color={Colors.newSecondary} size={14} />
+            <Title text={tx.id} size={12} fontFamily={FontFamily.bold} />
           </View>
 
           <View style={styles.row}>
             <Paragraph text="Asset" color={Colors.newSecondary} size={14} />
-            <Title text="USDT" size={14} fontFamily={FontFamily.bold} />
+            <Title text={displayAsset} size={14} fontFamily={FontFamily.bold} />
           </View>
 
           <View style={styles.row}>
-            <Paragraph text="Network" color={Colors.newSecondary} size={14} />
-            <Title text="TRC20" size={14} fontFamily={FontFamily.bold} />
+            <Paragraph text="Fee Charge" color={Colors.newSecondary} size={14} />
+            <Title text={`${tx.feeAmount ?? 0} ${displayAsset}`} size={14} fontFamily={FontFamily.bold} />
           </View>
 
-          <View style={styles.row}>
-            <Paragraph text="Rate" color={Colors.newSecondary} size={14} />
-            <Title text="$1.00" size={14} fontFamily={FontFamily.bold} />
-          </View>
-
-          <View style={styles.row}>
-            <Paragraph text="Created" color={Colors.newSecondary} size={14} />
-            <Title text="May 27, 2026" size={14} fontFamily={FontFamily.bold} />
-          </View>
-
-          <View
-            style={[styles.row, { borderBottomWidth: 0, paddingBottom: 0 }]}
-          >
-            <Paragraph text="Completed" color={Colors.newSecondary} size={14} />
-            <Title text="May 27, 2026" size={14} fontFamily={FontFamily.bold} />
+          <View style={[styles.row, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+            <Paragraph text="Timestamp" color={Colors.newSecondary} size={14} />
+            <Title text={formatDate(tx.createdAt)} size={13} fontFamily={FontFamily.bold} />
           </View>
         </View>
 
@@ -107,11 +110,11 @@ export default function TransactionDetailsView({
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 24 },
-  scrollContent: { paddingBottom: 40, alignItems: "center" },
+  scrollContent: { paddingBottom: 40, alignItems: "center", width: "100%" },
   statusBannerCard: {
-    backgroundColor: "rgba(94, 213, 168, 0.05)",
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
     borderWidth: 1,
-    borderColor: "rgba(94, 213, 168, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.05)",
     width: "100%",
     padding: 20,
     borderRadius: 20,

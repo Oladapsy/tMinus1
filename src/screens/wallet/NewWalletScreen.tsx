@@ -12,13 +12,17 @@ import WithdrawConfirmationView from "@/src/components/wallet/lite/ithdrawConfir
 import TransactionHistoryView from "@/src/components/wallet/lite/TransactionHistoryView";
 import TransactionDetailsView from "@/src/components/wallet/lite/TransactionDetailsView";
 import PortfolioHistoryView from "@/src/components/wallet/lite/PortfolioHistoryView";
-
+import { useDispatch } from "react-redux";
 import {
   useGetPortfolioHistoryQuery,
   useGetTransactionsQuery,
+  walletApi,
+  useRequestWithdrawalMutation,
+  useExecuteInternalTransferMutation,
 } from "@/src/services/walletApi";
 import { WalletResponse } from "@/src/types/wallet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useToast } from "@/src/context/ToastContext";
 
 type WorkflowMode =
   | "dashboard"
@@ -64,14 +68,29 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
   const [activeRange, setActiveRange] = useState<"1D" | "1W" | "1M" | "1Y">(
     "1M",
   );
+  const [successDetails, setSuccessDetails] = useState<any | null>(null);
+  // withdrawal and transfer mutation hooks for API calls
+  const [requestWithdrawal, { isLoading: isWithdrawalLoading }] =
+    useRequestWithdrawalMutation();
+  const [executeInternalTransfer, { isLoading: isTransferLoading }] =
+    useExecuteInternalTransferMutation();
+
+  // internal and external withdrawal state management nodes
+  type WithdrawalType = "external" | "internal";
+  const [withdrawalType, setWithdrawalType] =
+    useState<WithdrawalType>("external");
+
+  // 🟢 Live state preservation nodes tracking form input state parameters
+  const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
+  const [withdrawAddress, setWithdrawAddress] = useState<string>("");
+  const [withdrawNetwork, setWithdrawNetwork] = useState<string>("");
+
+  const dispatch = useDispatch();
+  const { showToast } = useToast();
 
   const { data: txResponse, refetch: refetchTransactions } =
     useGetTransactionsQuery({ limit: 5, page: 1 });
 
-  // for recent transaction
-  // const { data: txResponse } = useGetTransactionsQuery({
-  //   limit: 5,
-  // });
   const transactions = txResponse?.data || [];
 
   const { data: historyResponse, isLoading: isHistoryLoading } =
@@ -112,6 +131,60 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
     },
   );
 
+  const handleConfirmWithdrawal = async (pinCode: string) => {
+    if (!selectedAsset) return;
+
+    try {
+      let resultPayload: any;
+
+      if (withdrawalType === "internal") {
+        // 🚀 Hits /wallet/transfers (PIN is validated here on server side)
+        resultPayload = await executeInternalTransfer({
+          assetSymbol: selectedAsset.symbol,
+          amount: withdrawAmount,
+          recipient: withdrawAddress,
+          pin: pinCode,
+        }).unwrap(); // 🟢 UNWRAP converts rejected payloads directly into throwable catch errors!
+
+        setSuccessDetails({
+          status: resultPayload?.data?.transaction?.status || "completed",
+          amount: resultPayload?.data?.transfer?.amount,
+          fee: resultPayload?.data?.transaction?.feeAmount || 0,
+          reference: resultPayload?.data?.transfer?.reference,
+          createdAt: resultPayload?.data?.transaction?.createdAt,
+          isInternal: true,
+        });
+      } else {
+        // 🚀 Hits /wallet/withdrawals
+        resultPayload = await requestWithdrawal({
+          assetSymbol: selectedAsset.symbol,
+          amount: withdrawAmount,
+          address: withdrawAddress,
+          network: withdrawNetwork,
+        }).unwrap(); // 🟢 Throws error to catch block if server validates anything incorrectly
+
+        setSuccessDetails({
+          status: resultPayload?.data?.status || "pending",
+          amount: resultPayload?.data?.amount,
+          fee: resultPayload?.data?.feeAssetAmount || 0,
+          reference: resultPayload?.data?.id,
+          createdAt: resultPayload?.data?.createdAt,
+          isInternal: false,
+        });
+      }
+
+      // Now safe to navigate to success panel since unwrap passed validation checks!
+      setWorkflowMode("withdraw_success");
+    } catch (error: any) {
+      console.error("Transaction Error Details:", error);
+      // 🟢 Dynamic fallback engine reads standard backend failure alerts accurately
+      const errorMessage =
+        error?.data?.message ||
+        error?.message ||
+        "Action failed. Please verify credentials.";
+      showToast(`${errorMessage}`, "error");
+    }
+  };
   const portfolioTotalString = walletData?.portfolioValueUsd
     ? `$${walletData.portfolioValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     : "$0.00";
@@ -135,10 +208,9 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
               transactions={transactions}
               onDepositPress={() => setWorkflowMode("deposit_selector")}
               onWithdrawPress={() => setWorkflowMode("withdraw_selector")}
-              onTradePress={() =>
-                console.log("Navigating to active Market trading module...")
-              }
+              onTradePress={() => console.log("Navigating to market...")}
               onBalancePress={() => setWorkflowMode("portfolio_history")}
+              onViewTransactions={() => setWorkflowMode("transaction_history")} // 🟢 Add this line here
             />
           )}
 
@@ -146,8 +218,8 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
             <PortfolioHistoryView
               onGoBack={() => setWorkflowMode("dashboard")}
               apiPayload={historyResponse}
-              activeTimeframe={activeRange} // 🟢 Aligned with local state variable
-              onRangeChange={(range) => setActiveRange(range)} // 🟢 Aligned with local state modifier
+              activeTimeframe={activeRange}
+              onRangeChange={(range) => setActiveRange(range)}
               isLoading={isHistoryLoading}
             />
           )}
@@ -198,44 +270,60 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
               asset={selectedAsset}
               onGoBack={() => setWorkflowMode("crypto_deposit")}
               onCreateDeposit={() => {
-                // Step A: Immediately send the user back to the home dashboard
                 setWorkflowMode("dashboard");
-
-                // Step B: Wait 10 seconds for the backend sandbox block delay to resolve, then force pull fresh server data!
                 setTimeout(() => {
-                  refetchWallet();
                   refetchTransactions();
-                }, 10500); // 10.5 seconds guarantees the sandbox processing window is clear
+                  dispatch(
+                    walletApi.util.invalidateTags(["Wallet", "History"]),
+                  );
+                }, 10500);
               }}
             />
           )}
           {workflowMode === "withdraw_form" && selectedAsset && (
             <WithdrawFormView
-              asset={selectedAsset}
+              initialAsset={selectedAsset}
+              allAssets={mappedAssets}
               onGoBack={() => setWorkflowMode("withdraw_selector")}
-              onPreviewWithdrawal={() =>
-                setWorkflowMode("withdraw_confirmation")
-              }
+              onPreviewWithdrawal={(
+                amount,
+                destination,
+                chosenNetwork,
+                modeType,
+              ) => {
+                setWithdrawAmount(amount);
+                setWithdrawAddress(destination); // Stores address OR recipient data matching the string
+                setWithdrawNetwork(chosenNetwork);
+                setWithdrawalType(modeType);
+                setWorkflowMode("withdraw_confirmation");
+              }}
             />
           )}
 
           {workflowMode === "withdraw_confirmation" && selectedAsset && (
             <WithdrawConfirmationView
               asset={selectedAsset}
+              amount={withdrawAmount}
+              address={withdrawAddress}
+              network={withdrawNetwork}
+              withdrawalType={withdrawalType}
+              isLoading={isWithdrawalLoading || isTransferLoading} // 🟢 Fixes missing property error
               onGoBack={() => setWorkflowMode("withdraw_form")}
-              onSubmitWithdrawal={() => setWorkflowMode("withdraw_success")}
+              onSubmitWithdrawal={(pin) => handleConfirmWithdrawal(pin)} // 🟢 Binds pin to endpoint query runner
             />
           )}
 
           {workflowMode === "withdraw_success" && selectedAsset && (
             <WithdrawalSuccessView
               asset={selectedAsset}
+              details={successDetails} // 🟢 Pass down live server response metadata objects
               onViewTransaction={() => setWorkflowMode("transaction_history")}
             />
           )}
 
           {workflowMode === "transaction_history" && (
             <TransactionHistoryView
+              transactions={transactions} // 🟢 Pass down the query array
               onSelectTx={(tx) => {
                 setSelectedTx(tx);
                 setWorkflowMode("transaction_details");

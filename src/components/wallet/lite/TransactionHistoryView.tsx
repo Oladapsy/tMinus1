@@ -12,24 +12,24 @@ import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-
-interface TransactionItem {
-  id: string;
-  title: string;
-  type: "deposit" | "withdraw" | "buy" | "swap" | "alert";
-  status: string;
-  amount: string;
-  timeContext: string;
-  badgeLetter: string;
-  badgeBg: string;
-}
+import { Transaction } from "@/src/types/wallet";
 
 interface TransactionHistoryViewProps {
-  onSelectTx: (tx: TransactionItem) => void;
+  transactions: Transaction[]; // 🟢 Fed directly from RTK query response
+  onSelectTx: (tx: Transaction) => void;
   onGoBack: () => void;
 }
 
+const ASSET_COLORS: Record<string, string> = {
+  BTC: Colors.newCryptoYellow,
+  ETH: Colors.purple,
+  USDT: Colors.green,
+  USDC: "#2775CA",
+  SOL: Colors.green,
+};
+
 export default function TransactionHistoryView({
+  transactions = [],
   onSelectTx,
   onGoBack,
 }: TransactionHistoryViewProps) {
@@ -37,64 +37,20 @@ export default function TransactionHistoryView({
     "All" | "Deposits" | "Withdrawals"
   >("All");
 
-  const mockTxList: TransactionItem[] = [
-    {
-      id: "1",
-      title: "USDT deposit",
-      type: "deposit",
-      status: "Completed",
-      amount: "+$250.00",
-      timeContext: "Today",
-      badgeLetter: "U",
-      badgeBg: Colors.green,
-    },
-    {
-      id: "2",
-      title: "BTC buy",
-      type: "buy",
-      status: "Completed",
-      amount: "-$100.00",
-      timeContext: "Today",
-      badgeLetter: "B",
-      badgeBg: Colors.newCryptoYellow,
-    },
-    {
-      id: "3",
-      title: "USDT withdrawal",
-      type: "withdraw",
-      status: "Pending",
-      amount: "-100.00",
-      timeContext: "Review",
-      badgeLetter: "U",
-      badgeBg: Colors.green,
-    },
-    {
-      id: "4",
-      title: "ETH swap",
-      type: "swap",
-      status: "Completed",
-      amount: "0.03 ETH",
-      timeContext: "Yesterday",
-      badgeLetter: "E",
-      badgeBg: Colors.purple,
-    },
-    {
-      id: "5",
-      title: "Price alert",
-      type: "alert",
-      status: "Triggered",
-      amount: "BTC",
-      timeContext: "Read",
-      badgeLetter: "A",
-      badgeBg: Colors.green,
-    },
-  ];
+  // 🟢 Dynamically filter live backend transaction structures
+  const filteredTxList = transactions.filter((tx) => {
+    if (activeFilter === "Deposits")
+      return tx.type?.toLowerCase() === "deposit";
+    if (activeFilter === "Withdrawals")
+      return tx.type?.toLowerCase() === "withdrawal";
+    return true;
+  });
 
   return (
     <View style={styles.container}>
       <BackHeader
         title="Transactions"
-        paragraph="Deposits, withdrawals, buys, sells, and swaps."
+        paragraph="Deposits, withdrawals, and historical ledger actions."
         onBack={onGoBack}
       />
 
@@ -125,43 +81,75 @@ export default function TransactionHistoryView({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {mockTxList.map((tx) => (
-          <TouchableOpacity
-            key={tx.id}
-            style={styles.txCard}
-            activeOpacity={0.7}
-            onPress={() => onSelectTx(tx)}
-          >
-            <View style={styles.leftContent}>
-              <View style={[styles.avatar, { backgroundColor: tx.badgeBg }]}>
-                <Text style={styles.avatarText}>{tx.badgeLetter}</Text>
-              </View>
-              <View style={styles.meta}>
-                <Title text={tx.title} size={15} textAlign="left" />
-                <View style={{ marginTop: 2 }}>
-                  <Paragraph
-                    text={tx.status}
-                    color={Colors.newSecondary}
-                    size={12}
-                    textAlign="left"
-                  />
-                </View>
-              </View>
-            </View>
+        {filteredTxList.length === 0 ? (
+          <View style={{ marginTop: 40, alignItems: "center" }}>
+            <Paragraph
+              text="No transactions found matching this group."
+              color={Colors.newSecondary}
+            />
+          </View>
+        ) : (
+          filteredTxList.map((tx) => {
+            const isDeposit = tx.type?.toLowerCase() === "deposit";
+            const assetSymbol = tx.assetSymbol || "USDT";
+            const badgeBg = ASSET_COLORS[assetSymbol] || Colors.green;
+            const displayDate = tx.createdAt
+              ? new Date(tx.createdAt).toLocaleDateString()
+              : "Pending";
 
-            <View style={styles.rightContent}>
-              <Title text={tx.amount} size={15} textAlign="right" />
-              <View style={{ marginTop: 2 }}>
-                <Paragraph
-                  text={tx.timeContext}
-                  color={Colors.newSecondary}
-                  size={12}
-                  textAlign="right"
-                />
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+            return (
+              <TouchableOpacity
+                key={tx.id}
+                style={styles.txCard}
+                activeOpacity={0.7}
+                onPress={() => onSelectTx(tx)}
+              >
+                <View style={styles.leftContent}>
+                  <View style={[styles.avatar, { backgroundColor: badgeBg }]}>
+                    <Text style={styles.avatarText}>
+                      {assetSymbol.charAt(0)}
+                    </Text>
+                  </View>
+                  <View style={styles.meta}>
+                    <Title
+                      text={`${assetSymbol} ${tx.type || "Transaction"}`}
+                      size={15}
+                      textAlign="left"
+                    />
+                    <View style={{ marginTop: 2 }}>
+                      <Paragraph
+                        text={tx.status || "Processing"}
+                        color={
+                          tx.status === "completed"
+                            ? Colors.green
+                            : Colors.newCryptoYellow
+                        }
+                        size={12}
+                        textAlign="left"
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.rightContent}>
+                  <Title
+                    text={`${isDeposit ? "+" : "-"}${Number(tx.amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}`}
+                    size={15}
+                    textAlign="right"
+                  />
+                  <View style={{ marginTop: 2 }}>
+                    <Paragraph
+                      text={displayDate}
+                      color={Colors.newSecondary}
+                      size={12}
+                      textAlign="right"
+                    />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          })
+        )}
       </ScrollView>
     </View>
   );
@@ -170,7 +158,13 @@ export default function TransactionHistoryView({
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 24 },
   scrollContent: { paddingBottom: 40 },
-  filterBar: { flexDirection: "row", gap: 8, marginBottom: 24 },
+  filterBar: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 24,
+    marginTop: 16,
+    justifyContent: "flex-start",
+  },
   filterTab: {
     paddingVertical: 8,
     paddingHorizontal: 16,

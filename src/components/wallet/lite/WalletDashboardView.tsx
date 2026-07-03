@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, View, Text } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
@@ -21,6 +27,7 @@ interface WalletDashboardViewProps {
   onTradePress?: () => void;
   onBalancePress?: () => void;
   transactions: Transaction[];
+  onViewTransactions: () => void;
 }
 
 export default function WalletDashboardView({
@@ -32,6 +39,7 @@ export default function WalletDashboardView({
   onTradePress,
   onBalancePress,
   transactions,
+  onViewTransactions,
 }: WalletDashboardViewProps) {
   const [activeTab, setActiveTab] = useState<
     "deposit" | "withdraw" | "trade" | null
@@ -127,9 +135,22 @@ export default function WalletDashboardView({
       </View>
 
       {/* 5. Recent Transaction Module */}
-      <View style={styles.recentTransactionsHeader}>
+      <TouchableOpacity
+        style={styles.recentTransactionsHeader}
+        activeOpacity={0.7}
+        onPress={onViewTransactions}
+      >
         <Text style={styles.sectionTitleText}>Recent transactions</Text>
-      </View>
+        <Text
+          style={{
+            color: Colors.green,
+            fontFamily: FontFamily.medium,
+            fontSize: 13,
+          }}
+        >
+          See All
+        </Text>
+      </TouchableOpacity>
 
       <View style={styles.listSection}>
         {transactions.map((tx) => {
@@ -199,6 +220,9 @@ const styles = StyleSheet.create({
   recentTransactionsHeader: {
     marginTop: 24,
     marginBottom: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   sectionTitleText: {
     color: Colors.newWhite,

@@ -12,65 +12,127 @@ interface SelectedAssetPayload {
   symbol: string;
 }
 
+// 🟢 Define complete runtime parameter models matching the unwrap payload mapping
+interface SuccessDetails {
+  status: string;
+  amount: number;
+  fee: number;
+  reference: string;
+  createdAt: string;
+  isInternal: boolean;
+}
+
 interface WithdrawalSuccessViewProps {
   asset: SelectedAssetPayload;
+  details: SuccessDetails | null;
   onViewTransaction: () => void;
 }
 
 export default function WithdrawalSuccessView({
   asset,
+  details,
   onViewTransaction,
 }: WithdrawalSuccessViewProps) {
+  // Safe fallbacks to prevent crash issues if state hasn't fully loaded yet
+  const displayAmount = details?.amount ?? 0;
+  const displayFee = details?.fee ?? 0;
+  const displayRef = details?.reference ?? "---";
+
+  // Format the raw API timestamp into a cleaner UI string
+  const displayDate = details?.createdAt
+    ? new Date(details.createdAt).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Just now";
+
   return (
     <View style={styles.container}>
       <BackHeader
-        title="Withdrawal submitted"
-        paragraph="Finance review can approve or reject this request."
+        title={
+          details?.isInternal ? "Transfer Completed" : "Withdrawal Submitted"
+        }
+        paragraph={
+          details?.isInternal
+            ? "Funds moved instantly to recipient user account."
+            : "Finance review protocols can approve or reject this request."
+        }
       />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Large Animated Success Badge Ring */}
         <View style={styles.successRingWrapper}>
           <View style={styles.innerSuccessCircle}>
-            <Title text="✓" size={24} color={Colors.dark || "#0B0E14"} />
+            <Title text="✓" size={24} color="#0B0E14" />
           </View>
         </View>
 
-        {/* Receipt Key-Value Rows Card Layout */}
         <View style={styles.receiptCard}>
           <View style={styles.row}>
             <Paragraph text="Status" color={Colors.newSecondary} size={14} />
-            <Title text="Pending review" size={14} fontFamily={FontFamily.bold} />
+            <Title
+              text={
+                details?.isInternal ? "Success" : (details?.status ?? "Pending")
+              }
+              size={14}
+              fontFamily={FontFamily.bold}
+              color={
+                details?.isInternal ? Colors.green : Colors.newCryptoYellow
+              }
+            />
           </View>
 
           <View style={styles.row}>
-            <Paragraph text="Amount" color={Colors.newSecondary} size={14} />
-            <Title text={`100.00 ${asset.symbol}`} size={14} fontFamily={FontFamily.bold} />
+            <Paragraph
+              text="Sent Amount"
+              color={Colors.newSecondary}
+              size={14}
+            />
+            <Title
+              text={`${displayAmount} ${asset.symbol}`}
+              size={14}
+              fontFamily={FontFamily.bold}
+            />
           </View>
 
           <View style={styles.row}>
-            <Paragraph text="Fee" color={Colors.newSecondary} size={14} />
-            <Title text={`1.00 ${asset.symbol}`} size={14} fontFamily={FontFamily.bold} />
+            <Paragraph
+              text="Network Fee"
+              color={Colors.newSecondary}
+              size={14}
+            />
+            <Title
+              text={`${displayFee} ${asset.symbol}`}
+              size={14}
+              fontFamily={FontFamily.bold}
+            />
           </View>
 
           <View style={styles.row}>
-            <Paragraph text="Reference" color={Colors.newSecondary} size={14} />
-            <Title text="wd_8392" size={14} fontFamily={FontFamily.bold} />
+            <Paragraph
+              text="Reference ID"
+              color={Colors.newSecondary}
+              size={14}
+            />
+            <Title text={displayRef} size={14} fontFamily={FontFamily.bold} />
           </View>
 
-          <View style={[styles.row, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-            <Paragraph text="Created" color={Colors.newSecondary} size={14} />
-            <Title text="May 27, 2026" size={14} fontFamily={FontFamily.bold} />
+          <View
+            style={[styles.row, { borderBottomWidth: 0, paddingBottom: 0 }]}
+          >
+            <Paragraph text="Timestamp" color={Colors.newSecondary} size={14} />
+            <Title text={displayDate} size={14} fontFamily={FontFamily.bold} />
           </View>
         </View>
 
-        {/* Action Button */}
         <View style={styles.buttonWrapper}>
           <PrimaryButton
-            text="View transaction"
+            text="View history logs"
             fontSize={14}
             fontFamily={FontFamily.medium}
             onPress={onViewTransaction}
@@ -82,14 +144,8 @@ export default function WithdrawalSuccessView({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-    alignItems: "center",
-  },
+  container: { flex: 1, paddingHorizontal: 24 },
+  scrollContent: { paddingBottom: 40, alignItems: "center", width: "100%" },
   successRingWrapper: {
     width: 120,
     height: 120,
@@ -124,8 +180,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.04)",
   },
-  buttonWrapper: {
-    width: "100%",
-    marginTop: 40,
-  },
+  buttonWrapper: { width: "100%", marginTop: 40 },
 });

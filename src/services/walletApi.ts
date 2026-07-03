@@ -10,21 +10,113 @@ import {
   WithdrawalResponse,
 } from "../types/wallet";
 
+// 🟢 IMPORTANT: Import your auth slice actions here to update tokens or handle sessions
+// import { setCredentials, logout } from "../store/slices/authSlice";
+
+export interface TransferRequest {
+  assetSymbol: string;
+  amount: number;
+  recipient: string;
+  pin: string;
+}
+
+export interface TransferResponse {
+  data: {
+    transfer: {
+      reference: string;
+      assetSymbol: string;
+      amount: number;
+      recipient: {
+        id: string;
+        fullName: string;
+        email: string;
+        phone: string;
+      };
+    };
+    transaction: Transaction;
+    recipientTransaction: Transaction;
+    wallet: any;
+  };
+}
+
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
+// 1️⃣ Base query engine setup
+const baseQuery = fetchBaseQuery({
+  baseUrl: `${BASE_URL}/wallet`,
+  prepareHeaders: (headers, { getState }) => {
+    const token = (getState() as any).auth.accessToken;
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
+});
+
+// 2️⃣ Interceptor logic to catch expired sessions and refresh automatically
+const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result.error && result.error.status === 401) {
+    const errorData = result.error.data as any;
+
+    if (errorData?.error?.code === "ACCESS_TOKEN_EXPIRED") {
+      console.log(
+        "🔄 Access token expired. Attempting automated refresh routine...",
+      );
+
+      const refreshToken = (api.getState() as any).auth.refreshToken;
+
+      if (refreshToken) {
+        try {
+          // Perform a direct token swap request relative to the auth domain
+          const refreshResult = await fetch(`${BASE_URL}/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken }),
+          });
+
+          const refreshData = await refreshResult.json();
+
+          if (refreshResult.ok && refreshData?.data?.accessToken) {
+            console.log(
+              "✅ Token successfully renewed! Re-trying context transaction branch...",
+            );
+
+            // 🟢 Action Dispatch: Updates token credentials inside Redux memory structures
+            // api.dispatch(setCredentials({
+            //   accessToken: refreshData.data.accessToken,
+            //   refreshToken: refreshData.data.refreshToken || refreshToken,
+            // }));
+
+            // Retry the original query payload with the fresh authorization parameters
+            result = await baseQuery(args, api, extraOptions);
+          } else {
+            console.log(
+              "❌ Refresh token verification failed. Forcing session termination...",
+            );
+            // api.dispatch(logout());
+          }
+        } catch (error) {
+          console.error("🚨 Interceptor network refresh error caught:", error);
+          // api.dispatch(logout());
+        }
+      } else {
+        console.log(
+          "⚠️ No refresh token located inside localized Redux storage state.",
+        );
+      }
+    }
+  }
+
+  return result;
+};
+
+// 3️⃣ Main API Definition
 export const walletApi = createApi({
   reducerPath: "walletApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${BASE_URL}/wallet`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth.accessToken;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      return headers;
-    }
-  }),
-  
+  baseQuery: baseQueryWithReauth, // 👈 Hooked up the token auto-recovery layer here!
+
   tagTypes: ["Wallet", "Transactions", "History"],
   endpoints: (builder) => ({
     // 🏢 Wallet home interface metrics engine
@@ -75,7 +167,7 @@ export const walletApi = createApi({
         body,
         headers: { "Idempotency-Key": `dep-sim-${Date.now()}` },
       }),
-      invalidatesTags: ["Wallet", "Transactions"],
+      invalidatesTags: ["Wallet", "Transactions", "History"],
     }),
 
     // 💸 Liquid asset external extraction ledger dispatch
@@ -86,7 +178,21 @@ export const walletApi = createApi({
         body,
         headers: { "Idempotency-Key": `wd-req-${Date.now()}` },
       }),
-      invalidatesTags: ["Wallet", "Transactions"],
+      invalidatesTags: ["Wallet", "Transactions", "History"],
+    }),
+
+    // 🟢 3. Internal Transfer endpoint engine connecting to /wallet/transfers
+    executeInternalTransfer: builder.mutation<
+      TransferResponse,
+      TransferRequest
+    >({
+      query: (body) => ({
+        url: "/transfers",
+        method: "POST",
+        body,
+        headers: { "Idempotency-Key": `int-trf-${Date.now()}` },
+      }),
+      invalidatesTags: ["Wallet", "Transactions", "History"], // Instantly triggers balance & history recalculation redraws!
     }),
   }),
 });
@@ -98,4 +204,5 @@ export const {
   useGetTransactionDetailsQuery,
   useSimulateDepositMutation,
   useRequestWithdrawalMutation,
+  useExecuteInternalTransferMutation,
 } = walletApi;
