@@ -15,28 +15,31 @@ import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-// 🟢 IMPORT FROM THE CORRECT CENTRAL TYPES PATH
 import { PortfolioHistoryResponse } from "@/src/types/wallet";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+type TimeframeRange = "1D" | "1W" | "1M" | "1Y";
+
 interface PortfolioHistoryViewProps {
   onGoBack: () => void;
-  apiPayload: PortfolioHistoryResponse;
-  onRangeChange: (range: "1D" | "1W" | "1M" | "1Y") => void;
+  apiPayload: PortfolioHistoryResponse | undefined; // Allow undefined safely during initial load states
+  activeTimeframe: TimeframeRange; // 🟢 FIX: Passed directly from state to keep pills instantly responsive
+  onRangeChange: (range: TimeframeRange) => void;
   isLoading?: boolean;
 }
 
 export default function PortfolioHistoryView({
   onGoBack,
   apiPayload,
+  activeTimeframe, // 🟢 Destructure it
   onRangeChange,
   isLoading = false,
 }: PortfolioHistoryViewProps) {
-  const activeTimeframe = apiPayload?.meta?.range || "1M";
+  // Safe extraction fallbacks
   const latestValueUsd = apiPayload?.meta?.latestValueUsd || 0;
 
-  // 📈 🟢 Fixed: Explicitly typed 'point' parameter
+  // 📈 Convert incoming data array points to target coordinates expected by wagmi-charts
   const chartData = useMemo(() => {
     if (!apiPayload?.data || apiPayload.data.length === 0) {
       return [{ timestamp: Date.now(), value: 0 }];
@@ -47,7 +50,6 @@ export default function PortfolioHistoryView({
     }));
   }, [apiPayload]);
 
-  // 🟢 Fixed: Strictly typed the indexing map object
   const periodLabelText =
     (
       {
@@ -107,6 +109,7 @@ export default function PortfolioHistoryView({
             </View>
           </LineChart.Provider>
 
+          {/* Timeframe pill selection header matrix */}
           <View style={styles.timeframeRowBar}>
             {(["1D", "1W", "1M", "1Y"] as const).map((timeframe) => (
               <TouchableOpacity
@@ -130,6 +133,7 @@ export default function PortfolioHistoryView({
           </View>
         </View>
 
+        {/* Aggregated Closing Values Section */}
         <View style={styles.historyListGroup}>
           <View style={styles.logCard}>
             <View style={styles.leftMetaContainer}>

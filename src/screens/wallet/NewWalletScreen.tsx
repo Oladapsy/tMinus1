@@ -144,21 +144,11 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
 
           {workflowMode === "portfolio_history" && (
             <PortfolioHistoryView
-              apiPayload={
-                historyResponse || {
-                  data: [],
-                  meta: {
-                    count: 0, // 🌟 FIXED: Added missing required API property
-                    range: activeRange,
-                    latestValueUsd: 0,
-                    latestValue: 0,
-                    currency: "USD",
-                  },
-                }
-              }
-              onRangeChange={(range) => setActiveRange(range)}
-              isLoading={isHistoryLoading}
               onGoBack={() => setWorkflowMode("dashboard")}
+              apiPayload={historyResponse?.data} // Pass down the inner data payload directly
+              activeTimeframe={activeRange} // 🟢 Pass state down here
+              onRangeChange={(range) => setActiveRange(range)} // 🟢 Update state here
+              isLoading={isHistoryLoading}
             />
           )}
 
