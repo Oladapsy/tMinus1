@@ -17,7 +17,6 @@ import {
   useGetPortfolioHistoryQuery,
   useGetTransactionsQuery,
 } from "@/src/services/walletApi";
-// 🟢 IMPORT THE OFFICIAL SCHEMA TYPE SECTOR LIFTED DIRECTLY FROM CENTRAL STORAGE
 import { WalletResponse } from "@/src/types/wallet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -67,7 +66,7 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
   );
 
   // for recent transaction
-  const { data: txResponse, isLoading: isTxLoading } = useGetTransactionsQuery({
+  const { data: txResponse } = useGetTransactionsQuery({
     limit: 5,
   });
   const transactions = txResponse?.data || [];
@@ -77,7 +76,6 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
 
   const wallet = walletData?.wallet;
 
-  // 🔄 🟢 Fixed: Added strict inner array parameter definitions for loop passes
   const mappedAssets: AssetData[] = (wallet?.balances || []).map(
     (bal: { assetSymbol: string; available: number }) => {
       const assetMeta = ASSET_THEME_MAP[bal.assetSymbol] || {
@@ -111,7 +109,6 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
     },
   );
 
-  // Extract the live aggregate dollar evaluation directly from the server payload
   const portfolioTotalString = walletData?.portfolioValueUsd
     ? `$${walletData.portfolioValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     : "$0.00";
@@ -145,9 +142,9 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
           {workflowMode === "portfolio_history" && (
             <PortfolioHistoryView
               onGoBack={() => setWorkflowMode("dashboard")}
-              apiPayload={historyResponse?.data} // Pass down the inner data payload directly
-              activeTimeframe={activeRange} // 🟢 Pass state down here
-              onRangeChange={(range) => setActiveRange(range)} // 🟢 Update state here
+              apiPayload={historyResponse}
+              activeTimeframe={activeRange} // 🟢 Aligned with local state variable
+              onRangeChange={(range) => setActiveRange(range)} // 🟢 Aligned with local state modifier
               isLoading={isHistoryLoading}
             />
           )}
