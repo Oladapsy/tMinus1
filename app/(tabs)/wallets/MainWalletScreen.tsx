@@ -4,16 +4,18 @@ import OldWalletScreen from "@/src/screens/wallet/OldWalletScreen";
 import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from "@/src/constants/colors";
-import { useGetProfileQuery } from "@/src/services/profileApi"; // 🟢 Grabs cached data from Redux store automatically!
+import { useGetProfileQuery } from "@/src/services/profileApi"; 
 import { useGetWalletQuery } from "@/src/services/walletApi";
+import { useLocalSearchParams } from "expo-router"; // 🟢 1. Import the params hook
 
 export type KycStatus = "NOT_STARTED" | "PENDING" | "APPROVED";
 
 const MainWalletScreen = () => {
-  const { data: userResponse, isLoading: isProfileLoading } =
-    useGetProfileQuery();
-  const { data: walletResponse, isLoading: isWalletLoading } =
-    useGetWalletQuery();
+  // 🟢 2. Read the search parameters coming from the Home navigation trigger
+  const { action } = useLocalSearchParams<{ action?: string }>();
+
+  const { data: userResponse, isLoading: isProfileLoading } = useGetProfileQuery();
+  const { data: walletResponse, isLoading: isWalletLoading } = useGetWalletQuery();
 
   const oldScreen = false;
 
@@ -34,8 +36,11 @@ const MainWalletScreen = () => {
         {oldScreen && <OldWalletScreen />}
 
         {oldScreen === false && (
-          /* 🟢 Pass the full walletResponse?.data so NewWalletScreen gets BOTH balances AND portfolioValueUsd */
-          <NewWalletScreen walletData={walletResponse?.data} />
+          /* 🟢 3. Pass the action straight into NewWalletScreen as an initial configuration */
+          <NewWalletScreen 
+            walletData={walletResponse?.data} 
+            initialWorkflow={action === "open_deposit" ? "deposit_selector" : "dashboard"} 
+          />
         )}
       </KycGateGuard>
     </View>

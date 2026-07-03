@@ -18,11 +18,14 @@ import RocketIcon from "@/assets/icons/home/Rocket.svg";
 import WalletIcon from "@/assets/icons/home/wallet1.svg";
 import { RECENT_COINS, TOP_COINS } from "@/src/data/coins";
 import { RootState } from "@/src/store/store";
+import { useRouter } from "expo-router";
+
 
 // Design State Engine Options
 type DashboardState = "SUCCESS" | "LOADING" | "EMPTY" | "ERROR";
 
 export default function HomeTab() {
+  const router = useRouter();
   // Pull active user session directly from Redux Warehouse shelves
   const currentProfile = useSelector((state: RootState) => state.auth.user);
   const targetUsername = currentProfile?.fullName || "Ada";
@@ -30,7 +33,10 @@ export default function HomeTab() {
   // 🌟 TEST TOGGLE: Switch between "SUCCESS", "LOADING", "EMPTY", "ERROR" to test your layouts!
   const [screenState, setScreenState] = useState<DashboardState>("SUCCESS");
 
-  const handleDepositTrigger = () => console.log("Deposit initiated");
+  const handleDepositTrigger = () => router.push({
+    pathname: "/(tabs)/wallets/MainWalletScreen",
+    params: { action: "open_deposit" }
+  });
   const handleAction1Press = () => console.log("Action 1 pressed");
   const handleAction2Press = () => console.log("Action 2 pressed");
 

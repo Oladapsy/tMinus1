@@ -1,37 +1,76 @@
 import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import { useGetWalletQuery } from "@/src/services/walletApi";
+import { useGetProfileQuery } from "@/src/services/profileApi";
 
 interface TotalBalanceCardProps {
-  balance?: string;
-  percentageChange?: string;
-  isVerified?: boolean;
   onDepositPress?: () => void;
 }
 
+export type KycStatus = "NOT_STARTED" | "PENDING" | "APPROVED";
+
 export default function TotalBalanceCard({
-  balance = "$4,892.40",
-  percentageChange = "+3.8% today",
-  isVerified = false,
   onDepositPress,
 }: TotalBalanceCardProps) {
+  const { data: walletResponse, isLoading } = useGetWalletQuery();
+  const { data: userProfile, isLoading: isUserProfileLoading } =
+    useGetProfileQuery();
+
+  const rawBalance = walletResponse?.data?.portfolioValueUsd ?? 0;
+  const parsedBalance = isNaN(Number(rawBalance)) ? 0 : Number(rawBalance);
+
+  const kycStatus = (userProfile?.data?.kycStatus?.toUpperCase() ||
+    "NOT_STARTED") as KycStatus;
+
+  const isApproved =
+    kycStatus === "APPROVED" ||
+    walletResponse?.data?.verification?.status === "approved";
+
+  // Fallback label indicator placeholder
+  const percentageChange = "+0.0% today";
+
+  if (isLoading || isUserProfileLoading) {
+    return (
+      <View style={[styles.cardContainer, styles.loaderContainer]}>
+        <ActivityIndicator size="small" color={Colors.green} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.cardContainer}>
       {/* Label context */}
       <Text style={styles.label}>Total balance</Text>
-      
-      {/* Dynamic Main Balance Amount */}
-      <Text style={styles.amount}>{balance}</Text>
-      
-      {/* Subtext info strings */}
+
+      {/* Dynamic Main Balance Amount formatted safely */}
+      <Text style={styles.amount}>
+        $
+        {parsedBalance.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </Text>
+
+      {/* Subtext info strings mapping real status attributes */}
       <Text style={styles.subtext}>
         <Text style={styles.percentage}>{percentageChange}</Text>
-        {isVerified && " • verified" || isVerified === false && " • unverified" }
+        {isApproved ? " • verified" : " • unverified"}
       </Text>
 
       {/* Mint Green Deposit Button action anchor */}
-      <TouchableOpacity style={styles.depositButton} onPress={onDepositPress}>
+      <TouchableOpacity
+        style={styles.depositButton}
+        onPress={onDepositPress}
+        activeOpacity={0.8}
+      >
         <Text style={styles.depositButtonText}>Deposit</Text>
       </TouchableOpacity>
     </View>
@@ -46,6 +85,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.05)",
+  },
+  loaderContainer: {
+    height: 160,
+    justifyContent: "center",
+    alignItems: "center",
   },
   label: {
     color: Colors.secondary,

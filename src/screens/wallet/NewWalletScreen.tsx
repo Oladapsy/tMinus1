@@ -1,7 +1,7 @@
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import WalletDashboardView from "@/src/components/wallet/lite/WalletDashboardView";
 import { Colors } from "@/src/constants/colors";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
 import AssetSelectorView from "@/src/components/wallet/lite/AssetSelectorView";
 import CryptoDepositQrView from "@/src/components/wallet/lite/CryptoDepositQrView";
@@ -51,6 +51,7 @@ export interface AssetData {
 
 interface NewWalletScreenProps {
   walletData: WalletResponse["data"] | undefined;
+  initialWorkflow?: string;
 }
 
 const ASSET_THEME_MAP: Record<string, { name: string; color: string }> = {
@@ -61,8 +62,14 @@ const ASSET_THEME_MAP: Record<string, { name: string; color: string }> = {
   SOL: { name: "Solana", color: Colors.green },
 };
 
-export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
-  const [workflowMode, setWorkflowMode] = useState<WorkflowMode>("dashboard");
+export default function NewWalletScreen({
+  walletData,
+  initialWorkflow = "dashboard",
+}: NewWalletScreenProps) {
+  const [workflowMode, setWorkflowMode] = useState<WorkflowMode>(
+    initialWorkflow as WorkflowMode,
+  );
+
   const [selectedAsset, setSelectedAsset] = useState<AssetData | null>(null);
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
   const [activeRange, setActiveRange] = useState<"1D" | "1W" | "1M" | "1Y">(
@@ -189,6 +196,11 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
     ? `$${walletData.portfolioValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     : "$0.00";
 
+  useEffect(() => {
+    if (initialWorkflow) {
+      setWorkflowMode(initialWorkflow as WorkflowMode);
+    }
+  }, [initialWorkflow]);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ImageBackground
