@@ -65,10 +65,13 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
     "1M",
   );
 
+  const { data: txResponse, refetch: refetchTransactions } =
+    useGetTransactionsQuery({ limit: 5, page: 1 });
+
   // for recent transaction
-  const { data: txResponse } = useGetTransactionsQuery({
-    limit: 5,
-  });
+  // const { data: txResponse } = useGetTransactionsQuery({
+  //   limit: 5,
+  // });
   const transactions = txResponse?.data || [];
 
   const { data: historyResponse, isLoading: isHistoryLoading } =
@@ -194,10 +197,18 @@ export default function NewWalletScreen({ walletData }: NewWalletScreenProps) {
             <SimulateDepositView
               asset={selectedAsset}
               onGoBack={() => setWorkflowMode("crypto_deposit")}
-              onCreateDeposit={() => setWorkflowMode("dashboard")}
+              onCreateDeposit={() => {
+                // Step A: Immediately send the user back to the home dashboard
+                setWorkflowMode("dashboard");
+
+                // Step B: Wait 10 seconds for the backend sandbox block delay to resolve, then force pull fresh server data!
+                setTimeout(() => {
+                  refetchWallet();
+                  refetchTransactions();
+                }, 10500); // 10.5 seconds guarantees the sandbox processing window is clear
+              }}
             />
           )}
-
           {workflowMode === "withdraw_form" && selectedAsset && (
             <WithdrawFormView
               asset={selectedAsset}

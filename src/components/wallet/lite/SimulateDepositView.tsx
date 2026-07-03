@@ -1,14 +1,22 @@
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 
 import BackHeader from "@/src/components/common/BackHeader";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import ItemAndAddress from "../../common/ItemAndAdress";
 import Paragraph from "../../common/Paragraph";
 import Title from "../../common/Title";
+
+// 🟢 Hook directly into your official API slice module mutation generator
+import { useSimulateDepositMutation } from "@/src/services/walletApi";
 
 interface SelectedAssetPayload {
   id: string;
@@ -29,9 +37,37 @@ export default function SimulateDepositView({
   onGoBack,
   onCreateDeposit,
 }: SimulateDepositViewProps) {
+  // 🟢 Bind the precise mutation execution trigger from your endpoint schema
+  const [triggerSimulation, { isLoading }] = useSimulateDepositMutation();
+
+  // Dynamic sandbox values matching your chosen asset configuration profiles
+  const simulationAmount = asset.symbol === "BTC" ? "0.005" : "250.00";
+
+ const handleCreateDeposit = async () => {
+    try {
+      await triggerSimulation({
+        amount: parseFloat(simulationAmount),
+        settlementDelaySeconds: 10,
+      }).unwrap();
+
+      onCreateDeposit();
+    } catch (error: any) {
+      console.error("Sandbox simulation failed:", error);
+
+      // 🟢 Dig deep into the API payload structure to extract the exact error text
+      const errorMessage = 
+        error?.data?.error?.message || 
+        error?.data?.message || 
+        "Failed to trigger sandbox balance credit.";
+
+      Alert.alert(
+        "Simulation Error",
+        `${errorMessage} (Status: ${error?.status || 'Unknown'})`
+      );
+    }
+  };
   return (
     <View style={styles.container}>
-      {/* Screen Header Frame */}
       <BackHeader
         title="Simulate deposit"
         paragraph="Create a pending deposit for testing polling and receipts."
@@ -42,21 +78,22 @@ export default function SimulateDepositView({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Field 1: Asset Code Display */}
-        <ItemAndAddress title="Asset" address={asset.symbol} />
-
-        {/* Field 2: Static Sandbox Demo Amount */}
-        <ItemAndAddress title="Amount" address="250.00" />
-
-        {/* Field 3: Settlement Block Delay Metrics */}
+        <ItemAndAddress
+          title="Asset"
+          address={`${asset.name} (${asset.symbol})`}
+        />
+        <ItemAndAddress title="Amount" address={simulationAmount} />
         <ItemAndAddress title="Settlement delay" address="10 seconds" />
 
-        {/* Custom Dynamic Deposit Preview Sheet */}
         <View style={styles.previewContainer}>
           <Title text="Deposit preview" size={15} />
 
           <View style={{ marginTop: 10 }}>
-            <Title text="+250 USDT" color={Colors.green} size={23} />
+            <Title
+              text={`+${simulationAmount} ${asset.symbol}`}
+              color={Colors.green}
+              size={23}
+            />
           </View>
 
           <View style={{ marginTop: 4 }}>
@@ -68,14 +105,21 @@ export default function SimulateDepositView({
           </View>
         </View>
 
-        {/* Action Form Confirmation Trigger Block */}
         <View style={styles.buttonWrapper}>
-          <PrimaryButton
-            text="Create sandbox deposit"
-            fontSize={13.5}
-            fontFamily={FontFamily.medium}
-            onPress={onCreateDeposit}
-          />
+          {isLoading ? (
+            <ActivityIndicator
+              size="small"
+              color={Colors.green}
+              style={{ paddingVertical: 12 }}
+            />
+          ) : (
+            <PrimaryButton
+              text="Create sandbox deposit"
+              fontSize={13.5}
+              fontFamily={FontFamily.medium}
+              onPress={handleCreateDeposit}
+            />
+          )}
         </View>
       </ScrollView>
     </View>
@@ -83,14 +127,8 @@ export default function SimulateDepositView({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-    alignItems: "center",
-  },
+  container: { flex: 1, paddingHorizontal: 24 },
+  scrollContent: { paddingBottom: 40, alignItems: "center" },
   previewContainer: {
     backgroundColor: Colors.newDark,
     width: "100%",
@@ -100,8 +138,5 @@ const styles = StyleSheet.create({
     marginTop: 12,
     alignItems: "flex-start",
   },
-  buttonWrapper: {
-    width: "100%",
-    marginTop: 40,
-  },
+  buttonWrapper: { width: "100%", marginTop: 40 },
 });

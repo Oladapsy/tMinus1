@@ -26,7 +26,6 @@ export default function AssetSelectorView({
   onSelectAsset,
   onCancel,
 }: AssetSelectorViewProps) {
-  
   // Dynamic descriptive context paragraphs based on state variant
   const contextParagraph =
     title === "Deposit"
@@ -35,13 +34,16 @@ export default function AssetSelectorView({
 
   return (
     <View style={styles.container}>
-      <BackHeader 
-        title={title} 
-        paragraph={contextParagraph} 
-        onBack={onCancel} 
+      <BackHeader
+        title={title}
+        paragraph={contextParagraph}
+        onBack={onCancel}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.listContainer}>
           {assets.map((asset) => (
             <WalletAssetRow
@@ -68,6 +70,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
+    paddingTop: 10,
   },
   listContainer: {
     gap: 2,

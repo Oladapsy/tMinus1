@@ -133,17 +133,17 @@ export default function WalletDashboardView({
 
       <View style={styles.listSection}>
         {transactions.map((tx) => {
-          // 1. Safely handle optional transaction type string
           const transactionType = tx.type ?? "Transaction";
-          const isDeposit = transactionType.toLowerCase() === "deposit";
+          const isDeposit =
+            transactionType.toLowerCase() === "deposit" ||
+            transactionType.toLowerCase() === "buy";
 
-          // 2. Safely handle optional asset symbol string (e.g. "USDT")
-          const assetSymbol = tx.assetSymbol ?? "Crypto";
+          // 🟢 Extract the correct symbol fallback if tx.assetSymbol is blank
+          const assetSymbol =
+            tx.assetSymbol || tx.toAsset || tx.fromAsset || "USDT";
 
-          // 3. Safely handle optional status string
           const currentStatus = tx.status ?? "Pending";
 
-          // 4. Safely parse date timestamp with a safety fallback to right now
           const dateLabel = tx.createdAt
             ? new Date(tx.createdAt).toLocaleDateString(undefined, {
                 month: "short",
@@ -151,14 +151,17 @@ export default function WalletDashboardView({
               })
             : "Today";
 
+          // 🟢 Fallback chain to catch the correct numerical value from the server payload
+          const resolvedAmount = tx.amount ?? tx.toAmount ?? tx.fromAmount ?? 0;
+
           return (
             <WalletAssetRow
               key={tx.id}
               name={`${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)}`}
               symbol={assetSymbol}
-              network={currentStatus} // 🟢 Guaranteed strict string
-              balanceString={dateLabel} // 🟢 Guaranteed strict string
-              valueString={`${isDeposit ? "+" : "-"}$${Number(tx.amount ?? 0).toFixed(2)}`}
+              network={currentStatus}
+              balanceString={dateLabel}
+              valueString={`${isDeposit ? "+" : "-"}$${Number(resolvedAmount).toFixed(2)}`}
               dotColor={isDeposit ? Colors.green : Colors.newCryptoYellow}
               disabled={true}
             />
