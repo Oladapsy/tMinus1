@@ -15,11 +15,14 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../../common/BackHeader";
 import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
-import { useCreatePriceAlertMutation } from "@/src/services/profileApi"; // ⚡ Connected mutation hook
+import { useCreatePriceAlertMutation } from "@/src/services/profileApi";
 import { MarketAsset } from "@/src/types/alert";
 
+import { useDispatch } from "react-redux";
+import { setSessionExpired } from "@/src/store/authSlice";
+
 interface CreatePriceAlertProps {
-  symbol?: string; // ⚡ Accepting current active context from details view
+  symbol?: string;
   onGoBack: () => void;
   onAlertCreated: (payload: {
     symbol: string;
@@ -35,6 +38,7 @@ export default function CreatePriceAlert({
   onGoBack,
   onAlertCreated,
 }: CreatePriceAlertProps) {
+  const dispatch = useDispatch();
   const { data: assetsRes, isLoading: isAssetsLoading } =
     useGetMarketAssetsQuery();
   const [createPriceAlert, { isLoading: isSubmitting }] =
@@ -50,7 +54,6 @@ export default function CreatePriceAlert({
   const [targetPrice, setTargetPrice] = useState("");
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
-  // Auto-select based on active details view symbol or fall back to BTC
   useEffect(() => {
     if (assetList.length > 0 && !selectedAsset) {
       const activeContextSymbol = symbol || "BTC";
@@ -68,21 +71,35 @@ export default function CreatePriceAlert({
     if (!cleanPrice || isNaN(Number(cleanPrice)) || !selectedAsset) return;
 
     try {
-      // 🚀 Dispatching structure to perfectly match OpenAPI expectations
       await createPriceAlert({
         assetSymbol: selectedAsset.symbol.toUpperCase(),
         direction: direction.toLowerCase() as "above" | "below",
         targetPriceUsd: Number(cleanPrice),
       }).unwrap();
 
-      // Hand back local state configuration metadata to show on the final congratulations route
       onAlertCreated({
         symbol: selectedAsset.symbol,
         direction,
         targetPrice: cleanPrice,
       });
-    } catch (error) {
-      console.error("Backend failed to store alert context payload:", error);
+    } catch (error: any) {
+      // 🔒 Catch the expired session token error right here!
+      if (
+        error?.status === 401 ||
+        error?.data?.error?.code === "ACCESS_TOKEN_EXPIRED"
+      ) {
+        console.warn(
+          "Session expired during alert creation. Triggering lock overlay...",
+        );
+
+        // Trigger the overlay state automatically
+        dispatch(setSessionExpired(true));
+
+        alert("Your session has timed out. Please refresh or log in again.");
+        return;
+      }
+
+      console.log("Backend failed to store alert context payload:", error);
     }
   };
 
@@ -112,15 +129,19 @@ export default function CreatePriceAlert({
           onBack={onGoBack}
         />
 
+        {/* 🔘 SELECTABLE Asset Row Preview Box */}
         <TouchableOpacity
           style={styles.assetPreviewCard}
           onPress={() => setIsSelectorOpen(true)}
           activeOpacity={0.8}
         >
           <View style={styles.leftRow}>
+            {/* 🎨 Using Image Optimizer CDN to clean convert underlying SVGs to PNG streams */}
             <View style={styles.avatarWrapper}>
               <Image
-                source={{ uri: `${BASE_URL}${selectedAsset.iconUrl}` }}
+                source={{
+                  uri: `https://images.weserv.nl/?url=${encodeURIComponent(`${BASE_URL}${selectedAsset.iconUrl}`)}&output=png&w=128&h=128`,
+                }}
                 style={styles.avatarCircle}
                 resizeMode="contain"
               />
@@ -141,6 +162,7 @@ export default function CreatePriceAlert({
           </Text>
         </TouchableOpacity>
 
+        {/* Direction Select Pills Toggle Bar */}
         <View style={styles.pillRow}>
           <TouchableOpacity
             style={[
@@ -177,6 +199,7 @@ export default function CreatePriceAlert({
           </TouchableOpacity>
         </View>
 
+        {/* Target Input Section */}
         <View style={styles.inputBox}>
           <Text style={styles.inputLabel}>Target price</Text>
           <View style={styles.fieldContainer}>
@@ -192,6 +215,7 @@ export default function CreatePriceAlert({
           </View>
         </View>
 
+        {/* Meta Info Rows */}
         <View style={styles.metaRow}>
           <Text style={styles.metaLabel}>Trigger</Text>
           <Text style={styles.metaValue}>
@@ -208,21 +232,25 @@ export default function CreatePriceAlert({
         </View>
       </ScrollView>
 
-      <TouchableOpacity
-        style={[
-          styles.actionButton,
-          isSubmitting && styles.disabledActionButton,
-        ]}
-        onPress={handleCreate}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? (
-          <ActivityIndicator size="small" color={Colors.primary} />
-        ) : (
-          <Text style={styles.actionButtonText}>Create alert</Text>
-        )}
-      </TouchableOpacity>
+      {/* 🟢 Secure Footer container ensuring proper dynamic positioning spacing layout rules */}
+      <View style={styles.footerContainer}>
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            isSubmitting && styles.disabledActionButton,
+          ]}
+          onPress={handleCreate}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator size="small" color={Colors.primary} />
+          ) : (
+            <Text style={styles.actionButtonText}>Create alert</Text>
+          )}
+        </TouchableOpacity>
+      </View>
 
+      {/* 🪙 ASSET SELECTOR MODAL */}
       <Modal visible={isSelectorOpen} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -279,9 +307,10 @@ export default function CreatePriceAlert({
   );
 }
 
-// ... styles object remains identical as provided by you
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+  },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
@@ -289,7 +318,12 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 160,
+    paddingBottom: 24,
+  },
+  footerContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 90,
+    backgroundColor: "transparent",
   },
   assetPreviewCard: {
     flexDirection: "row",
@@ -297,7 +331,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.newDark,
     borderRadius: 16,
-    padding: 20,
+    padding: 15,
     marginTop: 20,
     marginBottom: 24,
   },
@@ -416,10 +450,6 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.medium,
   },
   actionButton: {
-    position: "absolute",
-    bottom: 80,
-    left: 24,
-    right: 24,
     backgroundColor: Colors.green,
     paddingVertical: 16,
     borderRadius: 16,
