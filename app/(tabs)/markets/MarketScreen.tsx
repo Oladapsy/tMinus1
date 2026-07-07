@@ -1,12 +1,12 @@
+import React, { useState } from "react";
 import { StyleSheet, ImageBackground } from "react-native";
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
-import { useState } from "react";
 
 // Components
 import MarketDashboardView from "@/src/components/market/MarketDashboardView";
 import MarketOrderBook from "@/src/components/market/MarketOrderBook";
-import RecentTrades from "@/src/components/market/RescentTrades"; // 🌟 Fixed duplicate/mismatched import name
+import RecentTrades from "@/src/components/market/RescentTrades";
 import MarketWatchlist from "@/src/components/market/MarketWatchlist";
 import AlertSuccessView from "@/src/components/market/component/AlertSuccessView";
 import CreatePriceAlert from "@/src/components/market/component/CreatePriceAlert";
@@ -47,7 +47,7 @@ export default function MarketScreen() {
           <MarketDashboardView
             onSelectAsset={(symbol) => {
               setActiveSymbol(symbol);
-              setWorkflowMode("coin"); // Modified to hit screen 3 asset details first!
+              setWorkflowMode("coin");
             }}
             onNavigateToTrending={() => {
               setWorkflowMode("trending");
@@ -58,12 +58,13 @@ export default function MarketScreen() {
           />
         )}
 
+        {/* Screen 2: Market Trending List View */}
         {workflowMode === "trending" && (
           <MarketTrendingView
             onGoBack={() => setWorkflowMode("dashboard")}
             onSelectAsset={(symbol) => {
               setActiveSymbol(symbol);
-              setWorkflowMode("coin"); // Takes you to Screen 3 Asset Details layout!
+              setWorkflowMode("coin");
             }}
           />
         )}
@@ -73,7 +74,11 @@ export default function MarketScreen() {
           <MarketAssetDetails
             symbol={activeSymbol}
             onGoBack={() => setWorkflowMode("dashboard")}
-            onNavigateToAlert={() => setWorkflowMode("createAlert")} // Takes you straight to Screen 7!
+            onNavigateToAlert={() => setWorkflowMode("createAlert")}
+            onBuyPress={(symbol) => {
+              setActiveSymbol(symbol);
+              setWorkflowMode("coinOrderBook");
+            }}
           />
         )}
 
@@ -81,11 +86,10 @@ export default function MarketScreen() {
         {workflowMode === "coinOrderBook" && (
           <MarketOrderBook
             symbol={activeSymbol}
-            onGoBack={() => setWorkflowMode("dashboard")}
+            onGoBack={() => setWorkflowMode("coin")}
             onTradeAction={(symbol) => {
               console.log(`Open trade panel for ${symbol}`);
             }}
-            // Toggles between internal tab panels seamlessly
             onToggleView={() => setWorkflowMode("recentTrades")}
           />
         )}
@@ -93,8 +97,8 @@ export default function MarketScreen() {
         {/* 🔵 Screen 5: Recent Trades Screen */}
         {workflowMode === "recentTrades" && (
           <RecentTrades
-            symbol={activeSymbol} // 🌟 Passed active symbol down here!
-            onGoBack={() => setWorkflowMode("dashboard")}
+            symbol={activeSymbol}
+            onGoBack={() => setWorkflowMode("coin")}
             onToggleView={() => setWorkflowMode("coinOrderBook")}
           />
         )}
@@ -106,17 +110,15 @@ export default function MarketScreen() {
             onExploreMarkets={() => setWorkflowMode("dashboard")}
             onSelectAsset={(symbol) => {
               setActiveSymbol(symbol);
-              setWorkflowMode("coinOrderBook"); // 🏃‍♂️ Deep dive into the order book for the selected coin!
+              setWorkflowMode("coin"); // ✨ Routes safely to Asset details view directly
             }}
           />
         )}
 
-        {/* Screen 7 */}
+        {/* Screen 7: Alert Creation Screen */}
         {workflowMode === "createAlert" && (
           <CreatePriceAlert
-            // symbol={activeSymbol}
-            // currentPrice={64200.5}
-            onGoBack={() => setWorkflowMode("coinOrderBook")}
+            onGoBack={() => setWorkflowMode("coin")}
             onAlertCreated={(payload) => {
               setAlertData({
                 direction: payload.direction,
@@ -127,12 +129,13 @@ export default function MarketScreen() {
           />
         )}
 
+        {/* Screen 8: Success State Confirmation */}
         {workflowMode === "alertSuccess" && (
           <AlertSuccessView
             symbol={activeSymbol}
             direction={alertData.direction}
             targetPrice={alertData.targetPrice}
-            onClose={() => setWorkflowMode("dashboard")}
+            onClose={() => setWorkflowMode("coin")}
           />
         )}
       </MySafeAreaView>

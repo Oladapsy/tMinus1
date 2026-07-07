@@ -15,8 +15,9 @@ import {
   NotificationItem,
   MarketAssetsResponse,
 } from "../types/alert";
+// 🌟 Import your Market Asset List types to cleanly type the list response
+import { MarketAssetListResponse } from "../types/market";
 
-// 🌟 Import structural device schema definitions inline or via types folder
 export interface DeviceItem {
   id: string;
   userId: string;
@@ -48,7 +49,14 @@ export const profileApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["UserProfile", "UserDevices", "PriceAlerts", "Notifications"],
+  // 🏷️ Added "Watchlist" to tagTypes to handle responsive live data cache updates
+  tagTypes: [
+    "UserProfile",
+    "UserDevices",
+    "PriceAlerts",
+    "Notifications",
+    "Watchlist",
+  ],
   endpoints: (builder) => ({
     getProfile: builder.query<ProfileResponse, void>({
       query: () => "/me",
@@ -93,7 +101,6 @@ export const profileApi = createApi({
       providesTags: ["PriceAlerts"],
     }),
 
-    // 🌟 FIXED: Used CreatePriceAlertRequest here
     createPriceAlert: builder.mutation<
       { data: PriceAlertItem },
       CreatePriceAlertRequest
@@ -106,7 +113,6 @@ export const profileApi = createApi({
       invalidatesTags: ["PriceAlerts"],
     }),
 
-    // 🌟 FIXED: Used UpdatePriceAlertRequest here
     updatePriceAlert: builder.mutation<
       { data: PriceAlertItem },
       UpdatePriceAlertRequest
@@ -150,6 +156,34 @@ export const profileApi = createApi({
       invalidatesTags: ["Notifications"],
     }),
 
+    // 🌟 ADDED: WATCHLIST PIPELINE SYSTEM
+    getWatchlistAssets: builder.query<
+      MarketAssetListResponse,
+      { include?: string } | void
+    >({
+      query: (params) => ({
+        url: "/me/watchlist",
+        params: { include: params?.include || "sparkline" },
+      }),
+      providesTags: ["Watchlist"],
+    }),
+
+    addToWatchlist: builder.mutation<{ data: string[] }, string>({
+      query: (symbol) => ({
+        url: `/me/watchlist/${symbol.toUpperCase()}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Watchlist"],
+    }),
+
+    removeFromWatchlist: builder.mutation<{ data: string[] }, string>({
+      query: (symbol) => ({
+        url: `/me/watchlist/${symbol.toUpperCase()}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Watchlist"],
+    }),
+
     // 📊 MARKET ENDPOINT
     getMarketAssets: builder.query<MarketAssetsResponse, void>({
       query: () => "/market/assets",
@@ -159,7 +193,7 @@ export const profileApi = createApi({
       query: () => "/market/prices",
     }),
 
-    // 📤 KYC FILE UPLOAD PIPELINE (Multipart form data for image assets)
+    // 📤 KYC FILE UPLOAD PIPELINE
     uploadKycFile: builder.mutation<{ data: { publicUrl: string } }, FormData>({
       query: (formData) => ({
         url: "/auth/kyc/uploads",
@@ -204,6 +238,10 @@ export const {
   useGetNotificationsQuery,
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
+  // 🌟 EXPORTED: New Watchlist query and mutation hooks
+  useGetWatchlistAssetsQuery,
+  useAddToWatchlistMutation,
+  useRemoveFromWatchlistMutation,
   useGetMarketAssetsQuery,
   useGetMarketPricesQuery,
   useUploadKycFileMutation,

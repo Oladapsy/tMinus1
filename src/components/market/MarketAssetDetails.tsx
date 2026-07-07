@@ -6,34 +6,44 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
-  Dimensions, // 🌟 Handlers for exact SVG canvas bounds calculation
+  Dimensions,
 } from "react-native";
 import { LineChart } from "react-native-wagmi-charts";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
+import { Star } from "lucide-react-native";
+import {
+  useGetWatchlistAssetsQuery,
+  useAddToWatchlistMutation,
+  useRemoveFromWatchlistMutation,
+} from "@/src/services/profileApi";
 
-// Calculate exact inner dimensions for the embedded chart layout
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const EXPANDED_CHART_WIDTH = Math.floor(SCREEN_WIDTH - 24 * 2 - 20 * 2); // Screen padding minus card inner margins
+const EXPANDED_CHART_WIDTH = Math.floor(SCREEN_WIDTH - 24 * 2 - 20 * 2);
 
 interface MarketAssetDetailsProps {
   symbol: string;
   onGoBack: () => void;
   onNavigateToAlert: () => void;
+  onBuyPress?: (symbol: string) => void;
+  onSellPress?: (symbol: string) => void;
+  onSwapPress?: (symbol: string) => void;
 }
 
 export default function MarketAssetDetails({
   symbol,
   onGoBack,
   onNavigateToAlert,
+  onBuyPress,
+  onSellPress,
+  onSwapPress,
 }: MarketAssetDetailsProps) {
   const [activeFrame, setActiveFrame] = useState<
     "1H" | "1D" | "1W" | "1M" | "1Y"
   >("1W");
 
-  // 📈 Fetch target market asset data arrays via live RTK Query subscription
   const {
     data: marketResponse,
     isLoading,
@@ -43,7 +53,11 @@ export default function MarketAssetDetails({
     include: "sparkline",
   });
 
-  // 🔄 Keep stats fresh via a 10-second poll interval
+  const { data: watchlistResponse } = useGetWatchlistAssetsQuery();
+  const [addToWatchlist, { isLoading: isAdding }] = useAddToWatchlistMutation();
+  const [removeFromWatchlist, { isLoading: isRemoving }] =
+    useRemoveFromWatchlistMutation();
+
   useEffect(() => {
     const livePoller = setInterval(() => {
       refetch();
@@ -51,14 +65,32 @@ export default function MarketAssetDetails({
     return () => clearInterval(livePoller);
   }, [refetch]);
 
-  // Target the exact asset row matched by token symbol string comparison
   const asset = marketResponse?.data?.find(
     (coin) => coin.symbol.toUpperCase() === symbol.toUpperCase(),
   );
 
+  const isStarred = useMemo(() => {
+    if (!watchlistResponse?.data) return false;
+    return watchlistResponse.data.some(
+      (wItem: any) => wItem.symbol.toUpperCase() === symbol.toUpperCase(),
+    );
+  }, [watchlistResponse, symbol]);
+
+  const handleWatchlistToggle = async () => {
+    if (isAdding || isRemoving || !asset) return;
+    try {
+      if (isStarred) {
+        await removeFromWatchlist(asset.symbol).unwrap();
+      } else {
+        await addToWatchlist(asset.symbol).unwrap();
+      }
+    } catch (err) {
+      console.error("Watchlist modification failed:", err);
+    }
+  };
+
   const isPositive = asset ? asset.change24h >= 0 : true;
 
-  // 🧠 Memoized timeframe filter logic matching user timeline pill selectors
   const chartData = useMemo(() => {
     if (!asset?.sparkline || asset.sparkline.length === 0) {
       return [
@@ -66,13 +98,10 @@ export default function MarketAssetDetails({
         { timestamp: 2, value: 0 },
       ];
     }
-
     const rawData = asset.sparkline.map((pt, idx) => ({
       timestamp: idx + 1,
       value: pt.priceUsd,
     }));
-
-    // Slice historical arrays dynamically on the front-end to emulate timeline intervals
     switch (activeFrame) {
       case "1H":
         return rawData.slice(-4);
@@ -84,13 +113,6 @@ export default function MarketAssetDetails({
         return rawData;
     }
   }, [asset?.sparkline, activeFrame]);
-
-  // Dynamic Avatar Accent Mappings matching mockups perfectly
-  const avatarColors: Record<string, string> = {
-    BTC: "#E28A16",
-    ETH: "#3758FF",
-    SOL: "#00FFA3",
-  };
 
   if (isLoading && !asset) {
     return (
@@ -116,22 +138,43 @@ export default function MarketAssetDetails({
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
-      <BackHeader
-        title={asset.name}
-        paragraph={`${asset.symbol} · ${asset.network || "Bitcoin network"}`} //
-        onBack={onGoBack}
-        staright
-      />
+      <View style={styles.headerActionRow}>
+        <View style={{ flex: 1 }}>
+          <BackHeader
+            title={asset.name}
+            paragraph={`${asset.symbol} · ${asset.network || "Bitcoin network"}`}
+            onBack={onGoBack}
+            staright
+          />
+        </View>
 
-      {/* Identity Avatar Badge Row */}
+        <TouchableOpacity
+          style={styles.starTouchArea}
+          onPress={handleWatchlistToggle}
+          activeOpacity={0.7}
+          disabled={isAdding || isRemoving}
+        >
+          {isAdding || isRemoving ? (
+            <ActivityIndicator size="small" color={Colors.green} />
+          ) : (
+            <Star
+              size={22}
+              color={isStarred ? Colors.green : "rgba(255,255,255,0.3)"}
+              fill={isStarred ? Colors.green : "transparent"}
+            />
+          )}
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.badgeRow}>
         <View
           style={[
             styles.avatarCircle,
             {
               backgroundColor:
-                avatarColors[asset.symbol.toUpperCase()] ||
-                "rgba(255,255,255,0.1)",
+                asset.symbol.toUpperCase() === "BTC"
+                  ? "#E28A16"
+                  : "rgba(255,255,255,0.1)",
             },
           ]}
         >
@@ -141,7 +184,6 @@ export default function MarketAssetDetails({
         </View>
       </View>
 
-      {/* Main Column-Stacked Large Price Block Header */}
       <View style={styles.priceContainer}>
         <Text style={styles.hugePrice}>
           $
@@ -161,7 +203,6 @@ export default function MarketAssetDetails({
         </Text>
       </View>
 
-      {/* Interactive Main Candle/Line Chart Grid Component */}
       <View style={styles.chartMainCard}>
         <View style={styles.chartMeta}>
           <Text style={styles.pairTitle}>{asset.symbol} / USD</Text>
@@ -188,11 +229,9 @@ export default function MarketAssetDetails({
           </Text>
         </View>
 
-        {/* Dynamic Width SVG Vector Area Container */}
         <View style={styles.graphContainer}>
           <LineChart.Provider data={chartData}>
             <LineChart width={EXPANDED_CHART_WIDTH} height={100} absolute>
-              {/* Horizontal Grid lines rendering cleanly inside bounds */}
               {[10, 20, 30, 40].map((val, idx) => (
                 <LineChart.HorizontalLine
                   key={idx}
@@ -220,7 +259,6 @@ export default function MarketAssetDetails({
           </LineChart.Provider>
         </View>
 
-        {/* Time intervals selector buttons row */}
         <View style={styles.intervalsRow}>
           {(["1H", "1D", "1W", "1M", "1Y"] as const).map((frame) => (
             <TouchableOpacity
@@ -246,27 +284,36 @@ export default function MarketAssetDetails({
         </View>
       </View>
 
-      {/* CORE ACTION PILLS ROW BLOCK */}
-      <TouchableOpacity style={styles.buyButton}>
+      <TouchableOpacity
+        style={styles.buyButton}
+        onPress={() => onBuyPress?.(asset.symbol)}
+      >
         <Text style={styles.buyButtonText}>Buy</Text>
       </TouchableOpacity>
 
       <View style={styles.subActionsGridRow}>
-        <TouchableOpacity style={styles.subActionBtn}>
+        <TouchableOpacity
+          style={styles.subActionBtn}
+          onPress={() => onSellPress?.(asset.symbol)}
+        >
           <Text style={styles.subActionBtnText}>Sell</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.subActionBtn}>
+        <TouchableOpacity
+          style={styles.subActionBtn}
+          onPress={() => onSwapPress?.(asset.symbol)}
+        >
           <Text style={styles.subActionBtnText}>Swap</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.subActionBtn}
           onPress={onNavigateToAlert}
         >
-          <Text style={[styles.subActionBtnText]}>Alert</Text>
+          <Text style={[styles.subActionBtnText, { color: Colors.green }]}>
+            Alert
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* GRID LAYOUT DATA CARDS INFO BOX */}
       <View style={styles.metricsGridContainer}>
         <View style={styles.metricRow}>
           <View style={styles.metricCard}>
@@ -308,6 +355,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 80,
   },
+  headerActionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  starTouchArea: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: 12,
+    marginTop: 10,
+  },
   centerFallback: {
     flex: 1,
     justifyContent: "center",
@@ -331,11 +392,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
     fontSize: 12,
   },
-  badgeRow: {
-    gap: 12,
-    marginTop: 16,
-    marginBottom: 12,
-  },
+  badgeRow: { marginTop: 16, marginBottom: 12 },
   avatarCircle: {
     width: 44,
     height: 44,
@@ -349,9 +406,10 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
   },
   priceContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    gap: 6,
     marginBottom: 24,
   },
   hugePrice: {
@@ -359,10 +417,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontFamily: FontFamily.bold,
   },
-  percentText: {
-    fontSize: 14,
-    fontFamily: FontFamily.bold,
-  },
+  percentText: { fontSize: 14, fontFamily: FontFamily.bold },
   chartMainCard: {
     backgroundColor: Colors.newDark,
     borderRadius: 24,
@@ -396,10 +451,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: FontFamily.medium,
   },
-  inlinePercentText: {
-    fontSize: 12,
-    fontFamily: FontFamily.bold,
-  },
+  inlinePercentText: { fontSize: 12, fontFamily: FontFamily.bold },
   graphContainer: {
     height: 100,
     marginVertical: 12,
@@ -419,9 +471,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  inactiveFrameButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
-  },
+  inactiveFrameButton: { backgroundColor: "rgba(255, 255, 255, 0.02)" },
   activeFrameButton: {
     backgroundColor: "#113124",
     borderWidth: 1,
@@ -438,12 +488,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: 12,
   },
   buyButtonText: {
     color: "#03140E",
     fontSize: 16,
-    fontFamily: FontFamily.medium,
+    fontFamily: FontFamily.bold,
   },
   subActionsGridRow: { flexDirection: "row", gap: 12, marginBottom: 28 },
   subActionBtn: {
@@ -458,13 +508,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FontFamily.bold,
   },
-  metricsGridContainer: {
-    gap: 12,
-  },
-  metricRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
+  metricsGridContainer: { gap: 12 },
+  metricRow: { flexDirection: "row", gap: 12 },
   metricCard: {
     flex: 1,
     backgroundColor: Colors.newDark,

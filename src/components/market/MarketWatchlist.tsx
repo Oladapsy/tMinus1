@@ -11,7 +11,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import MarketAssetRow from "@/src/components/market/component/MarketAssetRow";
-import { useGetWatchlistAssetsQuery } from "@/src/services/marketApi";
+import { useGetWatchlistAssetsQuery } from "@/src/services/profileApi";
 
 interface MarketWatchlistProps {
   onGoBack: () => void;
@@ -24,22 +24,18 @@ export default function MarketWatchlist({
   onExploreMarkets,
   onSelectAsset,
 }: MarketWatchlistProps) {
-  // 📈 Stream custom watchlist positions straight from the network layer
+  // 🟢 Pass query arguments or parameters matching your profileApi schema requirements
   const {
     data: watchlistResponse,
     isLoading,
     refetch,
-  } = useGetWatchlistAssetsQuery({
-    include: "sparkline",
-  });
-
-  // ⏱️ Auto-refresh tickers loop engine
-  useEffect(() => {
-    const listPoller = setInterval(() => {
-      refetch();
-    }, 10000);
-    return () => clearInterval(listPoller);
-  }, [refetch]);
+  } = useGetWatchlistAssetsQuery(
+    { include: "sparkline" }, // If your endpoint wrapper handles parameters object
+    {
+      pollingInterval: 10000, // Built-in RTK query auto-polling setup
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
   const watchlistData = watchlistResponse?.data ?? [];
 
@@ -51,7 +47,7 @@ export default function MarketWatchlist({
       >
         <BackHeader
           title="Watchlist"
-          paragraph="Assets you follow with row sparklines."
+          paragraph="Assets you follow with live sparklines."
           onBack={onGoBack}
         />
 
@@ -62,8 +58,16 @@ export default function MarketWatchlist({
         ) : (
           <View style={styles.listSection}>
             {watchlistData.map((coin) => (
-              <View key={coin.id} style={styles.rowCardWrapper}>
-                <MarketAssetRow coin={coin} onPress={onSelectAsset} />
+              <View key={coin.id || coin.symbol} style={styles.rowCardWrapper}>
+                {/* 📊 Passing down the coin data containing the sparkline array */}
+                <MarketAssetRow
+                  coin={{
+                    ...coin,
+                    // Fallback to guarantee sparkline isn't completely empty if backend is waking up
+                    sparkline: coin.sparkline || [],
+                  }}
+                  onPress={() => onSelectAsset(coin.symbol)}
+                />
               </View>
             ))}
 
@@ -75,7 +79,6 @@ export default function MarketWatchlist({
           </View>
         )}
 
-        {/* "Add more assets" Callout Container Box */}
         <View style={styles.infoBox}>
           <Text style={styles.infoTitle}>Add more assets</Text>
           <Text style={styles.infoDescription}>
@@ -84,7 +87,6 @@ export default function MarketWatchlist({
         </View>
       </ScrollView>
 
-      {/* Main Bottom Core Action Button Row */}
       <TouchableOpacity style={styles.actionButton} onPress={onExploreMarkets}>
         <Text style={styles.actionButtonText}>Explore markets</Text>
       </TouchableOpacity>
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 160, // Boost padding to clear position: absolute buttons
+    paddingBottom: 160,
   },
   centerLoader: {
     paddingVertical: 60,
@@ -143,7 +145,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     position: "absolute",
-    bottom: 40,
+    bottom: 80,
     left: 24,
     right: 24,
     backgroundColor: Colors.green,
@@ -159,6 +161,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: Colors.primary,
     fontSize: 14,
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.medium,
   },
 });
