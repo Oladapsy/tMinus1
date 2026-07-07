@@ -13,6 +13,9 @@ import CreatePriceAlert from "@/src/components/market/component/CreatePriceAlert
 import MarketTrendingView from "@/src/components/market/MarketTrendingView";
 import MarketAssetDetails from "@/src/components/market/MarketAssetDetails";
 
+// route the create alert
+import { useRouter } from "expo-router";
+
 type MarketWorkflowMode =
   | "dashboard"
   | "trending"
@@ -31,6 +34,7 @@ export default function MarketScreen() {
     direction: "Above" as "Above" | "Below",
     targetPrice: "72000",
   });
+  const router = useRouter();
 
   return (
     <ImageBackground
@@ -136,7 +140,10 @@ export default function MarketScreen() {
             symbol={activeSymbol}
             direction={alertData.direction}
             targetPrice={alertData.targetPrice}
-            onClose={() => setWorkflowMode("coin")}
+            onClose={() => {
+              setWorkflowMode("coin");
+              router.push("/profile/security/price-alerts");
+            }}
           />
         )}
       </MySafeAreaView>
