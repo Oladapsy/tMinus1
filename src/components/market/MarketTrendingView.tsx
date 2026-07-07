@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { LineChart } from "react-native-wagmi-charts";
 import { Colors } from "@/src/constants/colors";
@@ -13,6 +14,11 @@ import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import MarketAssetRow from "./component/MarketAssetRow";
 import { useGetTrendingAssetsQuery } from "@/src/services/marketApi";
+import MarketMiniSparkline from "./component/MarketMiniSparkline";
+
+// Math to calculate exact inner width of the pulse card automatically
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const PULSE_CHART_WIDTH = SCREEN_WIDTH - 24 * 2 - 16 * 2;
 
 interface MarketTrendingViewProps {
   onGoBack: () => void;
@@ -25,7 +31,7 @@ export default function MarketTrendingView({
 }: MarketTrendingViewProps) {
   const [period, setPeriod] = useState<"1H" | "1D" | "1W" | "1M" | "1Y">("1D");
 
-  // 📈 Hook into the trending API endpoint with automatic live updates
+  // 📈 Hook into the trending API endpoint cleanly
   const {
     data: trendingResponse,
     isLoading,
@@ -42,7 +48,11 @@ export default function MarketTrendingView({
     return () => clearInterval(poller);
   }, [refetch]);
 
-  const trendingList = trendingResponse?.data ?? [];
+  // 🧠 Stable array fallback reference to stop dependency thrashing
+  const trendingList = useMemo(
+    () => trendingResponse?.data ?? [],
+    [trendingResponse?.data],
+  );
   const featuredHero = trendingResponse?.meta?.featured;
 
   // 🛠️ Map API sparkline format ({ time, priceUsd }) to wagmi-charts expectation ({ timestamp, value })
@@ -65,15 +75,31 @@ export default function MarketTrendingView({
   const heroAssetItem = trendingList.find(
     (item) => item.symbol === featuredHero?.symbol,
   );
-  const heroChartData = mapChartData(heroAssetItem?.sparkline);
 
-  // Default fallback data for global market pulse timeline
-  const fallbackPulseData = trendingList[0]
-    ? mapChartData(trendingList[0].sparkline)
-    : [
+  // 📊 Local timeline filtering logic for the Market Pulse chart
+  const fallbackPulseData = useMemo(() => {
+    const rawData = trendingList[0]
+      ? mapChartData(trendingList[0].sparkline)
+      : [];
+    if (rawData.length === 0) {
+      return [
         { timestamp: 1, value: 100 },
         { timestamp: 2, value: 105 },
       ];
+    }
+
+    // Slice data array lengths based on selected time window pill
+    switch (period) {
+      case "1H":
+        return rawData.slice(-4);
+      case "1D":
+        return rawData.slice(-24);
+      case "1W":
+        return rawData.slice(-168);
+      default:
+        return rawData;
+    }
+  }, [trendingList, period]);
 
   return (
     <ScrollView
@@ -92,7 +118,7 @@ export default function MarketTrendingView({
         </View>
       ) : (
         <>
-          {/* 🟢 TOP GAINER HERO CARD - CONNECTED TO API */}
+          {/* 🟢 TOP GAINER HERO CARD - POWERED BY MARKETMINISPARKLINE */}
           {featuredHero && (
             <View style={styles.gainerCard}>
               {/* Left Column: Core Identity Metadata */}
@@ -131,15 +157,23 @@ export default function MarketTrendingView({
                   </Text>
                 </View>
 
-                {/* 🔒 Bounded Wrapper containing the SVG path overflows */}
                 <View style={styles.heroChartWrapper}>
-                  <LineChart.Provider data={heroChartData}>
-                    <LineChart height={54} absolute>
-                      <LineChart.Path color={Colors.green} width={2}>
-                        <LineChart.Gradient color="rgba(0, 255, 163, 0.12)" />
-                      </LineChart.Path>
-                    </LineChart>
-                  </LineChart.Provider>
+                  {heroAssetItem?.sparkline &&
+                  heroAssetItem.sparkline.length > 0 ? (
+                    <MarketMiniSparkline
+                      points={heroAssetItem.sparkline}
+                      isPositive={featuredHero.change24h >= 0}
+                      width={160}
+                      height={65}
+                    />
+                  ) : (
+                    <View
+                      style={[
+                        styles.fallbackTrendLine,
+                        { borderColor: Colors.green },
+                      ]}
+                    />
+                  )}
                 </View>
               </View>
             </View>
@@ -155,7 +189,7 @@ export default function MarketTrendingView({
               <View style={{ alignItems: "flex-end" }}>
                 <Text style={styles.pulseAvg}>
                   {featuredHero
-                    ? `${featuredHero.change24h >= 0 ? "+" : ""}${featuredHero.change24h.toFixed(1)}% max`
+                    ? `${featuredHero.change24h >= 0 ? "+" : ""}${featuredHero.change24h.toFixed(1)}% avg`
                     : "--"}
                 </Text>
                 <Text style={styles.refreshingText}>Refreshing</Text>
@@ -164,8 +198,23 @@ export default function MarketTrendingView({
 
             <View style={styles.pulseChartArea}>
               <LineChart.Provider data={fallbackPulseData}>
-                <LineChart height={100}>
-                  <LineChart.Path color={Colors.green} width={2.5} />
+                <LineChart width={PULSE_CHART_WIDTH} height={50} absolute>
+                  {[10, 20, 30, 40].map((val, idx) => (
+                    <LineChart.HorizontalLine
+                      key={idx}
+                      color="rgba(255, 255, 255, 0.04)"
+                      // width={1}
+                      at={{ index: idx }}
+                    />
+                  ))}
+                  <LineChart.Path color={Colors.green} width={2}>
+                    <LineChart.Gradient color="rgba(0, 255, 163, 0.08)" />
+                    <LineChart.Dot
+                      at={fallbackPulseData.length - 1}
+                      color="#5CD6A5"
+                      size={7}
+                    />
+                  </LineChart.Path>
                 </LineChart>
               </LineChart.Provider>
             </View>
@@ -177,7 +226,9 @@ export default function MarketTrendingView({
                   key={t}
                   style={[
                     styles.timePill,
-                    period === t && styles.activeTimePill,
+                    period === t
+                      ? styles.activeTimePill
+                      : styles.inactiveTimePill,
                   ]}
                   onPress={() => setPeriod(t)}
                 >
@@ -209,21 +260,24 @@ export default function MarketTrendingView({
 }
 
 const styles = StyleSheet.create({
-  container: { paddingHorizontal: 24, paddingBottom: 40 },
+  container: {
+    paddingHorizontal: 24,
+    paddingBottom: 80,
+  },
   centerLoader: {
     paddingVertical: 100,
     justifyContent: "center",
     alignItems: "center",
   },
   gainerCard: {
-    backgroundColor: "#063A24", // Deep forest green backdrop
+    backgroundColor: "#063A24",
     borderRadius: 24,
     padding: 20,
     marginTop: 16,
     marginBottom: 16,
     flexDirection: "row",
     justifyContent: "space-between",
-    height: 154, // Perfectly scales text content and line path side by side
+    height: 154,
   },
   gainerLeftColumn: {
     flex: 1.1,
@@ -234,13 +288,14 @@ const styles = StyleSheet.create({
     flex: 1.3,
     justifyContent: "space-between",
     alignItems: "stretch",
-    overflow: "hidden", // 👈 Protects the right edge layout boundary
+    overflow: "hidden",
   },
   heroChartWrapper: {
-    height: 54,
+    width: "100%",
+    height: 65,
     marginTop: "auto",
-    overflow: "hidden", // 👈 Clips the internal path canvas perfectly
-    borderRadius: 12, // Matches the card flow aesthetics
+    justifyContent: "center",
+    overflow: "hidden",
   },
   priceContainer: {
     alignItems: "flex-end",
@@ -287,23 +342,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: FontFamily.bold,
   },
-
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-
   pulseCard: {
     backgroundColor: Colors.newDark,
     borderRadius: 24,
-    padding: 20,
+    padding: 16,
+    paddingBottom: 14,
     marginBottom: 20,
+    height: 164,
+    justifyContent: "space-between",
+    overflow: "hidden",
   },
   pulseHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    alignItems: "flex-start",
   },
   pulseTitle: {
     color: Colors.newWhite,
@@ -311,9 +363,10 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
   },
   pulseSubtitle: {
-    color: Colors.newSecondary,
+    color: "rgba(255, 255, 255, 0.3)",
     fontSize: 11,
     fontFamily: FontFamily.medium,
+    marginTop: 2,
   },
   pulseAvg: {
     color: Colors.newWhite,
@@ -324,21 +377,44 @@ const styles = StyleSheet.create({
     color: Colors.green,
     fontSize: 11,
     fontFamily: FontFamily.bold,
+    marginTop: 2,
   },
-  pulseChartArea: { height: 100, marginBottom: 16 },
+  pulseChartArea: {
+    height: 50,
+    marginVertical: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   timeframeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    alignItems: "center",
+    gap: 6,
   },
-  timePill: { paddingVertical: 6, paddingHorizontal: 14, borderRadius: 12 },
-  activeTimePill: { backgroundColor: "rgba(255, 255, 255, 0.05)" },
+  timePill: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inactiveTimePill: {
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+  },
+  activeTimePill: {
+    backgroundColor: "#113124",
+    borderWidth: 1,
+    borderColor: "rgba(92, 214, 165, 0.15)",
+  },
   timeText: {
-    color: Colors.newSecondary,
+    color: "rgba(255, 255, 255, 0.3)",
     fontSize: 11,
-    fontFamily: FontFamily.medium,
+    fontFamily: FontFamily.bold,
   },
-  activeTimeText: { color: Colors.green, fontFamily: FontFamily.bold },
+  activeTimeText: {
+    color: "#5CD6A5",
+    fontFamily: FontFamily.bold,
+  },
   listSection: { gap: 14 },
   rowCardWrapper: {
     backgroundColor: Colors.newDark,
@@ -346,5 +422,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     marginBottom: -2,
+  },
+  fallbackTrendLine: {
+    borderBottomWidth: 2,
+    width: "80%",
+    alignSelf: "center",
+    transform: [{ rotate: "-6deg" }],
+    opacity: 0.4,
   },
 });
