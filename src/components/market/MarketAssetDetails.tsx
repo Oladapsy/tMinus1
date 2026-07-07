@@ -19,6 +19,8 @@ import {
   useAddToWatchlistMutation,
   useRemoveFromWatchlistMutation,
 } from "@/src/services/profileApi";
+import { useDispatch } from "react-redux";
+import { setSessionExpired } from "@/src/store/authSlice";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const EXPANDED_CHART_WIDTH = Math.floor(SCREEN_WIDTH - 24 * 2 - 20 * 2);
@@ -40,6 +42,7 @@ export default function MarketAssetDetails({
   onSellPress,
   onSwapPress,
 }: MarketAssetDetailsProps) {
+  const dispatch = useDispatch();
   const [activeFrame, setActiveFrame] = useState<
     "1H" | "1D" | "1W" | "1M" | "1Y"
   >("1W");
@@ -84,7 +87,21 @@ export default function MarketAssetDetails({
       } else {
         await addToWatchlist(asset.symbol).unwrap();
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (
+        err?.status === 401 ||
+        err?.data?.error?.code === "ACCESS_TOKEN_EXPIRED"
+      ) {
+        console.warn("Session expired! We need a fresh access token.");
+
+        dispatch(setSessionExpired(true));
+
+        alert(
+          "Your session has timed out. Please pull-to-refresh or log in again.",
+        );
+        return;
+      }
+
       console.error("Watchlist modification failed:", err);
     }
   };

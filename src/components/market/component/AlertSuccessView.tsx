@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 80,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -156,6 +156,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: Colors.primary,
     fontSize: 14,
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.medium,
   },
 });

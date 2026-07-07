@@ -118,6 +118,7 @@ export default function MarketScreen() {
         {/* Screen 7: Alert Creation Screen */}
         {workflowMode === "createAlert" && (
           <CreatePriceAlert
+            symbol={activeSymbol} // 🔥 Now accurately forces target coin focus auto-selection
             onGoBack={() => setWorkflowMode("coin")}
             onAlertCreated={(payload) => {
               setAlertData({

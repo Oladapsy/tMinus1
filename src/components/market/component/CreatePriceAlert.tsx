@@ -14,55 +14,76 @@ import {
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../../common/BackHeader";
-import { useGetMarketAssetsQuery } from "@/src/services/marketApi"; // 🌟 verified service query location
+import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
+import { useCreatePriceAlertMutation } from "@/src/services/profileApi"; // ⚡ Connected mutation hook
 import { MarketAsset } from "@/src/types/alert";
 
 interface CreatePriceAlertProps {
+  symbol?: string; // ⚡ Accepting current active context from details view
   onGoBack: () => void;
   onAlertCreated: (payload: {
     symbol: string;
     direction: "Above" | "Below";
     targetPrice: string;
   }) => void;
-  isSubmitting?: boolean;
 }
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function CreatePriceAlert({
+  symbol,
   onGoBack,
   onAlertCreated,
-  isSubmitting,
 }: CreatePriceAlertProps) {
-  // 1. Single Live Hook Stream Connection
-  const { data: assetsRes, isLoading } = useGetMarketAssetsQuery();
-  
-  // 🧠 Stable array fallback reference to prevent rendering thrash
-  const assetList = React.useMemo(() => assetsRes?.data || [], [assetsRes?.data]);
+  const { data: assetsRes, isLoading: isAssetsLoading } =
+    useGetMarketAssetsQuery();
+  const [createPriceAlert, { isLoading: isSubmitting }] =
+    useCreatePriceAlertMutation();
 
-  // 2. Component States
+  const assetList = React.useMemo(
+    () => assetsRes?.data || [],
+    [assetsRes?.data],
+  );
+
   const [selectedAsset, setSelectedAsset] = useState<MarketAsset | null>(null);
   const [direction, setDirection] = useState<"Above" | "Below">("Above");
   const [targetPrice, setTargetPrice] = useState("");
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
-  // Set the first item (Bitcoin) as default once the data loads stably
+  // Auto-select based on active details view symbol or fall back to BTC
   useEffect(() => {
     if (assetList.length > 0 && !selectedAsset) {
-      const fallbackSelection = assetList.find((a: any) => a.symbol === "BTC") || assetList[0];
-      setSelectedAsset(fallbackSelection as unknown as MarketAsset);
+      const activeContextSymbol = symbol || "BTC";
+      const match =
+        assetList.find(
+          (a: any) =>
+            a.symbol.toUpperCase() === activeContextSymbol.toUpperCase(),
+        ) || assetList[0];
+      setSelectedAsset(match as unknown as MarketAsset);
     }
-  }, [assetList, selectedAsset]);
+  }, [assetList, selectedAsset, symbol]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     const cleanPrice = targetPrice.trim().replace(/,/g, "");
     if (!cleanPrice || isNaN(Number(cleanPrice)) || !selectedAsset) return;
-    
-    onAlertCreated({
-      symbol: selectedAsset.symbol,
-      direction,
-      targetPrice: cleanPrice,
-    });
+
+    try {
+      // 🚀 Dispatching structure to perfectly match OpenAPI expectations
+      await createPriceAlert({
+        assetSymbol: selectedAsset.symbol.toUpperCase(),
+        direction: direction.toLowerCase() as "above" | "below",
+        targetPriceUsd: Number(cleanPrice),
+      }).unwrap();
+
+      // Hand back local state configuration metadata to show on the final congratulations route
+      onAlertCreated({
+        symbol: selectedAsset.symbol,
+        direction,
+        targetPrice: cleanPrice,
+      });
+    } catch (error) {
+      console.error("Backend failed to store alert context payload:", error);
+    }
   };
 
   const formattedSummaryPrice = isNaN(Number(targetPrice.replace(/,/g, "")))
@@ -71,7 +92,7 @@ export default function CreatePriceAlert({
         maximumFractionDigits: 6,
       });
 
-  if (isLoading || !selectedAsset) {
+  if (isAssetsLoading || !selectedAsset) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="small" color={Colors.green} />
@@ -91,7 +112,6 @@ export default function CreatePriceAlert({
           onBack={onGoBack}
         />
 
-        {/* 🔘 SELECTABLE Asset Row Preview Box */}
         <TouchableOpacity
           style={styles.assetPreviewCard}
           onPress={() => setIsSelectorOpen(true)}
@@ -106,7 +126,9 @@ export default function CreatePriceAlert({
               />
             </View>
             <View>
-              <Text style={styles.symbolText}>{selectedAsset.symbol.toUpperCase()} ▾</Text>
+              <Text style={styles.symbolText}>
+                {selectedAsset.symbol.toUpperCase()} ▾
+              </Text>
               <Text style={styles.nameText}>{selectedAsset.name}</Text>
             </View>
           </View>
@@ -119,7 +141,6 @@ export default function CreatePriceAlert({
           </Text>
         </TouchableOpacity>
 
-        {/* Direction Select Pills Toggle Bar */}
         <View style={styles.pillRow}>
           <TouchableOpacity
             style={[
@@ -156,7 +177,6 @@ export default function CreatePriceAlert({
           </TouchableOpacity>
         </View>
 
-        {/* Large Styled Target Price Input Section */}
         <View style={styles.inputBox}>
           <Text style={styles.inputLabel}>Target price</Text>
           <View style={styles.fieldContainer}>
@@ -172,7 +192,6 @@ export default function CreatePriceAlert({
           </View>
         </View>
 
-        {/* Meta Info Informational Rows */}
         <View style={styles.metaRow}>
           <Text style={styles.metaLabel}>Trigger</Text>
           <Text style={styles.metaValue}>
@@ -204,12 +223,10 @@ export default function CreatePriceAlert({
         )}
       </TouchableOpacity>
 
-      {/* 🪙 ASSET SELECTOR MODAL */}
       <Modal visible={isSelectorOpen} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Crypto Asset</Text>
-
             <FlatList
               data={assetList}
               keyExtractor={(item) => item.id}
@@ -233,7 +250,9 @@ export default function CreatePriceAlert({
                       />
                     </View>
                     <View>
-                      <Text style={styles.symbolText}>{item.symbol.toUpperCase()}</Text>
+                      <Text style={styles.symbolText}>
+                        {item.symbol.toUpperCase()}
+                      </Text>
                       <Text style={styles.nameText}>{item.name}</Text>
                     </View>
                   </View>
@@ -247,7 +266,6 @@ export default function CreatePriceAlert({
                 </TouchableOpacity>
               )}
             />
-
             <TouchableOpacity
               style={styles.closeModalBtn}
               onPress={() => setIsSelectorOpen(false)}
@@ -261,13 +279,10 @@ export default function CreatePriceAlert({
   );
 }
 
+// ... styles object remains identical as provided by you
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   scrollContainer: { paddingHorizontal: 24, paddingBottom: 160 },
   assetPreviewCard: {
     flexDirection: "row",
@@ -372,11 +387,11 @@ const styles = StyleSheet.create({
   metaValue: {
     color: Colors.newWhite,
     fontSize: 13,
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.medium,
   },
   actionButton: {
     position: "absolute",
-    bottom: 40,
+    bottom: 80,
     left: 24,
     right: 24,
     backgroundColor: Colors.green,
@@ -395,7 +410,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: Colors.primary,
     fontSize: 15,
-    fontFamily: FontFamily.bold,
+    fontFamily: FontFamily.medium,
   },
   modalOverlay: {
     flex: 1,
@@ -403,7 +418,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: Colors.primary || "#1c1d22",
+    backgroundColor: Colors.primary,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -424,7 +439,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
   },
-  modalPriceText: { color: "#fff", fontSize: 15, fontFamily: FontFamily.bold },
+  modalPriceText: {
+    color: "#fff",
+    fontSize: 15,
+    fontFamily: FontFamily.bold,
+  },
   closeModalBtn: {
     marginTop: 16,
     paddingVertical: 14,
@@ -432,5 +451,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.05)",
     alignItems: "center",
   },
-  closeModalText: { color: "#fff", fontSize: 14, fontFamily: FontFamily.bold },
+  closeModalText: {
+    color: "#fff",
+    fontSize: 14,
+    fontFamily: FontFamily.bold,
+  },
 });
