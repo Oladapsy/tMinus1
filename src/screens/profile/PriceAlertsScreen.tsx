@@ -25,7 +25,6 @@ import { useRouter } from "expo-router";
 // 📡 Real API Connections
 import {
   useGetPriceAlertsQuery,
-  useCreatePriceAlertMutation,
   useUpdatePriceAlertMutation,
   useDeletePriceAlertMutation,
 } from "@/src/services/profileApi";
@@ -41,8 +40,6 @@ export default function PriceAlertsScreen() {
   // 1. Live RTK Query Data Streams
   const { data: apiResponse, isLoading: isQueryLoading } =
     useGetPriceAlertsQuery();
-  const [createPriceAlert, { isLoading: isCreatingAlert }] =
-    useCreatePriceAlertMutation();
   const [updatePriceAlert] = useUpdatePriceAlertMutation();
   const [deletePriceAlert, { isLoading: isDeleting }] =
     useDeletePriceAlertMutation();
@@ -58,21 +55,21 @@ export default function PriceAlertsScreen() {
   const [activeDeleteTarget, setActiveDeleteTarget] =
     useState<PriceAlertItem | null>(null);
 
-  // 2. Toggle Active Status Mutation Handler (On-Click Turn On/Off)
+  // 2. Toggle Active Status Mutation Handler (Stable Data References Execution)
   const handleRowInteraction = async (item: PriceAlertItem) => {
     try {
-      const nextIsActive = !item.isActive;
+      const targetId = item.id;
+      const currentStatus = !!item.isActive;
+      const nextStatus = !currentStatus;
 
       await updatePriceAlert({
-        alertId: item.id,
-        isActive: nextIsActive,
+        alertId: targetId,
+        isActive: nextStatus,
       }).unwrap();
 
-      showToast(
-        `Alert set to ${nextIsActive ? "Active" : "Paused"}`,
-        "success",
-      );
+      showToast(`Alert set to ${nextStatus ? "Active" : "Paused"}`, "success");
     } catch (err) {
+      console.error("Failed to update alert state:", err);
       showToast("Failed to modify alert state.", "error");
     }
   };
@@ -89,31 +86,18 @@ export default function PriceAlertsScreen() {
     }
   };
 
-  // 4. Create Alert API Sync Pipeline integration
-  const handleAlertCreationSubmit = async (payload: {
+  // 4. Create Alert Local Coordinator (Handled inside CreatePriceAlert component directly)
+  const handleAlertCreationSubmit = (payload: {
     symbol: string;
     direction: "Above" | "Below";
     targetPrice: string;
   }) => {
-    try {
-      const parsedPrice = parseFloat(payload.targetPrice.replace(/,/g, ""));
-
-      await createPriceAlert({
-        assetSymbol: payload.symbol,
-        direction: payload.direction.toLowerCase() as "above" | "below",
-        targetPriceUsd: parsedPrice,
-      }).unwrap();
-
-      setCreatedAlertInfo({
-        symbol: payload.symbol,
-        direction: payload.direction,
-        targetPrice: payload.targetPrice,
-      });
-
-      setLocalStep("success");
-    } catch (err) {
-      showToast("Failed to generate price point marker.", "error");
-    }
+    setCreatedAlertInfo({
+      symbol: payload.symbol,
+      direction: payload.direction,
+      targetPrice: payload.targetPrice,
+    });
+    setLocalStep("success");
   };
 
   if (isQueryLoading) {
@@ -158,15 +142,20 @@ export default function PriceAlertsScreen() {
 
             <View style={styles.listWrapper}>
               {alerts.map((alert: PriceAlertItem) => {
+                const isCurrentlyActive = !!alert.isActive;
+                const formattedPrice = alert.targetPriceUsd
+                  ? alert.targetPriceUsd.toLocaleString()
+                  : "0";
+
                 return (
                   <PriceAlertRow
                     key={alert.id}
                     item={{
                       id: alert.id,
-                      title: `${alert.assetSymbol} · ${alert.direction.toUpperCase()}`,
-                      subtitle: `$${alert.targetPriceUsd.toLocaleString()} · ${alert.isActive ? "Notifications on" : "Paused"}`,
-                      badgeText: alert.isActive ? "On" : "Off",
-                      symbol: alert.assetSymbol.toLowerCase(), // 🌟 Lowercase token string ('btc', 'eth')
+                      title: `${alert.assetSymbol.toUpperCase()} · ${alert.direction.toUpperCase()}`,
+                      subtitle: `$${formattedPrice} · ${isCurrentlyActive ? "Notifications on" : "Paused"}`,
+                      badgeText: isCurrentlyActive ? "On" : "Off",
+                      symbol: alert.assetSymbol.toLowerCase(),
                     }}
                     onPress={() => handleRowInteraction(alert)}
                     onDeleteTrigger={() => setActiveDeleteTarget(alert)}
@@ -174,45 +163,6 @@ export default function PriceAlertsScreen() {
                 );
               })}
             </View>
-
-            {activeDeleteTarget && (
-              <View style={styles.deleteDialogBox}>
-                <Title
-                  text="Delete alert?"
-                  color={Colors.newWhite}
-                  size={17}
-                  fontFamily={FontFamily.bold}
-                />
-                <View style={styles.dialogDescMargin}>
-                  <Paragraph
-                    text="This removes the alert completely from your tracking dashboard parameters."
-                    color={Colors.newSecondary}
-                    size={12.5}
-                    lineHeight={17}
-                    textAlign="left"
-                  />
-                </View>
-
-                <View style={styles.dialogActionsRow}>
-                  <Pressable
-                    style={styles.cancelActionBtn}
-                    onPress={() => setActiveDeleteTarget(null)}
-                    disabled={isDeleting}
-                  >
-                    <Text style={styles.cancelBtnText}>Cancel</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.deleteActionBtn}
-                    onPress={executeDeleteAction}
-                    disabled={isDeleting}
-                  >
-                    <Text style={styles.deleteBtnText}>
-                      {isDeleting ? "Deleting..." : "Delete"}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            )}
           </ScrollView>
         )}
 
@@ -221,7 +171,6 @@ export default function PriceAlertsScreen() {
           <CreatePriceAlert
             onGoBack={() => setLocalStep("list")}
             onAlertCreated={handleAlertCreationSubmit}
-            isSubmitting={isCreatingAlert} // 🌟 Pass the loading state straight down!
           />
         )}
 
@@ -233,6 +182,48 @@ export default function PriceAlertsScreen() {
             targetPrice={createdAlertInfo.targetPrice}
             onClose={() => setLocalStep("list")}
           />
+        )}
+
+        {/* 🟢 FLOATING ABSOLUTE BACKDROP OVERLAY FOR CONFIRMATION WINDOW */}
+        {localStep === "list" && activeDeleteTarget && (
+          <View style={styles.modalBackdrop}>
+            <View style={styles.deleteDialogBox}>
+              <Title
+                text="Delete alert?"
+                color={Colors.newWhite}
+                size={17}
+                fontFamily={FontFamily.bold}
+              />
+              <View style={styles.dialogDescMargin}>
+                <Paragraph
+                  text="This removes the alert completely from your tracking dashboard parameters."
+                  color={Colors.newSecondary}
+                  size={12.5}
+                  lineHeight={17}
+                  textAlign="left"
+                />
+              </View>
+
+              <View style={styles.dialogActionsRow}>
+                <Pressable
+                  style={styles.cancelActionBtn}
+                  onPress={() => setActiveDeleteTarget(null)}
+                  disabled={isDeleting}
+                >
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.deleteActionBtn}
+                  onPress={executeDeleteAction}
+                  disabled={isDeleting}
+                >
+                  <Text style={styles.deleteBtnText}>
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
         )}
       </MySafeAreaView>
     </ImageBackground>
@@ -266,11 +257,18 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 12,
   },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    zIndex: 999,
+  },
   deleteDialogBox: {
     backgroundColor: Colors.newDark,
     borderRadius: 20,
     padding: 24,
-    marginTop: 42,
     width: "100%",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.04)",
