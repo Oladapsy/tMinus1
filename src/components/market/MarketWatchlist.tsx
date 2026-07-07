@@ -24,18 +24,20 @@ export default function MarketWatchlist({
   onExploreMarkets,
   onSelectAsset,
 }: MarketWatchlistProps) {
-  // 🟢 Pass query arguments or parameters matching your profileApi schema requirements
   const {
     data: watchlistResponse,
     isLoading,
     refetch,
-  } = useGetWatchlistAssetsQuery(
-    { include: "sparkline" }, // If your endpoint wrapper handles parameters object
-    {
-      pollingInterval: 10000, // Built-in RTK query auto-polling setup
-      refetchOnMountOrArgChange: true,
-    },
-  );
+  } = useGetWatchlistAssetsQuery({
+    include: "sparkline",
+  });
+
+  useEffect(() => {
+    const listPoller = setInterval(() => {
+      refetch();
+    }, 10000);
+    return () => clearInterval(listPoller);
+  }, [refetch]);
 
   const watchlistData = watchlistResponse?.data ?? [];
 
@@ -47,7 +49,7 @@ export default function MarketWatchlist({
       >
         <BackHeader
           title="Watchlist"
-          paragraph="Assets you follow with live sparklines."
+          paragraph="Assets you follow with row sparklines."
           onBack={onGoBack}
         />
 
@@ -59,13 +61,8 @@ export default function MarketWatchlist({
           <View style={styles.listSection}>
             {watchlistData.map((coin) => (
               <View key={coin.id || coin.symbol} style={styles.rowCardWrapper}>
-                {/* 📊 Passing down the coin data containing the sparkline array */}
                 <MarketAssetRow
-                  coin={{
-                    ...coin,
-                    // Fallback to guarantee sparkline isn't completely empty if backend is waking up
-                    sparkline: coin.sparkline || [],
-                  }}
+                  coin={coin}
                   onPress={() => onSelectAsset(coin.symbol)}
                 />
               </View>

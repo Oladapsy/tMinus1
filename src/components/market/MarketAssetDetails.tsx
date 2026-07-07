@@ -308,9 +308,7 @@ export default function MarketAssetDetails({
           style={styles.subActionBtn}
           onPress={onNavigateToAlert}
         >
-          <Text style={[styles.subActionBtnText, { color: Colors.green }]}>
-            Alert
-          </Text>
+          <Text style={[styles.subActionBtnText]}>Alert</Text>
         </TouchableOpacity>
       </View>
 
