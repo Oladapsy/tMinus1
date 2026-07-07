@@ -282,8 +282,15 @@ export default function CreatePriceAlert({
 // ... styles object remains identical as provided by you
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  scrollContainer: { paddingHorizontal: 24, paddingBottom: 160 },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 160,
+  },
   assetPreviewCard: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -294,7 +301,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 24,
   },
-  leftRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  leftRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
   avatarWrapper: {
     width: 40,
     height: 40,
@@ -309,8 +320,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.03)",
     overflow: "hidden",
   },
-  avatarCircle: { width: "100%", height: "100%" },
-  avatarCircleSmall: { width: "100%", height: "100%" },
+  avatarCircle: {
+    width: "100%",
+    height: "100%",
+  },
+  avatarCircleSmall: {
+    width: "100%",
+    height: "100%",
+  },
   symbolText: {
     color: Colors.newWhite,
     fontSize: 18,
@@ -327,20 +344,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FontFamily.bold,
   },
-  pillRow: { flexDirection: "row", gap: 10, marginBottom: 24 },
+  pillRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 24,
+  },
   pillButton: {
     paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 20,
     backgroundColor: "rgba(255,255,255,0.05)",
   },
-  activePill: { backgroundColor: Colors.green },
+  activePill: {
+    backgroundColor: Colors.green,
+  },
   pillText: {
     color: Colors.newSecondary,
     fontSize: 13,
     fontFamily: FontFamily.medium,
   },
-  activePillText: { color: Colors.primary, fontFamily: FontFamily.bold },
+  activePillText: {
+    color: Colors.primary,
+    fontFamily: FontFamily.bold,
+  },
   inputBox: {
     backgroundColor: Colors.newDark,
     borderRadius: 16,
