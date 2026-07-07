@@ -18,8 +18,8 @@ export default function MarketAssetRow({ coin, onPress }: MarketAssetRowProps) {
     : "";
   const avatarColors: Record<string, string> = {
     BTC: "#E28A16",
-    ETH: "#3758FF",
-    SOL: "#00FFA3",
+    ETH: "#29B8C7",
+    SOL: "#5CD6A5",
   };
 
   return (

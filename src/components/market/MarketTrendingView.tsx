@@ -95,44 +95,53 @@ export default function MarketTrendingView({
           {/* 🟢 TOP GAINER HERO CARD - CONNECTED TO API */}
           {featuredHero && (
             <View style={styles.gainerCard}>
-              <View style={styles.cardHeader}>
-                <View>
-                  <Text style={styles.gainerTag}>
-                    {featuredHero.type.replace("_", " ").toUpperCase()} · 24H
-                  </Text>
-                  <Text style={styles.gainerName}>{featuredHero.name}</Text>
-                  <Text style={styles.gainerSubtitle}>
-                    {featuredHero.reason}
-                  </Text>
-                </View>
-                <View style={{ alignItems: "flex-end" }}>
+              {/* Left Column: Core Identity Metadata */}
+              <View style={styles.gainerLeftColumn}>
+                <Text style={styles.gainerTag}>
+                  {featuredHero.type.replace("_", " ").toUpperCase()} · 24H
+                </Text>
+                <Text style={styles.gainerName} numberOfLines={1}>
+                  {featuredHero.name}
+                </Text>
+                <Text style={styles.gainerSubtitle} numberOfLines={1}>
+                  {featuredHero.reason || "Highest 24h move"}
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.viewAssetBtn}
+                  onPress={() => onSelectAsset(featuredHero.symbol)}
+                >
+                  <Text style={styles.viewAssetBtnText}>View asset</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Right Column: Price Feed + Sparkline Stream */}
+              <View style={styles.gainerRightColumn}>
+                <View style={styles.priceContainer}>
                   <Text style={styles.gainerPrice}>
                     $
                     {featuredHero.priceUsd.toLocaleString(undefined, {
                       minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
                     })}
                   </Text>
                   <Text style={styles.gainerPercent}>
                     {featuredHero.change24h >= 0 ? "+" : ""}
-                    {featuredHero.change24h.toFixed(2)}%
+                    {featuredHero.change24h.toFixed(1)}%
                   </Text>
                 </View>
-              </View>
 
-              <View style={styles.heroChartWrapper}>
-                <LineChart.Provider data={heroChartData}>
-                  <LineChart height={60}>
-                    <LineChart.Path color={Colors.green} width={2.5} />
-                  </LineChart>
-                </LineChart.Provider>
+                {/* 🔒 Bounded Wrapper containing the SVG path overflows */}
+                <View style={styles.heroChartWrapper}>
+                  <LineChart.Provider data={heroChartData}>
+                    <LineChart height={54} absolute>
+                      <LineChart.Path color={Colors.green} width={2}>
+                        <LineChart.Gradient color="rgba(0, 255, 163, 0.12)" />
+                      </LineChart.Path>
+                    </LineChart>
+                  </LineChart.Provider>
+                </View>
               </View>
-
-              <TouchableOpacity
-                style={styles.viewAssetBtn}
-                onPress={() => onSelectAsset(featuredHero.symbol)}
-              >
-                <Text style={styles.viewAssetBtnText}>View asset</Text>
-              </TouchableOpacity>
             </View>
           )}
 
@@ -207,30 +216,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   gainerCard: {
-    backgroundColor: "#063A24",
+    backgroundColor: "#063A24", // Deep forest green backdrop
     borderRadius: 24,
     padding: 20,
     marginTop: 16,
     marginBottom: 16,
-  },
-  cardHeader: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    height: 154, // Perfectly scales text content and line path side by side
+  },
+  gainerLeftColumn: {
+    flex: 1.1,
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
-  gainerTag: { color: Colors.green, fontSize: 10, fontFamily: FontFamily.bold },
+  gainerRightColumn: {
+    flex: 1.3,
+    justifyContent: "space-between",
+    alignItems: "stretch",
+    overflow: "hidden", // 👈 Protects the right edge layout boundary
+  },
+  heroChartWrapper: {
+    height: 54,
+    marginTop: "auto",
+    overflow: "hidden", // 👈 Clips the internal path canvas perfectly
+    borderRadius: 12, // Matches the card flow aesthetics
+  },
+  priceContainer: {
+    alignItems: "flex-end",
+    marginBottom: 4,
+  },
+  gainerTag: {
+    color: "rgba(255, 255, 255, 0.6)",
+    fontSize: 10,
+    fontFamily: FontFamily.bold,
+    letterSpacing: 0.5,
+  },
   gainerName: {
     color: Colors.newWhite,
-    fontSize: 24,
+    fontSize: 26,
     fontFamily: FontFamily.bold,
-    marginTop: 4,
+    marginTop: 2,
   },
   gainerSubtitle: {
     color: "rgba(255,255,255,0.6)",
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: FontFamily.medium,
-    maxWidth: "70%",
-    marginTop: 2,
+    marginTop: -2,
+    marginBottom: 10,
   },
   gainerPrice: {
     color: Colors.newWhite,
@@ -239,22 +272,28 @@ const styles = StyleSheet.create({
   },
   gainerPercent: {
     color: Colors.green,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: FontFamily.bold,
+    marginTop: 2,
   },
-  heroChartWrapper: { height: 60, marginVertical: 12 },
   viewAssetBtn: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 14,
-    alignSelf: "flex-start",
+    borderRadius: 20,
   },
   viewAssetBtnText: {
     color: Colors.newWhite,
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: FontFamily.bold,
   },
+
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+
   pulseCard: {
     backgroundColor: Colors.newDark,
     borderRadius: 24,
