@@ -421,11 +421,11 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
   },
   priceContainer: {
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     gap: 6,
-    marginBottom: 24,
+    marginBottom: 5,
   },
   hugePrice: {
     color: Colors.newWhite,
