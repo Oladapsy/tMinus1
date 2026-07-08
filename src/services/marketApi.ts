@@ -3,8 +3,10 @@ import {
   MarketAssetListResponse,
   TrendingResponse,
   AssetDetails,
+  MarketCandlesResponse,
   MarketOrderBookResponse,
   RecentTradesResponse,
+  LivePriceFeedResponse,
 } from "../types/market";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -21,8 +23,9 @@ export const marketApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Assets", "Trending", "OrderBook"],
+  tagTypes: ["Assets", "Trending", "OrderBook", "Candles", "Trades", "Prices"],
   endpoints: (builder) => ({
+    // 🔍 GET /market/assets
     getMarketAssets: builder.query<
       MarketAssetListResponse,
       {
@@ -51,6 +54,7 @@ export const marketApi = createApi({
       providesTags: ["Assets"],
     }),
 
+    // 🔥 GET /market/trending
     getTrendingAssets: builder.query<
       TrendingResponse,
       { include?: "sparkline" | "none" } | void
@@ -59,27 +63,49 @@ export const marketApi = createApi({
       providesTags: ["Trending"],
     }),
 
+    // 🪙 GET /market/assets/{symbol}
     getAssetDetails: builder.query<{ data: AssetDetails }, string>({
       query: (symbol) => `assets/${symbol.toUpperCase()}`,
     }),
 
-    // 📊 ADDED: Order book live feed query endpoint
+    // 🕯️ GET /market/assets/{symbol}/candles
+    getAssetCandles: builder.query<
+      MarketCandlesResponse,
+      {
+        symbol: string;
+        interval?: "1m" | "5m" | "15m" | "1h" | "1d";
+        limit?: number;
+      }
+    >({
+      query: ({ symbol, interval = "1m", limit = 50 }) =>
+        `assets/${symbol.toUpperCase()}/candles?interval=${interval}&limit=${limit}`,
+      providesTags: ["Candles"],
+    }),
+
+    // 📊 GET /market/assets/{symbol}/order-book
     getMarketOrderBook: builder.query<
       MarketOrderBookResponse,
-      { symbol: string }
+      { symbol: string; levels?: number }
     >({
-      query: ({ symbol }) => `order-book?symbol=${symbol.toUpperCase()}`,
+      query: ({ symbol, levels = 12 }) =>
+        `assets/${symbol.toUpperCase()}/order-book?levels=${levels}`,
       providesTags: ["OrderBook"],
     }),
-    getRecentTrades: builder.query<RecentTradesResponse, { symbol: string }>({
-      query: ({ symbol }) => `trades?symbol=${symbol.toUpperCase()}`,
-    }),
-    getWatchlistAssets: builder.query<
-      MarketAssetListResponse,
-      { include?: string } | void
+
+    // 🤝 GET /market/assets/{symbol}/trades
+    getRecentTrades: builder.query<
+      RecentTradesResponse,
+      { symbol: string; limit?: number }
     >({
-      query: (params) => `watchlist?include=${params?.include || "sparkline"}`,
-      providesTags: ["Assets"],
+      query: ({ symbol, limit = 30 }) =>
+        `assets/${symbol.toUpperCase()}/trades?limit=${limit}`,
+      providesTags: ["Trades"],
+    }),
+
+    // 💵 GET /market/prices
+    getLivePrices: builder.query<LivePriceFeedResponse, void>({
+      query: () => "prices",
+      providesTags: ["Prices"],
     }),
   }),
 });
@@ -88,7 +114,8 @@ export const {
   useGetMarketAssetsQuery,
   useGetTrendingAssetsQuery,
   useGetAssetDetailsQuery,
+  useGetAssetCandlesQuery,
   useGetMarketOrderBookQuery,
   useGetRecentTradesQuery,
-  useGetWatchlistAssetsQuery,
+  useGetLivePricesQuery,
 } = marketApi;

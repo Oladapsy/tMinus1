@@ -62,6 +62,25 @@ export interface AssetDetails {
   chart: { time: string; priceUsd: number }[];
 }
 
+// 🕯️ ADDED: Candlestick Specific Interfaces
+export interface CandleData {
+  time: string;
+  openUsd: number;
+  highUsd: number;
+  lowUsd: number;
+  closeUsd: number;
+  volume: number;
+}
+
+export interface MarketCandlesResponse {
+  data: CandleData[];
+  meta: {
+    count: number;
+    symbol: string;
+    interval: string;
+  };
+}
+
 export interface OrderLevel {
   priceUsd: number;
   amount: number;
@@ -75,14 +94,12 @@ export interface OrderBookData {
   asks: OrderLevel[];
 }
 
-export interface OrderBookMeta {
-  symbol: string;
-  levels: number;
-}
-
 export interface MarketOrderBookResponse {
   data: OrderBookData;
-  meta: OrderBookMeta;
+  meta: {
+    symbol: string;
+    levels: number;
+  };
 }
 
 export interface TradeItemPayload {
@@ -96,4 +113,31 @@ export interface TradeItemPayload {
 
 export interface RecentTradesResponse {
   data: TradeItemPayload[];
+  meta: {
+    count: number;
+    symbol: string;
+  };
+}
+
+// 📈 ADDED: Live Price Feed Interface
+export interface LivePriceFeedItem {
+  symbol: string;
+  name: string;
+  priceUsd: number;
+  change24h: number;
+  updatedAt: string;
+}
+
+export interface LivePriceFeedResponse {
+  data: LivePriceFeedItem[];
+  meta: {
+    count: number;
+    market: {
+      mode: string;
+      source: string;
+      lastUpdatedAt: string;
+      tickIntervalMs: number;
+      lastError: string | null;
+    };
+  };
 }

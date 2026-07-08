@@ -28,6 +28,7 @@ export default function TradesScreen() {
     "Buy" | "Sell" | "Swap" | null
   >(null);
 
+
   return (
     <KycGateGuard status={currentKycStatus} gateType="trades">
       <GestureHandlerRootView style={styles.rootWrapper}>
@@ -61,6 +62,8 @@ export default function TradesScreen() {
                 }}
               />
             )}
+
+      
           </MySafeAreaView>
         </ImageBackground>
       </GestureHandlerRootView>

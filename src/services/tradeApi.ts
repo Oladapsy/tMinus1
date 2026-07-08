@@ -68,6 +68,8 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
         }
       } catch (err) {
         api.dispatch(logOut());
+        // consoling err as err is complaining
+        console.log("Token refresh failed:", err);
       }
     } else {
       api.dispatch(logOut());

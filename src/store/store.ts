@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/src/store/authSlice";
 import { authApi } from "@/src/services/authApi";
-import { profileApi } from "../services/profileApi";
-import { walletApi } from "../services/walletApi";
-import { marketApi } from "../services/marketApi";
-import { tradeApi } from "../services/tradeApi";
+import { profileApi } from "@/src/services/profileApi";
+import { walletApi } from "@/src/services/walletApi";
+import { marketApi } from "@/src/services/marketApi";
+import { tradeApi } from "@/src/services/tradeApi";
 
 export const store = configureStore({
   reducer: {
