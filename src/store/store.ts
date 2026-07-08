@@ -4,6 +4,7 @@ import { authApi } from "@/src/services/authApi";
 import { profileApi } from "../services/profileApi";
 import { walletApi } from "../services/walletApi";
 import { marketApi } from "../services/marketApi";
+import { tradeApi } from "../services/tradeApi";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     [profileApi.reducerPath]: profileApi.reducer,
     [walletApi.reducerPath]: walletApi.reducer,
     [marketApi.reducerPath]: marketApi.reducer,
+    [tradeApi.reducerPath]: tradeApi.reducer,
 
   },
 
@@ -25,7 +27,8 @@ export const store = configureStore({
       .concat(authApi.middleware)
       .concat(profileApi.middleware)
       .concat(walletApi.middleware)
-      .concat(marketApi.middleware),
+      .concat(marketApi.middleware)
+      .concat(tradeApi.middleware),
 });
 
 // --- TypeScript Setup Types ---
