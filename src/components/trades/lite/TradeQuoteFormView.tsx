@@ -15,6 +15,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useCreateQuoteMutation } from "@/src/services/tradeApi";
 import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
+import { useGetWalletQuery } from "@/src/services/walletApi"; // 💳 Linked your live wallet query hooks
 import { AssetSymbol, TradeType } from "@/src/types/trade";
 
 interface TradeQuoteFormViewProps {
@@ -42,16 +43,18 @@ export default function TradeQuoteFormView({
   const [fromAsset, setFromAsset] = useState<string>("USDT");
   const [toAsset, setToAsset] = useState<string>(initialSymbol || "BTC");
   const [activePicker, setActivePicker] = useState<"from" | "to" | null>(null);
-  const [estimatedReceive, setEstimatedReceive] = useState<string>("");
 
-  // 📡 Load true backend data stream
+  const [activeQuoteDetails, setActiveQuoteDetails] = useState<any>(null);
+  const [rateUnavailable, setRateUnavailable] = useState(false);
+
+  // 📡 Live Data Streams
   const { data: marketAssetsResponse, isLoading: isAssetsLoading } =
     useGetMarketAssetsQuery({ limit: 50 });
-  const allSupportedCoins = marketAssetsResponse?.data || [];
-
+  const { data: walletResponse } = useGetWalletQuery(); // 🪙 Pulls live portfolio data maps from the backend
   const [createQuote, { isLoading }] = useCreateQuoteMutation();
 
-  const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+  const allSupportedCoins = marketAssetsResponse?.data || [];
+  const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     if (currentMode === "Buy") {
@@ -61,7 +64,8 @@ export default function TradeQuoteFormView({
       setFromAsset(initialSymbol || "BTC");
       setToAsset("USDT");
     }
-    setEstimatedReceive("");
+    setActiveQuoteDetails(null);
+    setRateUnavailable(false);
   }, [currentMode, initialSymbol]);
 
   useEffect(() => {
@@ -69,7 +73,8 @@ export default function TradeQuoteFormView({
       if (amount && !isNaN(Number(amount)) && Number(amount) > 0) {
         runSilentPreviewCalculation();
       } else {
-        setEstimatedReceive("");
+        setActiveQuoteDetails(null);
+        setRateUnavailable(false);
       }
     }, 600);
 
@@ -78,6 +83,7 @@ export default function TradeQuoteFormView({
 
   const runSilentPreviewCalculation = async () => {
     try {
+      setRateUnavailable(false);
       const response = await createQuote({
         type: currentMode.toLowerCase() as TradeType,
         fromAsset: fromAsset as AssetSymbol,
@@ -85,11 +91,12 @@ export default function TradeQuoteFormView({
         fromAmount: Number(amount),
       }).unwrap();
 
-      if (response?.data?.toAmount) {
-        setEstimatedReceive(`${response.data.toAmount} ${toAsset}`);
+      if (response?.data) {
+        setActiveQuoteDetails(response.data);
       }
     } catch (err) {
-      setEstimatedReceive("Rate unavailable");
+      setRateUnavailable(true);
+      setActiveQuoteDetails(null);
     }
   };
 
@@ -97,7 +104,7 @@ export default function TradeQuoteFormView({
     const temp = fromAsset;
     setFromAsset(toAsset);
     setToAsset(temp);
-    setEstimatedReceive("");
+    setActiveQuoteDetails(null);
   };
 
   const handleFetchFinalQuote = async () => {
@@ -118,11 +125,6 @@ export default function TradeQuoteFormView({
     }
   };
 
-  /**
-   * 🔄 Weserv Image Transform Pipeline
-   * Takes the backend SVG URL reference path, passes it to an open-source image proxy router,
-   * which translates the SVG vector graphics data straight into high-performance PNG image streams.
-   */
   const renderAssetLogo = (
     iconUrlPath: string,
     styleOverride = styles.assetLogoImage,
@@ -133,7 +135,6 @@ export default function TradeQuoteFormView({
           style={[styleOverride, { backgroundColor: "rgba(255,255,255,0.1)" }]}
         />
       );
-
     const rawAbsoluteUrl = iconUrlPath.startsWith("http")
       ? iconUrlPath
       : `${BASE_URL}${iconUrlPath}`;
@@ -148,9 +149,26 @@ export default function TradeQuoteFormView({
     );
   };
 
-  // Helper selectors to fetch current selected metadata rows cleanly
   const currentFromItem = allSupportedCoins.find((c) => c.symbol === fromAsset);
   const currentToItem = allSupportedCoins.find((c) => c.symbol === toAsset);
+
+  // 📈 Parse parameters straight out of your live payload structures
+  const estimatedReceiveAmount = activeQuoteDetails?.toAmount || "";
+  const networkFeeEstimate = activeQuoteDetails?.feeAmount || "0.00";
+  const networkFeeAsset = activeQuoteDetails?.feeAsset || fromAsset;
+
+  // 🔍 Check your live wallet balance array returned from walletApi
+  const userBalancesArray = walletResponse?.data?.wallet?.balances || [];
+  const dynamicActiveBalance = userBalancesArray.find(
+    (bal: any) => bal.assetSymbol === fromAsset,
+  );
+
+  const formattedAvailableBalance = dynamicActiveBalance
+    ? Number(dynamicActiveBalance.available).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 6,
+      })
+    : "0.00";
 
   return (
     <View style={styles.container}>
@@ -172,13 +190,22 @@ export default function TradeQuoteFormView({
               keyboardType="numeric"
               placeholder="0.00"
               placeholderTextColor={Colors.newSecondary}
+              editable={!isLoading}
             />
             <TouchableOpacity
               style={styles.assetSelector}
               onPress={() => setActivePicker("from")}
             >
-              {currentFromItem &&
-                renderAssetLogo(currentFromItem.iconUrl, styles.formRowIcon)}
+              {currentFromItem?.iconUrl ? (
+                renderAssetLogo(currentFromItem.iconUrl, styles.formRowIcon)
+              ) : (
+                <View
+                  style={[
+                    styles.formRowIcon,
+                    { backgroundColor: "rgba(255,255,255,0.1)" },
+                  ]}
+                />
+              )}
               <Text style={styles.assetUnit}>{fromAsset} ▾</Text>
             </TouchableOpacity>
           </View>
@@ -199,7 +226,7 @@ export default function TradeQuoteFormView({
         <View style={styles.inputCard}>
           <Text style={styles.inputLabel}>You Receive</Text>
           <View style={styles.inputRow}>
-            {isLoading && !estimatedReceive ? (
+            {isLoading && !estimatedReceiveAmount ? (
               <ActivityIndicator
                 size="small"
                 color={Colors.green}
@@ -209,28 +236,75 @@ export default function TradeQuoteFormView({
               <Text
                 style={[
                   styles.textInput,
-                  {
-                    color:
-                      estimatedReceive &&
-                      estimatedReceive !== "Rate unavailable"
-                        ? Colors.newWhite
-                        : Colors.newSecondary,
-                  },
+                  { color: rateUnavailable ? Colors.newRed : Colors.newWhite },
                 ]}
               >
-                {estimatedReceive || "Calculating conversion..."}
+                {rateUnavailable
+                  ? "Rate unavailable"
+                  : estimatedReceiveAmount
+                    ? `${estimatedReceiveAmount}`
+                    : "Calculating conversion..."}
               </Text>
             )}
             <TouchableOpacity
               style={styles.assetSelector}
               onPress={() => setActivePicker("to")}
             >
-              {currentToItem &&
-                renderAssetLogo(currentToItem.iconUrl, styles.formRowIcon)}
+              {currentToItem?.iconUrl ? (
+                renderAssetLogo(currentToItem.iconUrl, styles.formRowIcon)
+              ) : (
+                <View
+                  style={[
+                    styles.formRowIcon,
+                    { backgroundColor: "rgba(255,255,255,0.1)" },
+                  ]}
+                />
+              )}
               <Text style={styles.assetUnit}>{toAsset} ▾</Text>
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* 📊 REAL TIME FINANCIAL BREAKDOWN MATRIX */}
+        {(activeQuoteDetails || isLoading) && (
+          <View style={styles.breakdownContainer}>
+            {/* Row 1: Real Wallet Balance */}
+            <View style={styles.breakdownRowCard}>
+              <Text style={styles.breakdownLabel}>Available</Text>
+              <Text style={styles.breakdownValue}>
+                {formattedAvailableBalance} {fromAsset}
+              </Text>
+            </View>
+
+            {/* Row 2: Live Trade Fee */}
+            <View style={styles.breakdownRowCard}>
+              <Text style={styles.breakdownLabel}>Fee estimate</Text>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={Colors.green} />
+              ) : (
+                <Text style={styles.breakdownValue}>
+                  {networkFeeEstimate} {networkFeeAsset}
+                </Text>
+              )}
+            </View>
+
+            {/* Row 3: Final Receive Payout */}
+            <View style={styles.breakdownRowCard}>
+              <Text style={styles.breakdownLabel}>Receive after fees</Text>
+              {isLoading ? (
+                <ActivityIndicator size="small" color={Colors.green} />
+              ) : (
+                <Text
+                  style={[styles.breakdownValue, { color: Colors.newWhite }]}
+                >
+                  {estimatedReceiveAmount
+                    ? `${estimatedReceiveAmount} ${toAsset}`
+                    : "--"}
+                </Text>
+              )}
+            </View>
+          </View>
+        )}
       </View>
 
       <TouchableOpacity
@@ -242,11 +316,7 @@ export default function TradeQuoteFormView({
           },
         ]}
         onPress={handleFetchFinalQuote}
-        disabled={
-          isLoading ||
-          !estimatedReceive ||
-          estimatedReceive === "Rate unavailable"
-        }
+        disabled={isLoading || rateUnavailable || !estimatedReceiveAmount}
       >
         <Text style={styles.actionButtonText}>
           {isLoading ? "Fetching fresh quote..." : "Get Quote"}
@@ -262,7 +332,6 @@ export default function TradeQuoteFormView({
         >
           <View style={styles.dropdownModalBox}>
             <Text style={styles.modalTitle}>Select Token Asset</Text>
-
             {isAssetsLoading ? (
               <ActivityIndicator
                 size="large"
@@ -284,7 +353,6 @@ export default function TradeQuoteFormView({
                     }}
                   >
                     {renderAssetLogo(item.iconUrl, styles.assetLogoImage)}
-
                     <View style={styles.metaTextBox}>
                       <Text style={styles.marketAssetSymbol}>
                         {item.symbol}
@@ -326,7 +394,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 0,
   },
-
   assetSelector: {
     flexDirection: "row",
     alignItems: "center",
@@ -335,10 +402,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 12,
   },
-  // 🟢 FIXED: Removed background color to perfectly eliminate strict layout matching typing runtime compilation collisions
   formRowIcon: { width: 18, height: 18, borderRadius: 9, marginRight: 6 },
   assetUnit: { color: Colors.green, fontSize: 14, fontFamily: FontFamily.bold },
-
   arrowWrapper: { alignItems: "center", zIndex: 10, marginVertical: -14 },
   arrowTouchCircle: {
     width: 32,
@@ -351,6 +416,27 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.1)",
   },
   arrowIcon: { color: Colors.green, fontSize: 14, fontFamily: FontFamily.bold },
+
+  breakdownContainer: { gap: 8, marginTop: 16 },
+  breakdownRowCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Colors.newDark,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+  },
+  breakdownLabel: {
+    color: Colors.newSecondary,
+    fontSize: 14,
+    fontFamily: FontFamily.medium,
+  },
+  breakdownValue: {
+    color: Colors.newWhite,
+    fontSize: 14,
+    fontFamily: FontFamily.bold,
+  },
 
   actionButton: {
     paddingVertical: 16,
@@ -391,12 +477,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255,255,255,0.05)",
   },
-  assetLogoImage: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: 12,
-  },
+  assetLogoImage: { width: 36, height: 36, borderRadius: 18, marginRight: 12 },
   metaTextBox: { flex: 1, justifyContent: "center" },
   marketAssetSymbol: {
     color: Colors.newWhite,

@@ -9,6 +9,7 @@ import { Colors } from "@/src/constants/colors";
 // Component imports...
 import TradeDashboardView from "@/src/components/trades/lite/TradeDashboardView";
 import TradeQuoteFormView from "@/src/components/trades/lite/TradeQuoteFormView";
+import TradeQuoteConfirmationDetails from "@/src/components/trades/lite/TradeQuoteConfirmationDetails";
 
 type TradeWorkflowMode =
   | "dashboard"
@@ -20,14 +21,16 @@ type TradeWorkflowMode =
 export default function TradesScreen() {
   const currentKycStatus = "APPROVED";
 
-  // 🟢 Extract routing params (e.g. from Market Details or Order Book)
-
   const [workflowMode, setWorkflowMode] =
     useState<TradeWorkflowMode>("dashboard");
   const [activeAction, setActiveAction] = useState<
     "Buy" | "Sell" | "Swap" | null
   >(null);
 
+  // 🟢 Shared data parameters feeding the layout chunk previews
+  const [currentQuoteId, setCurrentQuoteId] = useState<string>("");
+  const [tradeAmount, setTradeAmount] = useState<string>("0");
+  const [targetAssetSymbol, setTargetAssetSymbol] = useState<string>("BTC");
 
   return (
     <KycGateGuard status={currentKycStatus} gateType="trades">
@@ -55,16 +58,32 @@ export default function TradesScreen() {
             {workflowMode === "quote_form" && activeAction && (
               <TradeQuoteFormView
                 initialMode={activeAction}
-                initialSymbol="BTC"
+                initialSymbol={targetAssetSymbol}
                 onGoBack={() => setWorkflowMode("dashboard")}
-                onRequestQuote={(amount, asset, updatedMode) => {
+                onRequestQuote={(amount, asset, updatedMode, quoteId) => {
+                  setTradeAmount(amount);
+                  setTargetAssetSymbol(asset);
                   setActiveAction(updatedMode);
+                  setCurrentQuoteId(quoteId);
                   setWorkflowMode("quote_preview");
                 }}
               />
             )}
 
-      
+            {/* ⏱️ Quote Preview & Expiry Window Panel */}
+            {workflowMode === "quote_preview" && activeAction && (
+              <TradeQuoteConfirmationDetails
+                quoteId={currentQuoteId}
+                amount={tradeAmount}
+                targetAsset={targetAssetSymbol}
+                tradeMode={activeAction}
+                onGoBack={() => setWorkflowMode("quote_form")}
+                onRefreshQuote={() => {
+                  // 🔄 Sends them back to the input deck to fetch a fresh calculation stream
+                  setWorkflowMode("quote_form");
+                }}
+              />
+            )}
           </MySafeAreaView>
         </ImageBackground>
       </GestureHandlerRootView>
