@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, ImageBackground } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useLocalSearchParams } from "expo-router"; // 🟢 For picking up deep links
 
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import KycGateGuard from "@/src/components/kyc/KycGateGuard";
 import { Colors } from "@/src/constants/colors";
 
-//new modular trade layout views
+// Component imports...
 import TradeDashboardView from "@/src/components/trades/lite/TradeDashboardView";
 import TradeQuoteFormView from "@/src/components/trades/lite/TradeQuoteFormView";
 import TradeQuotePreviewView from "@/src/components/trades/lite/TradeQuotePreviewView";
@@ -21,18 +22,40 @@ type TradeWorkflowMode =
   | "receipt";
 
 export default function TradesScreen() {
-  // KYC State - Grabbed from Redux/Context later
   const currentKycStatus = "APPROVED";
 
-  // Flow Engine Workflow Management States
+  // 🟢 Extract routing params (e.g. from Market Details or Order Book)
+  const params = useLocalSearchParams<{ action?: string; symbol?: string }>();
+
   const [workflowMode, setWorkflowMode] =
     useState<TradeWorkflowMode>("dashboard");
   const [activeAction, setActiveAction] = useState<
     "Buy" | "Sell" | "Swap" | null
   >(null);
+  const [selectedAssetSymbol, setSelectedAssetSymbol] = useState<string>("BTC"); // Track focused asset
   const [receiptStatus, setReceiptStatus] = useState<
     "success" | "failed" | "expired"
   >("success");
+
+  // 🟢 Effect to catch external navigation requests from the Market screen
+  useEffect(() => {
+    if (params?.action) {
+      const formattedAction =
+        params.action.charAt(0).toUpperCase() +
+        params.action.slice(1).toLowerCase();
+      if (
+        formattedAction === "Buy" ||
+        formattedAction === "Sell" ||
+        formattedAction === "Swap"
+      ) {
+        setActiveAction(formattedAction);
+        if (params.symbol) {
+          setSelectedAssetSymbol(params.symbol.toUpperCase());
+        }
+        setWorkflowMode("quote_form");
+      }
+    }
+  }, [params]);
 
   return (
     <KycGateGuard status={currentKycStatus} gateType="trades">
@@ -56,7 +79,7 @@ export default function TradesScreen() {
               />
             )}
 
-            {/* 📝 Quote Input Form Panel (Buy / Sell / Swap Layouts) */}
+            {/* 📝 Quote Input Form Panel */}
             {workflowMode === "quote_form" && activeAction && (
               <TradeQuoteFormView
                 initialMode={activeAction}
@@ -80,7 +103,7 @@ export default function TradesScreen() {
               />
             )}
 
-            {/* 🔒 Secure Transaction PIN Overlay & Simulator Hub */}
+            {/* 🔒 Secure Transaction PIN Overlay */}
             {workflowMode === "execution_pin" && (
               <TradeExecutionOverlay
                 onGoBack={() => setWorkflowMode("quote_preview")}
@@ -91,7 +114,7 @@ export default function TradesScreen() {
               />
             )}
 
-            {/* 🎉 Unified Result State Receipt Screen (Success / Fail / Expired) */}
+            {/* 🎉 Unified Result State Receipt Screen */}
             {workflowMode === "receipt" && (
               <TradeResultReceiptView
                 status={receiptStatus}
