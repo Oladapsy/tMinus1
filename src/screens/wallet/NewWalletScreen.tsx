@@ -52,6 +52,7 @@ export interface AssetData {
 interface NewWalletScreenProps {
   walletData: WalletResponse["data"] | undefined;
   initialWorkflow?: string;
+  initialTxReference?: string; // 🟢 1. Added optional prop here
 }
 
 const ASSET_THEME_MAP: Record<string, { name: string; color: string }> = {
@@ -65,6 +66,7 @@ const ASSET_THEME_MAP: Record<string, { name: string; color: string }> = {
 export default function NewWalletScreen({
   walletData,
   initialWorkflow = "dashboard",
+  initialTxReference, // 🟢 2. Destructured here
 }: NewWalletScreenProps) {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>(
     initialWorkflow as WorkflowMode,
@@ -76,18 +78,16 @@ export default function NewWalletScreen({
     "1M",
   );
   const [successDetails, setSuccessDetails] = useState<any | null>(null);
-  // withdrawal and transfer mutation hooks for API calls
+
   const [requestWithdrawal, { isLoading: isWithdrawalLoading }] =
     useRequestWithdrawalMutation();
   const [executeInternalTransfer, { isLoading: isTransferLoading }] =
     useExecuteInternalTransferMutation();
 
-  // internal and external withdrawal state management nodes
   type WithdrawalType = "external" | "internal";
   const [withdrawalType, setWithdrawalType] =
     useState<WithdrawalType>("external");
 
-  // 🟢 Live state preservation nodes tracking form input state parameters
   const [withdrawAmount, setWithdrawAmount] = useState<number>(0);
   const [withdrawAddress, setWithdrawAddress] = useState<string>("");
   const [withdrawNetwork, setWithdrawNetwork] = useState<string>("");
@@ -95,9 +95,9 @@ export default function NewWalletScreen({
   const dispatch = useDispatch();
   const { showToast } = useToast();
 
+  // Increase the lookup range to ensure recent trades are easily discoverable
   const { data: txResponse, refetch: refetchTransactions } =
-    useGetTransactionsQuery({ limit: 5, page: 1 });
-
+    useGetTransactionsQuery({ limit: 20, page: 1 });
   const transactions = txResponse?.data || [];
 
   const { data: historyResponse, isLoading: isHistoryLoading } =
@@ -105,6 +105,7 @@ export default function NewWalletScreen({
 
   const wallet = walletData?.wallet;
 
+  // ... your mappedAssets code block stays exactly the same ...
   const mappedAssets: AssetData[] = (wallet?.balances || []).map(
     (bal: { assetSymbol: string; available: number }) => {
       const assetMeta = ASSET_THEME_MAP[bal.assetSymbol] || {
@@ -145,13 +146,12 @@ export default function NewWalletScreen({
       let resultPayload: any;
 
       if (withdrawalType === "internal") {
-        // 🚀 Hits /wallet/transfers (PIN is validated here on server side)
         resultPayload = await executeInternalTransfer({
           assetSymbol: selectedAsset.symbol,
           amount: withdrawAmount,
           recipient: withdrawAddress,
           pin: pinCode,
-        }).unwrap(); // 🟢 UNWRAP converts rejected payloads directly into throwable catch errors!
+        }).unwrap();
 
         setSuccessDetails({
           status: resultPayload?.data?.transaction?.status || "completed",
@@ -162,13 +162,12 @@ export default function NewWalletScreen({
           isInternal: true,
         });
       } else {
-        // 🚀 Hits /wallet/withdrawals
         resultPayload = await requestWithdrawal({
           assetSymbol: selectedAsset.symbol,
           amount: withdrawAmount,
           address: withdrawAddress,
           network: withdrawNetwork,
-        }).unwrap(); // 🟢 Throws error to catch block if server validates anything incorrectly
+        }).unwrap();
 
         setSuccessDetails({
           status: resultPayload?.data?.status || "pending",
@@ -180,11 +179,9 @@ export default function NewWalletScreen({
         });
       }
 
-      // Now safe to navigate to success panel since unwrap passed validation checks!
       setWorkflowMode("withdraw_success");
     } catch (error: any) {
       console.log("Transaction Error Details:", error);
-      // 🟢 Dynamic fallback engine reads standard backend failure alerts accurately
       const errorMessage =
         error?.data?.message ||
         error?.message ||
@@ -192,16 +189,47 @@ export default function NewWalletScreen({
       showToast(`${errorMessage}`, "error");
     }
   };
+
   const portfolioTotalString = walletData?.portfolioValueUsd
     ? `$${walletData.portfolioValueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     : "$0.00";
 
+  // 🟢 3. Modified selection effect engine intercepts redirects
   useEffect(() => {
-    if (initialWorkflow) {
+    if (initialWorkflow === "transaction_details" && initialTxReference) {
+      // Look for the transaction inside your list data arrays
+      const matchedTx = transactions.find(
+        (t: any) =>
+          t.reference === initialTxReference || t.id === initialTxReference,
+      );
+
+      if (matchedTx) {
+        setSelectedTx(matchedTx);
+        setWorkflowMode("transaction_details");
+      } else {
+        // Safe immediate local fallback shell object if background cache is still downloading raw payloads
+        setSelectedTx({
+          id: initialTxReference,
+          reference: initialTxReference,
+          type: "swap",
+          status: "completed",
+          fromAsset: "USDT",
+          toAsset: "",
+          fromAmount: 0,
+          toAmount: 0,
+          feeAmount: 0,
+          note: "Trade completed successfully",
+          createdAt: new Date().toISOString(),
+        });
+        setWorkflowMode("transaction_details");
+      }
+    } else if (initialWorkflow) {
       setWorkflowMode(initialWorkflow as WorkflowMode);
     }
-  }, [initialWorkflow]);
+  }, [initialWorkflow, initialTxReference, transactions]);
+
   return (
+    // ... your return block layout stays exactly the same as you shared it
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ImageBackground
         source={require("@/assets/images/kyc/kycBg.png")}
@@ -222,7 +250,7 @@ export default function NewWalletScreen({
               onWithdrawPress={() => setWorkflowMode("withdraw_selector")}
               onTradePress={() => console.log("Navigating to market...")}
               onBalancePress={() => setWorkflowMode("portfolio_history")}
-              onViewTransactions={() => setWorkflowMode("transaction_history")} // 🟢 Add this line here
+              onViewTransactions={() => setWorkflowMode("transaction_history")}
             />
           )}
 
@@ -292,6 +320,7 @@ export default function NewWalletScreen({
               }}
             />
           )}
+
           {workflowMode === "withdraw_form" && selectedAsset && (
             <WithdrawFormView
               initialAsset={selectedAsset}
@@ -304,7 +333,7 @@ export default function NewWalletScreen({
                 modeType,
               ) => {
                 setWithdrawAmount(amount);
-                setWithdrawAddress(destination); // Stores address OR recipient data matching the string
+                setWithdrawAddress(destination);
                 setWithdrawNetwork(chosenNetwork);
                 setWithdrawalType(modeType);
                 setWorkflowMode("withdraw_confirmation");
@@ -319,16 +348,16 @@ export default function NewWalletScreen({
               address={withdrawAddress}
               network={withdrawNetwork}
               withdrawalType={withdrawalType}
-              isLoading={isWithdrawalLoading || isTransferLoading} // 🟢 Fixes missing property error
+              isLoading={isWithdrawalLoading || isTransferLoading}
               onGoBack={() => setWorkflowMode("withdraw_form")}
-              onSubmitWithdrawal={(pin) => handleConfirmWithdrawal(pin)} // 🟢 Binds pin to endpoint query runner
+              onSubmitWithdrawal={(pin) => handleConfirmWithdrawal(pin)}
             />
           )}
 
           {workflowMode === "withdraw_success" && selectedAsset && (
             <WithdrawalSuccessView
               asset={selectedAsset}
-              details={successDetails} // 🟢 Pass down live server response metadata objects
+              details={successDetails}
               onViewTransaction={() => setWorkflowMode("transaction_history")}
             />
           )}

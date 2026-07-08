@@ -44,19 +44,23 @@ export default function TransactionHistoryView({
   });
   const transactions = txResponse?.data || [];
 
- // 🟢 Dynamically filter live backend transaction structures securely
-const filteredTxList = transactions.filter((tx) => {
-  const typeStr = (tx.type || "").toLowerCase();
-  
-  if (activeFilter === "Deposits") {
-    return typeStr === "deposit" || typeStr === "buy";
-  }
-  if (activeFilter === "Withdrawals") {
-    // Catches external "withdrawal" strings as well as internal "transfer" actions
-    return typeStr === "withdrawal" || typeStr === "transfer" || typeStr === "withdraw";
-  }
-  return true;
-});
+  // 🟢 Dynamically filter live backend transaction structures securely
+  const filteredTxList = transactions.filter((tx) => {
+    const typeStr = (tx.type || "").toLowerCase();
+
+    if (activeFilter === "Deposits") {
+      return typeStr === "deposit" || typeStr === "buy";
+    }
+    if (activeFilter === "Withdrawals") {
+      // Catches external "withdrawal" strings as well as internal "transfer" actions
+      return (
+        typeStr === "withdrawal" ||
+        typeStr === "transfer" ||
+        typeStr === "withdraw"
+      );
+    }
+    return true;
+  });
 
   return (
     <View style={styles.container}>
@@ -189,7 +193,12 @@ const filteredTxList = transactions.filter((tx) => {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 24 },
   scrollContent: { paddingBottom: 40 },
-  filterBar: { flexDirection: "row", gap: 8, marginBottom: 24 },
+  filterBar: {
+    marginTop: 15,
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 24,
+  },
   filterTab: {
     paddingVertical: 8,
     paddingHorizontal: 16,

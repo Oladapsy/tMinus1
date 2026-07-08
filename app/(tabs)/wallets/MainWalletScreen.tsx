@@ -4,18 +4,24 @@ import OldWalletScreen from "@/src/screens/wallet/OldWalletScreen";
 import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from "@/src/constants/colors";
-import { useGetProfileQuery } from "@/src/services/profileApi"; 
+import { useGetProfileQuery } from "@/src/services/profileApi";
 import { useGetWalletQuery } from "@/src/services/walletApi";
-import { useLocalSearchParams } from "expo-router"; // 🟢 1. Import the params hook
+import { useLocalSearchParams } from "expo-router";
 
 export type KycStatus = "NOT_STARTED" | "PENDING" | "APPROVED";
 
 const MainWalletScreen = () => {
-  // 🟢 2. Read the search parameters coming from the Home navigation trigger
-  const { action } = useLocalSearchParams<{ action?: string }>();
+  // 🟢 Read both the legacy shortcut parameters AND your new trade success route fields
+  const { action, initialWorkflow, initialTxReference } = useLocalSearchParams<{
+    action?: string;
+    initialWorkflow?: string;
+    initialTxReference?: string;
+  }>();
 
-  const { data: userResponse, isLoading: isProfileLoading } = useGetProfileQuery();
-  const { data: walletResponse, isLoading: isWalletLoading } = useGetWalletQuery();
+  const { data: userResponse, isLoading: isProfileLoading } =
+    useGetProfileQuery();
+  const { data: walletResponse, isLoading: isWalletLoading } =
+    useGetWalletQuery();
 
   const oldScreen = false;
 
@@ -30,16 +36,24 @@ const MainWalletScreen = () => {
   const currentKycStatus = (userResponse?.data?.kycStatus?.toUpperCase() ||
     "NOT_STARTED") as KycStatus;
 
+  // 🟢 Compute the primary starting workflow layout dynamically
+  let startingWorkflow = "dashboard";
+  if (initialWorkflow) {
+    startingWorkflow = initialWorkflow;
+  } else if (action === "open_deposit") {
+    startingWorkflow = "deposit_selector";
+  }
+
   return (
     <View style={styles.container}>
       <KycGateGuard status={currentKycStatus} gateType="wallets">
         {oldScreen && <OldWalletScreen />}
 
         {oldScreen === false && (
-          /* 🟢 3. Pass the action straight into NewWalletScreen as an initial configuration */
-          <NewWalletScreen 
-            walletData={walletResponse?.data} 
-            initialWorkflow={action === "open_deposit" ? "deposit_selector" : "dashboard"} 
+          <NewWalletScreen
+            walletData={walletResponse?.data}
+            initialWorkflow={startingWorkflow}
+            initialTxReference={initialTxReference} // 🟢 Pass the reference ID string down to activate the details view instantly
           />
         )}
       </KycGateGuard>
@@ -57,6 +71,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.newDark,
+    backgroundColor: Colors.newDark || "#121824",
   },
 });

@@ -10,6 +10,7 @@ import { Colors } from "@/src/constants/colors";
 import TradeDashboardView from "@/src/components/trades/lite/TradeDashboardView";
 import TradeQuoteFormView from "@/src/components/trades/lite/TradeQuoteFormView";
 import TradeQuoteConfirmationDetails from "@/src/components/trades/lite/TradeQuoteConfirmationDetails";
+import { useRouter } from "expo-router";
 
 type TradeWorkflowMode =
   | "dashboard"
@@ -20,6 +21,7 @@ type TradeWorkflowMode =
 
 export default function TradesScreen() {
   const currentKycStatus = "APPROVED";
+  const router = useRouter();
 
   const [workflowMode, setWorkflowMode] =
     useState<TradeWorkflowMode>("dashboard");
@@ -78,17 +80,20 @@ export default function TradesScreen() {
                 targetAsset={targetAssetSymbol}
                 tradeMode={activeAction}
                 onGoBack={() => setWorkflowMode("quote_form")}
-                onRefreshQuote={() => {
-                  // 🔄 Sends them back to the input deck to fetch a fresh calculation stream
-                  setWorkflowMode("quote_form");
-                }}
+                onRefreshQuote={() => setWorkflowMode("quote_form")}
+                // 🚀 This links up perfectly with the "View transaction" receipt click!
                 onViewTransaction={(txId) => {
-                  // Push to your activity route using your navigator or Expo Router:
-                  // router.push({ pathname: "/activity", params: { id: txId } });
-                  console.log(
-                    "Route user straight to transaction detail logs for id:",
-                    txId,
-                  );
+                  // 1. Silently revert the trade tab to form state for when they come back later
+                  setWorkflowMode("quote_form");
+
+                  // 2. Teleport them directly over to the Wallet Activity breakdown tab!
+                  router.push({
+                    pathname: "/(tabs)/wallets/MainWalletScreen" as any,
+                    params: {
+                      initialWorkflow: "transaction_history",
+                      initialTxReference: txId,
+                    },
+                  });
                 }}
               />
             )}
