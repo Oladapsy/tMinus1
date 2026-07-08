@@ -82,6 +82,14 @@ export default function TradesScreen() {
                   // 🔄 Sends them back to the input deck to fetch a fresh calculation stream
                   setWorkflowMode("quote_form");
                 }}
+                onViewTransaction={(txId) => {
+                  // Push to your activity route using your navigator or Expo Router:
+                  // router.push({ pathname: "/activity", params: { id: txId } });
+                  console.log(
+                    "Route user straight to transaction detail logs for id:",
+                    txId,
+                  );
+                }}
               />
             )}
           </MySafeAreaView>

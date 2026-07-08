@@ -14,23 +14,19 @@ interface ActiveQuotePreviewProps {
     estimatedReceive: string;
   };
   onBack: () => void;
+  onProceedToPin: () => void;
 }
 
 export default function ActiveQuotePreview({
   timeLeft,
   details,
   onBack,
+  onProceedToPin,
 }: ActiveQuotePreviewProps) {
   // Pad countdown parameters correctly (e.g., "00:24")
   const formatTimerString = (seconds: number) => {
     const displaySecs = seconds < 10 ? `0${seconds}` : seconds;
     return `00:${displaySecs}`;
-  };
-
-  const handleConfirmWithPin = () => {
-    console.log(
-      "Trigger Pin verification popup modal row logic context here...",
-    );
   };
 
   return (
@@ -81,7 +77,7 @@ export default function ActiveQuotePreview({
       <View style={styles.bottomSpacerContainer}>
         <TouchableOpacity
           style={styles.primaryActionButton}
-          onPress={handleConfirmWithPin}
+          onPress={onProceedToPin}
         >
           <Text style={styles.buttonText}>Confirm with PIN</Text>
         </TouchableOpacity>
