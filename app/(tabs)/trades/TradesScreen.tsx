@@ -55,6 +55,7 @@ export default function TradesScreen() {
             {workflowMode === "quote_form" && activeAction && (
               <TradeQuoteFormView
                 initialMode={activeAction}
+                initialSymbol="BTC"
                 onGoBack={() => setWorkflowMode("dashboard")}
                 onRequestQuote={(amount, asset, updatedMode) => {
                   setActiveAction(updatedMode);
