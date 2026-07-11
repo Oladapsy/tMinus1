@@ -23,6 +23,7 @@ import CoinList from "@/src/components/home/CoinList";
 // Assets and Data Slices
 import RocketIcon from "@/assets/icons/home/Rocket.svg";
 import WalletIcon from "@/assets/icons/home/wallet1.svg";
+import KycIcon from "@/assets/icons/profile/kyc/kyc.svg";
 import { RECENT_COINS, TOP_COINS } from "@/src/data/coins";
 import { RootState } from "@/src/store/store";
 import { useRouter } from "expo-router";
@@ -38,6 +39,7 @@ export default function HomeTab() {
   const currentProfile = useSelector((state: RootState) => state.auth.user);
 
   const targetUsername = currentProfile?.fullName || "User";
+  const kycStatus = currentProfile?.kycStatus;
 
   // 🌟 TEST TOGGLE: Switch between "SUCCESS", "LOADING", "EMPTY", "ERROR" to test layouts!
   const [screenState, setScreenState] = useState<DashboardState>("SUCCESS");
@@ -143,20 +145,33 @@ export default function HomeTab() {
         {/* ⚪ THE BOTTOM LIGHT WHITE SECTION CONTAINER */}
         <View style={styles.whiteBodyWrapper}>
           {/* Action banner row anchors */}
-          <View style={styles.actionRowGrid}>
-            <ActionCard
-              icon={<RocketIcon />}
-              title="P2P Trading"
-              description="Bank Transfer, Paypal Revolut..."
-              onPress={handleAction1Press}
-            />
-            <ActionCard
-              icon={<WalletIcon />}
-              title="Credit/Debit Card"
-              description="Visa, Mastercard"
-              onPress={handleAction2Press}
-            />
-          </View>
+          {kycStatus === "approved" && (
+            <View style={styles.actionRowGrid}>
+              <ActionCard
+                icon={<RocketIcon />}
+                title="P2P Trading"
+                description="Bank Transfer, Paypal Revolut..."
+                onPress={handleAction1Press}
+              />
+              <ActionCard
+                icon={<WalletIcon />}
+                title="Credit/Debit Card"
+                description="Visa, Mastercard"
+                onPress={handleAction2Press}
+              />
+            </View>
+          )}
+
+          {kycStatus !== "approved" && (
+            <View style={styles.actionRowGrid}>
+              <ActionCard
+                icon={<KycIcon />}
+                title="Verify Your Kyc"
+                description="Go to Kyc to start enjoying the app"
+                onPress={() => router.push("/profile/kyc")}
+              />
+            </View>
+          )}
 
           {/* Coin List Panels */}
           <View style={styles.coinListSpacing}>
