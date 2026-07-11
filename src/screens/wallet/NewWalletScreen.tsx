@@ -99,45 +99,68 @@ export default function NewWalletScreen({
   const { data: txResponse, refetch: refetchTransactions } =
     useGetTransactionsQuery({ limit: 20, page: 1 });
   const transactions = txResponse?.data || [];
+  
 
   const { data: historyResponse, isLoading: isHistoryLoading } =
     useGetPortfolioHistoryQuery({ range: activeRange });
 
   const wallet = walletData?.wallet;
+  const derivedPrices: Record<string, number> = {
+  USDT: 1.00,
+  USDC: 1.00,
+};
+
+transactions.forEach((tx: any) => {
+  // If your tx object has fields like fromAsset, toAsset, fromAmount, toAmount
+  if (tx.type === "swap" || tx.type === "trade") {
+    const isStableFrom = tx.fromAsset === "USDT" || tx.fromAsset === "USDC";
+    const isStableTo = tx.toAsset === "USDT" || tx.toAsset === "USDC";
+
+    if (isStableFrom && tx.fromAmount > 0 && tx.toAmount > 0) {
+      // Example: Buying BTC with USDT -> Price = USDT paid / BTC received
+      derivedPrices[tx.toAsset] = tx.fromAmount / tx.toAmount;
+    } else if (isStableTo && tx.toAmount > 0 && tx.fromAmount > 0) {
+      // Example: Selling BTC for USDT -> Price = USDT received / BTC sold
+      derivedPrices[tx.fromAsset] = tx.toAmount / tx.fromAmount;
+    }
+  }
+});
+
+const mappedAssets: AssetData[] = (wallet?.balances || []).map(
+  (bal: { assetSymbol: string; available: number }) => {
+    const assetMeta = ASSET_THEME_MAP[bal.assetSymbol] || {
+      name: bal.assetSymbol,
+      color: Colors.green,
+    };
+
+    const addressInfo = wallet?.depositAddresses?.find(
+      (addr: { assetSymbol: string }) => addr.assetSymbol === bal.assetSymbol,
+    );
+
+    // Get the price: Use the derived rate or default to 1 for stables, fallback to 0
+    const currentPrice = derivedPrices[bal.assetSymbol] || (bal.assetSymbol === "USDT" || bal.assetSymbol === "USDC" ? 1 : 0);
+    const calculatedFiatWorth = bal.available * currentPrice;
+
+    return {
+      id: bal.assetSymbol.toLowerCase(),
+      name: assetMeta.name,
+      symbol: bal.assetSymbol,
+      network: addressInfo?.network || "Network Layer Testnet",
+      balance: `${bal.available.toLocaleString()} ${bal.assetSymbol}`,
+      
+      // 🟢 Update this conditional block to display your calculated worth
+      value: currentPrice > 0 
+        ? `$${calculatedFiatWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        : "Market Live", // Fallback string if no matching trades are found yet
+        
+      color: assetMeta.color,
+      depositAddress: addressInfo?.address || "",
+      qrPayload: addressInfo?.qrPayload || "",
+    };
+  },
+);
 
   // ... your mappedAssets code block stays exactly the same ...
-  const mappedAssets: AssetData[] = (wallet?.balances || []).map(
-    (bal: { assetSymbol: string; available: number }) => {
-      const assetMeta = ASSET_THEME_MAP[bal.assetSymbol] || {
-        name: bal.assetSymbol,
-        color: Colors.green,
-      };
-
-      const addressInfo = wallet?.depositAddresses?.find(
-        (addr: {
-          assetSymbol: string;
-          network: string;
-          address: string;
-          qrPayload: string;
-        }) => addr.assetSymbol === bal.assetSymbol,
-      );
-
-      return {
-        id: bal.assetSymbol.toLowerCase(),
-        name: assetMeta.name,
-        symbol: bal.assetSymbol,
-        network: addressInfo?.network || "Network Layer Testnet",
-        balance: `${bal.available.toLocaleString()} ${bal.assetSymbol}`,
-        value:
-          bal.assetSymbol === "USDT" || bal.assetSymbol === "USDC"
-            ? `$${bal.available.toFixed(2)}`
-            : "Market Live",
-        color: assetMeta.color,
-        depositAddress: addressInfo?.address || "",
-        qrPayload: addressInfo?.qrPayload || "",
-      };
-    },
-  );
 
   const handleConfirmWithdrawal = async (pinCode: string) => {
     if (!selectedAsset) return;
