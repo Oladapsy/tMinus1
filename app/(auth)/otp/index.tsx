@@ -103,7 +103,7 @@ export default function OtpScreen() {
 
       return () => clearTimeout(timer);
     }
-  }, [codeOnMount]);
+  }, [codeOnMount, showToast]);
 
   return (
     <MySafeAreaView style={styles.container}>
