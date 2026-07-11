@@ -26,6 +26,8 @@ import WalletIcon from "@/assets/icons/home/wallet1.svg";
 import { RECENT_COINS, TOP_COINS } from "@/src/data/coins";
 import { RootState } from "@/src/store/store";
 import { useRouter } from "expo-router";
+import Title from "@/src/components/common/Title";
+import Paragraph from "@/src/components/common/Paragraph";
 
 // Design State Engine Options
 type DashboardState = "SUCCESS" | "LOADING" | "EMPTY" | "ERROR";
@@ -34,9 +36,10 @@ export default function HomeTab() {
   const router = useRouter();
   // Pull active user session directly from Redux Warehouse shelves
   const currentProfile = useSelector((state: RootState) => state.auth.user);
-  const targetUsername = currentProfile?.fullName || "Ada";
 
-  // 🌟 TEST TOGGLE: Switch between "SUCCESS", "LOADING", "EMPTY", "ERROR" to test your layouts!
+  const targetUsername = currentProfile?.fullName || "User";
+
+  // 🌟 TEST TOGGLE: Switch between "SUCCESS", "LOADING", "EMPTY", "ERROR" to test layouts!
   const [screenState, setScreenState] = useState<DashboardState>("SUCCESS");
 
   const handleDepositTrigger = () =>
@@ -61,11 +64,13 @@ export default function HomeTab() {
 
           {/* Dynamic Greeting Title Card */}
           <View style={styles.greetingContainer}>
-            <Text style={styles.headerLabel}>Home</Text>
+            <Title text="Home" fontFamily={FontFamily.bold} size={28} />
             {screenState === "SUCCESS" && (
-              <Text style={styles.subGreeting}>
-                Welcome back, {targetUsername}
-              </Text>
+              <Paragraph
+                text={`Welcome back, ${targetUsername}`}
+                textAlign="left"
+                size={14}
+              />
             )}
           </View>
 
@@ -185,18 +190,6 @@ const styles = StyleSheet.create({
   },
   greetingContainer: {
     marginTop: 12,
-    marginBottom: 8,
-  },
-  headerLabel: {
-    color: "white",
-    fontSize: 28,
-    fontFamily: FontFamily.bold,
-  },
-  subGreeting: {
-    color: Colors.secondary,
-    fontSize: 14,
-    fontFamily: FontFamily.regular,
-    marginTop: 2,
   },
   quickActionsContainer: {
     marginTop: 20,

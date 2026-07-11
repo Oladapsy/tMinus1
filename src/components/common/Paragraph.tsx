@@ -29,7 +29,6 @@ export default function Paragraph({
 
 const styles = StyleSheet.create({
   container: {
-
   },
   text: {
     // fontFamily: FontFamily.medium,
