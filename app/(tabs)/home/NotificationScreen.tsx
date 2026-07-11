@@ -57,6 +57,7 @@ export default function NotificationScreen() {
       showToast("All notifications marked as read!", "success");
     } catch (err) {
       showToast("Failed to clear notifications.", "error");
+      console.log(err)
     }
   };
 
