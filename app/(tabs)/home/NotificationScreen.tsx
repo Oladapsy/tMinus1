@@ -57,7 +57,7 @@ export default function NotificationScreen() {
       showToast("All notifications marked as read!", "success");
     } catch (err) {
       showToast("Failed to clear notifications.", "error");
-      console.log(err)
+      console.log(err);
     }
   };
 
@@ -159,13 +159,13 @@ const Styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.primary,
     flex: 1,
+    paddingHorizontal: 24,
   },
   centerContainer: {
     justifyContent: "center",
     alignItems: "center",
   },
   notification: {
-    paddingHorizontal: 24,
     flex: 1,
   },
   titleFilter: {
