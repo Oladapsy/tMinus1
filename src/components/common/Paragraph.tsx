@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
 import React from "react";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
@@ -21,16 +21,12 @@ export default function Paragraph({
   fontFamily = FontFamily.medium,
 }: ParagraphProps) {
   return (
-    <View style={styles.container}>
-      <Text style={[styles.text, { color, fontSize: size, textAlign, lineHeight, fontFamily }]}>{text}</Text>
+    <View>
+      <Text
+        style={[{ color, fontSize: size, textAlign, lineHeight, fontFamily }]}
+      >
+        {text}
+      </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-  },
-  text: {
-    // fontFamily: FontFamily.medium,
-  },
-});
