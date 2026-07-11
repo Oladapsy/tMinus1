@@ -5,7 +5,6 @@ import {
   View,
   Text,
   ActivityIndicator,
-  TouchableOpacity,
 } from "react-native";
 import { useSelector } from "react-redux";
 
@@ -29,6 +28,7 @@ import { RootState } from "@/src/store/store";
 import { useRouter } from "expo-router";
 import Title from "@/src/components/common/Title";
 import Paragraph from "@/src/components/common/Paragraph";
+import WalletFallbackState from "@/src/components/common/WalletFallbackState";
 
 // Design State Engine Options
 type DashboardState = "SUCCESS" | "LOADING" | "EMPTY" | "ERROR";
@@ -98,47 +98,26 @@ export default function HomeTab() {
           )}
 
           {screenState === "EMPTY" && (
-            <View style={styles.fallbackCenterBox}>
-              <View style={styles.emptyIconCircle}>
-                <Text style={styles.emptyIconText}>+</Text>
-              </View>
-              <Text style={styles.fallbackTitleText}>
-                Start your sandbox wallet
-              </Text>
-              <Text style={styles.fallbackParaText}>
-                Deposit USDT, build a watchlist, then create your first quote.
-              </Text>
-
-              <TouchableOpacity
-                style={styles.stateActionButton}
-                onPress={() =>
-                  console.log("Deposit USDT pressed from empty state")
-                }
-              >
-                <Text style={styles.stateActionButtonText}>Deposit USDT</Text>
-              </TouchableOpacity>
-            </View>
+            <WalletFallbackState
+              icon="+"
+              title="Start your sandbox wallet"
+              paragraph="Deposit USDT, build a watchlist, then create your first quote."
+              actionText="Deposit USDT"
+              onActionPress={() =>
+                console.log("Deposit USDT pressed from empty state")
+              }
+            />
           )}
 
           {screenState === "ERROR" && (
-            <View style={styles.fallbackCenterBox}>
-              <View style={styles.errorIconCircle}>
-                <Text style={styles.errorIconText}>!</Text>
-              </View>
-              <Text style={styles.fallbackTitleText}>
-                Could not refresh data
-              </Text>
-              <Text style={styles.fallbackParaText}>
-                Keep cached balances visible and let the user retry.
-              </Text>
-
-              <TouchableOpacity
-                style={styles.stateActionButton}
-                onPress={() => console.log("Retrying data fetch...")}
-              >
-                <Text style={styles.stateActionButtonText}>Try again</Text>
-              </TouchableOpacity>
-            </View>
+            <WalletFallbackState
+              icon="!"
+              isErrorType={true}
+              title="Could not refresh data"
+              paragraph="Keep cached balances visible and let the user retry."
+              actionText="Try again"
+              onActionPress={() => console.log("Retrying data fetch...")}
+            />
           )}
         </View>
 
@@ -233,66 +212,5 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
     fontSize: 13,
     fontFamily: FontFamily.regular,
-  },
-  fallbackCenterBox: {
-    alignItems: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  emptyIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(94, 213, 168, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  emptyIconText: {
-    color: Colors.green,
-    fontSize: 28,
-    fontFamily: FontFamily.medium,
-  },
-  errorIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(255, 77, 77, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  errorIconText: {
-    color: Colors.newRed,
-    fontSize: 28,
-    fontFamily: FontFamily.bold,
-  },
-  fallbackTitleText: {
-    color: "white",
-    fontSize: 18,
-    fontFamily: FontFamily.bold,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  fallbackParaText: {
-    color: Colors.secondary,
-    fontSize: 13,
-    fontFamily: FontFamily.regular,
-    textAlign: "center",
-    lineHeight: 18,
-  },
-  stateActionButton: {
-    backgroundColor: Colors.green,
-    height: 48,
-    width: "100%",
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 24,
-  },
-  stateActionButtonText: {
-    color: Colors.primary,
-    fontFamily: FontFamily.bold,
-    fontSize: 16,
   },
 });
