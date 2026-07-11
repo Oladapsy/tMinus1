@@ -42,7 +42,7 @@ export default function HomeTab() {
   const kycStatus = currentProfile?.kycStatus;
 
   // 🌟 TEST TOGGLE: Switch between "SUCCESS", "LOADING", "EMPTY", "ERROR" to test layouts!
-  const [screenState, setScreenState] = useState<DashboardState>("SUCCESS");
+  const [screenState] = useState<DashboardState>("SUCCESS");
 
   const handleDepositTrigger = () =>
     router.push({
