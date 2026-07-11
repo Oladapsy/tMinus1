@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { useSelector } from "react-redux";
 
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
@@ -20,7 +27,6 @@ import { RECENT_COINS, TOP_COINS } from "@/src/data/coins";
 import { RootState } from "@/src/store/store";
 import { useRouter } from "expo-router";
 
-
 // Design State Engine Options
 type DashboardState = "SUCCESS" | "LOADING" | "EMPTY" | "ERROR";
 
@@ -33,41 +39,42 @@ export default function HomeTab() {
   // 🌟 TEST TOGGLE: Switch between "SUCCESS", "LOADING", "EMPTY", "ERROR" to test your layouts!
   const [screenState, setScreenState] = useState<DashboardState>("SUCCESS");
 
-  const handleDepositTrigger = () => router.push({
-    pathname: "/(tabs)/wallets/MainWalletScreen",
-    params: { action: "open_deposit" }
-  });
+  const handleDepositTrigger = () =>
+    router.push({
+      pathname: "/(tabs)/wallets/MainWalletScreen",
+      params: { action: "open_deposit" },
+    });
   const handleAction1Press = () => console.log("Action 1 pressed");
   const handleAction2Press = () => console.log("Action 2 pressed");
 
   return (
     <MySafeAreaView edges={["top"]} style={styles.container}>
-      {/* Main viewport ScrollView containing both the dark top header and light bottom section */}
       <ScrollView
         style={styles.masterScrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.masterScrollContent}
         bounces={true}
       >
-        
         {/* 🟢 THE TOP DARK PANEL FRAME */}
         <View style={styles.darkHeaderWrapper}>
           <HeadIcons />
-          
+
           {/* Dynamic Greeting Title Card */}
           <View style={styles.greetingContainer}>
             <Text style={styles.headerLabel}>Home</Text>
             {screenState === "SUCCESS" && (
-              <Text style={styles.subGreeting}>Welcome back, {targetUsername}</Text>
+              <Text style={styles.subGreeting}>
+                Welcome back, {targetUsername}
+              </Text>
             )}
           </View>
 
           {/* Conditional Header Content based on State */}
           {screenState === "SUCCESS" && (
             <View>
-             {/* integrate both UI */}
+              {/* integrate both UI */}
               <TotalBalanceCard onDepositPress={handleDepositTrigger} />
-            
+
               <View style={styles.quickActionsContainer}>
                 <QuickActions />
               </View>
@@ -77,7 +84,9 @@ export default function HomeTab() {
           {screenState === "LOADING" && (
             <View style={styles.loaderStateBox}>
               <ActivityIndicator color={Colors.green} size="large" />
-              <Text style={styles.loaderStateText}>Loading market and wallet data...</Text>
+              <Text style={styles.loaderStateText}>
+                Loading market and wallet data...
+              </Text>
             </View>
           )}
 
@@ -86,14 +95,18 @@ export default function HomeTab() {
               <View style={styles.emptyIconCircle}>
                 <Text style={styles.emptyIconText}>+</Text>
               </View>
-              <Text style={styles.fallbackTitleText}>Start your sandbox wallet</Text>
+              <Text style={styles.fallbackTitleText}>
+                Start your sandbox wallet
+              </Text>
               <Text style={styles.fallbackParaText}>
                 Deposit USDT, build a watchlist, then create your first quote.
               </Text>
-              
-              <TouchableOpacity 
-                style={styles.stateActionButton} 
-                onPress={() => console.log("Deposit USDT pressed from empty state")}
+
+              <TouchableOpacity
+                style={styles.stateActionButton}
+                onPress={() =>
+                  console.log("Deposit USDT pressed from empty state")
+                }
               >
                 <Text style={styles.stateActionButtonText}>Deposit USDT</Text>
               </TouchableOpacity>
@@ -105,13 +118,15 @@ export default function HomeTab() {
               <View style={styles.errorIconCircle}>
                 <Text style={styles.errorIconText}>!</Text>
               </View>
-              <Text style={styles.fallbackTitleText}>Could not refresh data</Text>
+              <Text style={styles.fallbackTitleText}>
+                Could not refresh data
+              </Text>
               <Text style={styles.fallbackParaText}>
                 Keep cached balances visible and let the user retry.
               </Text>
-              
-              <TouchableOpacity 
-                style={styles.stateActionButton} 
+
+              <TouchableOpacity
+                style={styles.stateActionButton}
                 onPress={() => console.log("Retrying data fetch...")}
               >
                 <Text style={styles.stateActionButtonText}>Try again</Text>
@@ -144,7 +159,6 @@ export default function HomeTab() {
             <CoinList title="Top Coins" data={TOP_COINS} />
           </View>
         </View>
-
       </ScrollView>
     </MySafeAreaView>
   );
@@ -157,16 +171,16 @@ const styles = StyleSheet.create({
   },
   masterScrollView: {
     flex: 1,
-    backgroundColor: "white", 
+    backgroundColor: "white",
   },
   masterScrollContent: {
-    paddingBottom: 100, 
+    paddingBottom: 100,
   },
   darkHeaderWrapper: {
-    backgroundColor: Colors.primary, 
+    backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingBottom: 28,
-    borderBottomLeftRadius: 24,  
+    borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
   greetingContainer: {
@@ -185,7 +199,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   quickActionsContainer: {
-    marginTop: 20, 
+    marginTop: 20,
   },
   whiteBodyWrapper: {
     backgroundColor: "white",
@@ -199,7 +213,7 @@ const styles = StyleSheet.create({
   coinListSpacing: {
     marginTop: 16,
   },
-  
+
   // Custom Fallback/State Mechanics
   loaderStateBox: {
     alignItems: "center",

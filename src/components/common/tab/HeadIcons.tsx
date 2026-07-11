@@ -15,7 +15,7 @@ export default function HeadIcons() {
 
   const handleScannerPress = () => {
     console.log("Scanner icon pressed");
-    router.push("/(tabs)/wallets/WalletScreen")
+    router.push("/(tabs)/wallets/WalletScreen");
   };
 
   const handleNotificationPress = () => {
@@ -57,16 +57,18 @@ export default function HeadIcons() {
             />
           }
         />
-        <IconAndText
-          icon={
-            <NotificationIcon
-              // width={26}
-              // height={26}
-              color={Colors.green}
-              onPress={handleNotificationPress}
-            />
-          }
-        />
+        <View style={styles.lastIcon}>
+          <IconAndText
+            icon={
+              <NotificationIcon
+                // width={26}
+                // height={26}
+                color={Colors.green}
+                onPress={handleNotificationPress}
+              />
+            }
+          />
+        </View>
       </View>
     </View>
   );
@@ -79,7 +81,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1.5,
     borderBottomColor: Colors.tabDarkLight,
     paddingBottom: 10,
-    paddingHorizontal: 24,
+    paddingHorizontal: 2,
 
     // iOS Shadow Props
     shadowColor: Colors.tabDark,
@@ -91,7 +93,11 @@ const styles = StyleSheet.create({
   },
   otherAction: {
     flexDirection: "row",
+    justifyContent: "space-between",
     gap: 9,
     alignItems: "center",
+  },
+  lastIcon: {
+    marginLeft: -10,
   },
 });
