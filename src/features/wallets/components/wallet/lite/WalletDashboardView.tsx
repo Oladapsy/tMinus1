@@ -14,7 +14,7 @@ import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import PortfolioValueCard from "./PortfolioValueCard";
 import WalletAssetRow from "./WalletAssetRow";
-import { AssetData } from "@/src/screens/wallet/NewWalletScreen";
+import { AssetData } from "@/src/features/wallets/screens/NewWalletScreen";
 import { Transaction } from "@/src/types/wallet";
 import Paragraph from "../../common/Paragraph";
 // 🟢 Import your explicit layout interface structure

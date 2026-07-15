@@ -1,6 +1,6 @@
 import KycGateGuard from "@/src/components/kyc/KycGateGuard";
-import NewWalletScreen from "@/src/screens/wallet/NewWalletScreen";
-import OldWalletScreen from "@/src/screens/wallet/OldWalletScreen";
+import NewWalletScreen from "@/src/features/wallets/screens/NewWalletScreen";
+import OldWalletScreen from "@/src/features/wallets/screens/OldWalletScreen";
 import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from "@/src/constants/colors";

@@ -17,7 +17,7 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { AssetData } from "@/src/screens/wallet/NewWalletScreen";
+import { AssetData } from "@/src/features/wallets/screens/NewWalletScreen";
 
 interface WithdrawFormViewProps {
   initialAsset: AssetData;

@@ -9,7 +9,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import ItemAndAddress from "../../common/ItemAndAdress";
 
-import { AssetData } from "@/src/screens/wallet/NewWalletScreen";
+import { AssetData } from "@/src/features/wallets/screens/NewWalletScreen";
 
 interface WithdrawConfirmationViewProps {
   asset: AssetData;

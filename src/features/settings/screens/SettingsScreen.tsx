@@ -4,11 +4,12 @@ import AppearanceIcon from "@/assets/icons/settings/appearance.svg";
 import CurrencyIcon from "@/assets/icons/settings/currency.svg";
 import LanguageIcon from "@/assets/icons/settings/language.svg";
 import PreferenceIcon from "@/assets/icons/settings/preference.svg";
-import ListItem from "@/src/components/common/ListItem";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import IconAndText from "@/src/components/common/tab/IconAndText";
+
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import ListItem from "@/src/features/shared/components/ListItem";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import IconAndText from "@/src/features/shared/components/tab/IconAndText";
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
