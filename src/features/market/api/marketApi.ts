@@ -7,7 +7,7 @@ import {
   MarketOrderBookResponse,
   RecentTradesResponse,
   LivePriceFeedResponse,
-} from "../types/market";
+} from "../../../types/market";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 

@@ -11,7 +11,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import OrderBookRow, { OrderLevel } from "./component/OrderBookRow";
-import { useGetMarketOrderBookQuery } from "@/src/services/marketApi";
+import { useGetMarketOrderBookQuery } from "@/src/features/market/api/marketApi";
 
 interface MarketOrderBookProps {
   symbol: string;

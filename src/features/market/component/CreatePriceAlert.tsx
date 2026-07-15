@@ -14,7 +14,7 @@ import {
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../../common/BackHeader";
-import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
+import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
 import { useCreatePriceAlertMutation } from "@/src/services/profileApi";
 import { MarketAsset } from "@/src/types/alert";
 

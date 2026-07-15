@@ -11,7 +11,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import RecentTradeCard from "./component/RecentTradeCard";
-import { useGetRecentTradesQuery } from "@/src/services/marketApi";
+import { useGetRecentTradesQuery } from "@/src/features/market/api/marketApi";
 
 interface RecentTradesProps {
   symbol: string; // 🌟 Passed down from parent context

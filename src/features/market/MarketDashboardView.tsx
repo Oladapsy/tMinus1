@@ -12,7 +12,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import MarketAssetRow from "./component/MarketAssetRow";
-import { useGetMarketAssetsQuery } from "@/src/services/marketApi";
+import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
 
 interface MarketDashboardViewProps {
   onSelectAsset: (symbol: string) => void;

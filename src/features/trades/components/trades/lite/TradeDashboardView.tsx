@@ -19,7 +19,7 @@ import Title from "@/src/components/common/Title";
 import Paragraph from "@/src/components/common/Paragraph";
 
 // 📡 Import live RTK Query Hook and standard types matching your clean marketApi.ts
-import { useGetAssetCandlesQuery } from "@/src/services/marketApi";
+import { useGetAssetCandlesQuery } from "@/src/features/market/api/marketApi";
 import { AssetSymbol } from "@/src/types/trade";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");

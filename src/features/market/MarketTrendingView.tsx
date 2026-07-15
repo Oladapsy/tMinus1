@@ -13,7 +13,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import MarketAssetRow from "./component/MarketAssetRow";
-import { useGetTrendingAssetsQuery } from "@/src/services/marketApi";
+import { useGetTrendingAssetsQuery } from "@/src/features/market/api/marketApi";
 import MarketMiniSparkline from "./component/MarketMiniSparkline";
 
 // Math to calculate exact inner width of the pulse card automatically
