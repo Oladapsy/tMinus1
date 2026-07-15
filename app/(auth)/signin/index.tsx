@@ -1,5 +1,4 @@
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import NavigateIconText from "@/src/components/common/NavigateIconText";
+
 import { Colors } from "@/src/constants/colors";
 import {
   StyleSheet,
@@ -9,10 +8,13 @@ import {
   Platform,
 } from "react-native";
 import Cancel from "@/assets/icons/main/cancel.svg";
-import AuthTabs from "@/src/components/auth/AuthTabs";
 import { useState } from "react";
-import SignInForm from "@/src/components/auth/forms/SignInForm";
-import SignUpForm from "@/src/components/auth/forms/SignUpForm";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import NavigateIconText from "@/src/features/shared/components/NavigateIconText";
+import AuthTabs from "@/src/features/auth/components/auth/AuthTabs";
+import SignInForm from "@/src/features/auth/components/auth/forms/SignInForm";
+import SignUpForm from "@/src/features/auth/components/auth/forms/SignUpForm";
+
 
 export default function SignInScreen() {
   const [activeTab, setActiveTab] = useState(0);
