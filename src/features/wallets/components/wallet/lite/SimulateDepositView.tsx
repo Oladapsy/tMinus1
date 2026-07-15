@@ -16,7 +16,7 @@ import Paragraph from "../../common/Paragraph";
 import Title from "../../common/Title";
 
 // 🟢 Hook directly into your official API slice module mutation generator
-import { useSimulateDepositMutation } from "@/src/services/walletApi";
+import { useSimulateDepositMutation } from "@/src/features/wallets/api/walletApi";
 
 interface SelectedAssetPayload {
   id: string;

@@ -5,7 +5,7 @@ import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { useGetProfileQuery } from "@/src/features/profile/api/profileApi";
-import { useGetWalletQuery } from "@/src/services/walletApi";
+import { useGetWalletQuery } from "@/src/features/wallets/api/walletApi";
 import { useLocalSearchParams } from "expo-router";
 
 export type KycStatus = "NOT_STARTED" | "PENDING" | "APPROVED";

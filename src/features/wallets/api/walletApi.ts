@@ -8,9 +8,9 @@ import {
   WalletResponse,
   WithdrawalRequest,
   WithdrawalResponse,
-} from "../types/wallet";
+} from "../../../types/wallet";
 
-import { updateTokens, logOut } from "../store/authSlice";
+import { updateTokens, logOut } from "../../../store/authSlice";
 
 export interface TransferRequest {
   assetSymbol: string;

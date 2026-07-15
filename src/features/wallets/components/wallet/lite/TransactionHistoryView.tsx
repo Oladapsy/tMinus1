@@ -13,7 +13,7 @@ import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { useGetTransactionsQuery } from "@/src/services/walletApi"; // 🟢 Hook imported directly here
+import { useGetTransactionsQuery } from "@/src/features/wallets/api/walletApi"; // 🟢 Hook imported directly here
 import { Transaction } from "@/src/types/wallet";
 
 interface TransactionHistoryViewProps {

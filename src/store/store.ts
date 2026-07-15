@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/src/store/authSlice";
 import { authApi } from "@/src/features/auth/api/authApi";
 import { profileApi } from "@/src/features/profile/api/profileApi";
-import { walletApi } from "@/src/services/walletApi";
+import { walletApi } from "@/src/features/wallets/api/walletApi";
 import { marketApi } from "@/src/features/market/api/marketApi";
 import { tradeApi } from "@/src/features/trades/api/tradeApi";
 

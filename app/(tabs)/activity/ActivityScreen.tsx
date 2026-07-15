@@ -12,7 +12,7 @@ import Title from "@/src/components/common/Title";
 import Paragraph from "@/src/components/common/Paragraph";
 import { FontFamily } from "@/src/constants/fonts";
 import ActivityCard from "@/src/components/activity/ActivityCard";
-import { useGetTransactionsQuery } from "@/src/services/walletApi";
+import { useGetTransactionsQuery } from "@/src/features/wallets/api/walletApi";
 
 const ActivityScreen = () => {
   const router = useRouter();
