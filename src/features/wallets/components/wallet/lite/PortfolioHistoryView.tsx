@@ -15,7 +15,7 @@ import Paragraph from "@/src/components/common/Paragraph";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { PortfolioHistoryResponse } from "@/src/types/wallet";
+import { PortfolioHistoryResponse } from "@/src/features/wallets/utils/types/wallet";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 

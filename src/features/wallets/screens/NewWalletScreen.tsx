@@ -20,7 +20,7 @@ import {
   useRequestWithdrawalMutation,
   useExecuteInternalTransferMutation,
 } from "@/src/features/wallets/api/walletApi";
-import { WalletResponse } from "@/src/types/wallet";
+import { WalletResponse } from "@/src/features/wallets/utils/types/wallet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useToast } from "@/src/context/ToastContext";
 

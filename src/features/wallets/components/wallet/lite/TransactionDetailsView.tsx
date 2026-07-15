@@ -7,7 +7,7 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Title from "@/src/components/common/Title";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { Transaction } from "@/src/types/wallet";
+import { Transaction } from "@/src/features/wallets/utils/types/wallet";
 
 interface TransactionDetailsViewProps {
   tx: Transaction;

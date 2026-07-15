@@ -8,7 +8,7 @@ import {
   WalletResponse,
   WithdrawalRequest,
   WithdrawalResponse,
-} from "../../../types/wallet";
+} from "../utils/types/wallet";
 
 import { updateTokens, logOut } from "../../../store/authSlice";
 
