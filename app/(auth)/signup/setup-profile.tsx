@@ -1,26 +1,42 @@
-import { StyleSheet, View, TextInput, ActivityIndicator, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  ActivityIndicator,
+  Text,
+} from "react-native";
 import React, { useState } from "react";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import NavigateIconText from "@/src/components/common/NavigateIconText";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useLocalSearchParams, router } from "expo-router";
 // 🌟 Import your brand new OTP request mutation hook
-import { useRegisterCustomerMutation, useRequestEmailOtpMutation } from "@/src/features/auth/api/authApi";
+import {
+  useRegisterCustomerMutation,
+  useRequestEmailOtpMutation,
+} from "@/src/features/auth/api/authApi";
+
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import NavigateIconText from "@/src/features/shared/components/NavigateIconText";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import Title from "@/src/features/shared/components/Title";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 export default function SetupProfileScreen() {
-  const { email, phone } = useLocalSearchParams<{ email: string; phone: string }>();
-  
+  const { email, phone } = useLocalSearchParams<{
+    email: string;
+    phone: string;
+  }>();
+
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const [registerUser, { isLoading: isRegistering }] = useRegisterCustomerMutation();
+  const [registerUser, { isLoading: isRegistering }] =
+    useRegisterCustomerMutation();
   // 🌟 Initialize the OTP mutation hook
-  const [requestOtp, { isLoading: isSendingOtp }] = useRequestEmailOtpMutation();
+  const [requestOtp, { isLoading: isSendingOtp }] =
+    useRequestEmailOtpMutation();
 
   const handleRegister = async () => {
     setError(null);
@@ -40,7 +56,6 @@ export default function SetupProfileScreen() {
 
       // 2. If backend confirms registration profile created but needs a verification token:
       if (response.data?.emailVerificationRequired) {
-        
         // 🌟 CRITICAL FIX: Trigger the backend to actually generate and send the OTP to this email!
         await requestOtp({ email: email }).unwrap();
 
@@ -52,9 +67,9 @@ export default function SetupProfileScreen() {
       }
     } catch (err: any) {
       setError(
-        err?.data?.error?.message || 
-        err?.data?.message || 
-        "Registration failed. Please try again."
+        err?.data?.error?.message ||
+          err?.data?.message ||
+          "Registration failed. Please try again.",
       );
     }
   };
@@ -67,14 +82,24 @@ export default function SetupProfileScreen() {
       <NavigateIconText title="Back" onClickIcon={router.back} />
 
       <View style={styles.titleContainer}>
-        <Title text="Complete Profile" color="white" size={32} fontFamily={FontFamily.bold} />
+        <Title
+          text="Complete Profile"
+          color="white"
+          size={32}
+          fontFamily={FontFamily.bold}
+        />
       </View>
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       {/* Full Name Input */}
       <View style={styles.inputWrapper}>
-        <Paragraph text="Full Name" textAlign="left" color={Colors.lightGray} size={14} />
+        <Paragraph
+          text="Full Name"
+          textAlign="left"
+          color={Colors.lightGray}
+          size={14}
+        />
         <TextInput
           style={styles.input}
           placeholder="e.g. Ada Student"
@@ -86,7 +111,12 @@ export default function SetupProfileScreen() {
 
       {/* Password Input */}
       <View style={styles.inputWrapper}>
-        <Paragraph text="Password" textAlign="left" color={Colors.lightGray} size={14} />
+        <Paragraph
+          text="Password"
+          textAlign="left"
+          color={Colors.lightGray}
+          size={14}
+        />
         <TextInput
           style={styles.input}
           placeholder="Choose a strong password"
@@ -114,7 +144,11 @@ export default function SetupProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: Colors.primary, flex: 1, paddingHorizontal: 24 },
+  container: {
+    backgroundColor: Colors.primary,
+    flex: 1,
+    paddingHorizontal: 24,
+  },
   titleContainer: { marginTop: 26, marginBottom: 16 },
   inputWrapper: { marginTop: 20 },
   input: {
@@ -127,6 +161,6 @@ const styles = StyleSheet.create({
     height: 54,
     marginTop: 8,
   },
-  errorText: { color: 'red', fontSize: 14, textAlign: 'center', marginTop: 10 },
+  errorText: { color: "red", fontSize: 14, textAlign: "center", marginTop: 10 },
   btnSpacing: { marginTop: 40 },
 });
