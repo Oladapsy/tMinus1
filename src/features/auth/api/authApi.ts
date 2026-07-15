@@ -15,7 +15,7 @@ import {
   EnableTwoFaRequest,
   EnableTwoFaResponse,
   DisableTwoFaRequest,
-} from "@/src/types/auth";
+} from "@/src/features/auth/utils/types/auth";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
