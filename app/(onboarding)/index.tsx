@@ -7,16 +7,17 @@ import {
 } from "react-native";
 import { useRef, useState } from "react";
 import { onboardingSlides, Slide } from "@/src/constants/onboardingSlides";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+
 // linear gradient
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 // 🌟 Import AsyncStorage to store the completion flag permanently
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
 
 const { width } = Dimensions.get("window");
 
