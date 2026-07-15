@@ -6,18 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import HeadIcons from "@/src/components/common/tab/HeadIcons";
-import { Colors } from "@/src/constants/colors";
-import Title from "@/src/components/common/Title";
-import { FontFamily } from "@/src/constants/fonts";
-import IconAndText from "@/src/components/common/tab/IconAndText";
-import Filter from "@/assets/icons/notification/Filter.svg";
-import NotificationCards from "@/src/components/notification/NotificationCards";
-import Paragraph from "@/src/components/common/Paragraph";
-import { NotificationFilterType } from "@/src/features/notification/utils/data/notificationFilters";
-import NotificationFilterDropdown from "@/src/components/notification/NotificationFilterDropdown";
-import EmptyNotification from "@/src/components/notification/EmptyNotification";
+
 import { useToast } from "@/src/context/ToastContext";
 import {
   useGetNotificationsQuery,
@@ -25,6 +14,18 @@ import {
   useMarkAllNotificationsReadMutation,
 } from "@/src/features/profile/api/profileApi";
 import { NotificationItem } from "@/src/features/notification/utils/data/alert";
+import { NotificationFilterType } from "@/src/features/notification/utils/data/notificationFilters";
+import { Colors } from "@/src/constants/colors";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import HeadIcons from "@/src/features/shared/components/tab/HeadIcons";
+import Title from "@/src/features/shared/components/Title";
+import { FontFamily } from "@/src/constants/fonts";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import IconAndText from "@/src/features/shared/components/tab/IconAndText";
+import { Filter } from "react-native-svg";
+import NotificationFilterDropdown from "@/src/features/notification/NotificationFilterDropdown";
+import NotificationCards from "@/src/features/notification/NotificationCards";
+import EmptyNotification from "@/src/features/notification/EmptyNotification";
 
 export default function NotificationScreen() {
   const { showToast } = useToast();
