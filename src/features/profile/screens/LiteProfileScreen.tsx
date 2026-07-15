@@ -19,7 +19,7 @@ import {
   useGetNotificationsQuery,
   useGetPriceAlertsQuery,
 } from "@/src/features/profile/api/profileApi";
-import { PriceAlertItem } from "@/src/types/alert";
+import { PriceAlertItem } from "@/src/features/notification/utils/data/alert";
 import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
 import BackHeader from "@/src/features/shared/components/BackHeader";
 import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";

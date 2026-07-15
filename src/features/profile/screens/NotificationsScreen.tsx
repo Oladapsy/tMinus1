@@ -17,7 +17,7 @@ import {
   useMarkNotificationReadMutation, 
   useMarkAllNotificationsReadMutation 
 } from "@/src/features/profile/api/profileApi";
-import { NotificationItem } from "@/src/types/alert";
+import { NotificationItem } from "@/src/features/notification/utils/data/alert";
 
 export default function NotificationsScreen() {
   const router = useRouter();

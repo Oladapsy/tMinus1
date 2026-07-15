@@ -28,7 +28,7 @@ import {
   useUpdatePriceAlertMutation,
   useDeletePriceAlertMutation,
 } from "@/src/features/profile/api/profileApi";
-import { PriceAlertItem } from "@/src/types/alert";
+import { PriceAlertItem } from "@/src/features/notification/utils/data/alert";
 
 type LocalWorkflowState = "list" | "create" | "success";
 

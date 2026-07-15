@@ -14,7 +14,7 @@ import {
   NotificationsResponse,
   NotificationItem,
   MarketAssetsResponse,
-} from "../../../types/alert";
+} from "../../notification/utils/data/alert";
 // 🌟 Import your Market Asset List types to cleanly type the list response
 import { MarketAssetListResponse } from "../../market/utils/types/market";
 

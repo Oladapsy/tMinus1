@@ -1,4 +1,4 @@
-import { GlobalKycStatus } from "@/src/types/kycGate";
+import { GlobalKycStatus } from "@/src/features/kyc/utils/types/kycGate";
 import React from "react";
 import TradeNoKyc from "../trades/lite/TradeNoKyc";
 import WalletPendingKyc from "../wallet/lite/WalletPendingKyc";
