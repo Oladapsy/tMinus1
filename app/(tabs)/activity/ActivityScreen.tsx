@@ -1,18 +1,18 @@
 import { StyleSheet, View, FlatList, ActivityIndicator } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
-import HeadIcons from "@/src/components/common/tab/HeadIcons";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
-import ListItem from "@/src/components/common/ListItem";
 import DeopsitIcon from "@/assets/icons/activity/deposit.svg";
 import WithdrawlIcon from "@/assets/icons/activity/withdrawal.svg";
 import BuyOrderIcon from "@/assets/icons/activity/buyOrder.svg";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
 import { FontFamily } from "@/src/constants/fonts";
-import ActivityCard from "@/src/components/activity/ActivityCard";
 import { useGetTransactionsQuery } from "@/src/features/wallets/api/walletApi";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import HeadIcons from "@/src/features/shared/components/tab/HeadIcons";
+import ListItem from "@/src/features/shared/components/ListItem";
+import Title from "@/src/features/shared/components/Title";
+import ActivityCard from "@/src/features/activity/ActivityCard";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 
 const ActivityScreen = () => {
   const router = useRouter();
