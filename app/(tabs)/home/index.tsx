@@ -8,27 +8,27 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
 // Layout Component Links
-import HeadIcons from "@/src/components/common/tab/HeadIcons";
-import ActionCard from "@/src/components/common/ActionCard";
-import TotalBalanceCard from "@/src/components/home/TotalBalanceCard";
-import QuickActions from "@/src/components/home/QuickActions";
-import CoinList from "@/src/components/home/CoinList";
 
 // Assets and Data Slices
 import RocketIcon from "@/assets/icons/home/Rocket.svg";
 import WalletIcon from "@/assets/icons/home/wallet1.svg";
 import KycIcon from "@/assets/icons/profile/kyc/kyc.svg";
-import { RECENT_COINS, TOP_COINS } from "@/src/data/coins";
 import { RootState } from "@/src/store/store";
 import { useRouter } from "expo-router";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
-import WalletFallbackState from "@/src/components/common/WalletFallbackState";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import HeadIcons from "@/src/features/shared/components/tab/HeadIcons";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import TotalBalanceCard from "@/src/features/home/TotalBalanceCard";
+import QuickActions from "@/src/features/home/QuickActions";
+import WalletFallbackState from "@/src/features/shared/components/WalletFallbackState";
+import ActionCard from "@/src/features/shared/components/ActionCard";
+import CoinList from "@/src/features/home/CoinList";
+import { RECENT_COINS, TOP_COINS } from "@/src/features/home/utils/data/coins";
 
 // Design State Engine Options
 type DashboardState = "SUCCESS" | "LOADING" | "EMPTY" | "ERROR";
