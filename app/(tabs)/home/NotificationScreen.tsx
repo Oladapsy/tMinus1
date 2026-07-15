@@ -15,7 +15,7 @@ import IconAndText from "@/src/components/common/tab/IconAndText";
 import Filter from "@/assets/icons/notification/Filter.svg";
 import NotificationCards from "@/src/components/notification/NotificationCards";
 import Paragraph from "@/src/components/common/Paragraph";
-import { NotificationFilterType } from "@/src/data/notificationFilters";
+import { NotificationFilterType } from "@/src/features/notification/utils/data/notificationFilters";
 import NotificationFilterDropdown from "@/src/components/notification/NotificationFilterDropdown";
 import EmptyNotification from "@/src/components/notification/EmptyNotification";
 import { useToast } from "@/src/context/ToastContext";

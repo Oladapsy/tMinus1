@@ -1,5 +1,4 @@
 // src/data/coins.ts
-import { CoinItem } from "@/src/components/home/CoinList";
 import BTCIcon from "@/assets/icons/home/coin/bitcoin.svg";
 import CARDANOIcon from "@/assets/icons/home/coin/Cardano.svg"
 import CHAINLINKIcon from "@/assets/icons/home/coin/chainlink.svg"
@@ -8,6 +7,7 @@ import MFTIcon from "@/assets/icons/home/coin/mft.svg"
 import RENIcon from "@/assets/icons/home/coin/ren.svg"
 import SHIBAINUIcon from "@/assets/icons/home/coin/shibaInu.svg"
 import SOLIcon from "@/assets/icons/home/coin/sol.svg"
+import { CoinItem } from "@/src/features/home/CoinList";
 
 export const RECENT_COINS: CoinItem[] = [
   {
