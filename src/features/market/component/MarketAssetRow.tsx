@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import MarketMiniSparkline from "./MarketMiniSparkline";
-import { MarketAsset } from "@/src/types/market";
+import { MarketAsset } from "@/src/features/market/utils/types/market";
 
 interface MarketAssetRowProps {
   coin: MarketAsset;

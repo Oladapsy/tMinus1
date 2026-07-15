@@ -16,7 +16,7 @@ import {
   MarketAssetsResponse,
 } from "../../../types/alert";
 // 🌟 Import your Market Asset List types to cleanly type the list response
-import { MarketAssetListResponse } from "../../../types/market";
+import { MarketAssetListResponse } from "../../market/utils/types/market";
 
 export interface DeviceItem {
   id: string;
