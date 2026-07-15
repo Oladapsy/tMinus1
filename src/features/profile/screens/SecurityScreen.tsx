@@ -11,7 +11,7 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-import { useGet2FaStatusQuery } from "@/src/services/authApi";
+import { useGet2FaStatusQuery } from "@/src/features/auth/api/authApi";
 // 🌟 1. IMPORT YOUR NEW DEVICES HOOK
 import { useGetRegisteredDevicesQuery } from "@/src/services/profileApi";
 

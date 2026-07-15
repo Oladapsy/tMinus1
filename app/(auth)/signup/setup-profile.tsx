@@ -9,7 +9,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useLocalSearchParams, router } from "expo-router";
 // 🌟 Import your brand new OTP request mutation hook
-import { useRegisterCustomerMutation, useRequestEmailOtpMutation } from "@/src/services/authApi";
+import { useRegisterCustomerMutation, useRequestEmailOtpMutation } from "@/src/features/auth/api/authApi";
 
 export default function SetupProfileScreen() {
   const { email, phone } = useLocalSearchParams<{ email: string; phone: string }>();

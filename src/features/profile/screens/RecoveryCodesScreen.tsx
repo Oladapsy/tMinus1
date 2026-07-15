@@ -15,7 +15,7 @@ import {
   View,
 } from "react-native";
 // 🌟 TypeScript warning resolved! Now securely importing the real live hook
-import { useRegenerate2FaCodesMutation } from "@/src/services/authApi";
+import { useRegenerate2FaCodesMutation } from "@/src/features/auth/api/authApi";
 
 export default function RecoveryCodesScreen() {
   const router = useRouter();

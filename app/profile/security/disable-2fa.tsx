@@ -7,7 +7,7 @@ import { useToast } from "@/src/context/ToastContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
-import { useDisable2FaMutation } from "@/src/services/authApi";
+import { useDisable2FaMutation } from "@/src/features/auth/api/authApi";
 import EyeIcon from "@/assets/icons/wallet/eye-slash.svg";
 import EyeOpenIcon from "@/assets/icons/wallet/eye-open.svg";
 

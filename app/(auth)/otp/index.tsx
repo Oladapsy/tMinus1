@@ -13,7 +13,7 @@ import ResendTimer from "@/src/components/auth/ResendTimer";
 import {
   useVerifyEmailOtpMutation,
   useRequestEmailOtpMutation,
-} from "@/src/services/authApi";
+} from "@/src/features/auth/api/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/src/store/authSlice";
 import { useToast } from "@/src/context/ToastContext";

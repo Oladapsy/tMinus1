@@ -9,7 +9,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 
 import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import { useLoginCustomerMutation } from "@/src/services/authApi";
+import { useLoginCustomerMutation } from "@/src/features/auth/api/authApi";
 import { setCredentials } from "@/src/store/authSlice";
 import { RootState } from "@/src/store/store";
 import { useToast } from "@/src/context/ToastContext";

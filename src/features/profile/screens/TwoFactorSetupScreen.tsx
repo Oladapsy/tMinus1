@@ -20,7 +20,7 @@ import QRCode from "react-native-qrcode-svg";
 import {
   useSetup2FaMutation,
   useEnable2FaMutation,
-} from "@/src/services/authApi";
+} from "@/src/features/auth/api/authApi";
 import { useToast } from "@/src/context/ToastContext";
 
 export default function TwoFactorSetupScreen() {

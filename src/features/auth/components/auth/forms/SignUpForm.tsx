@@ -12,7 +12,7 @@ import Paragraph from "../../common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { router } from "expo-router";
-import { useValidateSignupMutation } from "@/src/services/authApi";
+import { useValidateSignupMutation } from "@/src/features/auth/api/authApi";
 import SocialLoginButton from "../SocialLoginButton";
 
 export default function SignUpForm() {

@@ -14,7 +14,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { useGet2FaStatusQuery } from "@/src/services/authApi";
+import { useGet2FaStatusQuery } from "@/src/features/auth/api/authApi";
 
 export default function RecoveryCodesVaultScreen() {
   const router = useRouter();

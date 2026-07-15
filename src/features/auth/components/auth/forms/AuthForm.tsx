@@ -19,7 +19,7 @@ import Paragraph from "../../common/Paragraph";
 import {
   useLoginCustomerMutation,
   useRequestEmailOtpMutation,
-} from "@/src/services/authApi";
+} from "@/src/features/auth/api/authApi";
 import { router } from "expo-router";
 // import { useToast } from "@/src/context/ToastContext";
 import { useDispatch } from "react-redux";

@@ -17,7 +17,7 @@ import {
   TouchableWithoutFeedback, // 🌟 Optional: To dismiss keyboard by tapping outside
   Keyboard,
 } from "react-native";
-import { useVerify2FaMutation } from "@/src/services/authApi";
+import { useVerify2FaMutation } from "@/src/features/auth/api/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/src/store/authSlice";
 import * as SecureStore from "expo-secure-store";
