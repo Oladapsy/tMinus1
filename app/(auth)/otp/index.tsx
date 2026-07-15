@@ -1,15 +1,11 @@
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import React, { useState, useEffect } from "react";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import NavigateIconText from "@/src/components/common/NavigateIconText";
+
 import { useLocalSearchParams, router } from "expo-router";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
+
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import OTPInput from "@/src/components/auth/OTPInput";
-import ResendTimer from "@/src/components/auth/ResendTimer";
+
 import {
   useVerifyEmailOtpMutation,
   useRequestEmailOtpMutation,
@@ -17,6 +13,13 @@ import {
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/src/store/authSlice";
 import { useToast } from "@/src/context/ToastContext";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import NavigateIconText from "@/src/features/shared/components/NavigateIconText";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import OTPInput from "@/src/features/auth/components/auth/OTPInput";
+import ResendTimer from "@/src/features/auth/components/auth/ResendTimer";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 // 🌟 Import your toast hook context
 
 export default function OtpScreen() {

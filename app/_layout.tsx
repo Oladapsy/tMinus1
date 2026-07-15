@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ToastProvider } from "@/src/context/ToastContext";
 import { store, RootState } from "@/src/store/store";
-import ReauthOverlay from "@/src/components/auth/ReauthOverlay";
+import ReauthOverlay from "@/src/features/auth/components/auth/ReauthOverlay";
 
 // Prevent splash screen from auto-hiding until assets and flags are fully verified
 SplashScreen.preventAutoHideAsync();
