@@ -1,6 +1,4 @@
-import BackHeader from "@/src/components/common/BackHeader";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useToast } from "@/src/context/ToastContext";
@@ -21,6 +19,9 @@ import { useVerify2FaMutation } from "@/src/features/auth/api/authApi";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/src/store/authSlice";
 import * as SecureStore from "expo-secure-store";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
+import BackHeader from "@/src/features/shared/components/BackHeader";
 
 export default function TwoFactorVerificationScreen() {
   const router = useRouter();
