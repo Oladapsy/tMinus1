@@ -1,14 +1,15 @@
 import Back from "@/assets/icons/main/backward.svg";
 import More from "@/assets/icons/main/More.svg";
 import Avatar from "@/assets/images/market/avatar.png";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import IconAndText from "@/src/components/common/tab/IconAndText";
-import CommonActions from "@/src/components/more/CommonActions";
-import FinanceActions from "@/src/components/more/FinanceActions";
-import ProfileHeader from "@/src/components/more/MarketHeader";
-import TradeActions from "@/src/components/more/TradeActions";
+
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import CommonActions from "@/src/features/more/CommonActions";
+import FinanceActions from "@/src/features/more/FinanceActions";
+import ProfileHeader from "@/src/features/more/MarketHeader";
+import TradeActions from "@/src/features/more/TradeActions";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import IconAndText from "@/src/features/shared/components/tab/IconAndText";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
