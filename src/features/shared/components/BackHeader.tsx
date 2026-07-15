@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import ArrowLeft from "@/assets/icons/main/backward.svg"; 
 import { Colors } from "@/src/constants/colors";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
 
 interface BackHeaderProps {
   title: string;
