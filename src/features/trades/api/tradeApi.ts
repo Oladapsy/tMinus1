@@ -7,7 +7,7 @@ import {
   TradeQuote,
   ExecuteTradeRequest,
   ExecuteTradeResponse,
-} from "../../../types/trade";
+} from "../utils/types/trade";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 

@@ -20,7 +20,7 @@ import Paragraph from "@/src/components/common/Paragraph";
 
 // 📡 Import live RTK Query Hook and standard types matching your clean marketApi.ts
 import { useGetAssetCandlesQuery } from "@/src/features/market/api/marketApi";
-import { AssetSymbol } from "@/src/types/trade";
+import { AssetSymbol } from "@/src/features/trades/utils/types/trade";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 type CandleInterval = "1m" | "5m" | "15m" | "1h" | "1d";

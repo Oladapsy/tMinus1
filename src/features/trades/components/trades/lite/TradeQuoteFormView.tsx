@@ -16,7 +16,7 @@ import { FontFamily } from "@/src/constants/fonts";
 import { useCreateQuoteMutation } from "@/src/features/trades/api/tradeApi";
 import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
 import { useGetWalletQuery } from "@/src/features/wallets/api/walletApi"; // 💳 Linked your live wallet query hooks
-import { AssetSymbol, TradeType } from "@/src/types/trade";
+import { AssetSymbol, TradeType } from "@/src/features/trades/utils/types/trade";
 
 interface TradeQuoteFormViewProps {
   initialMode: "Buy" | "Sell" | "Swap";
