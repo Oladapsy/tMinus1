@@ -13,7 +13,7 @@ import {
 import BackHeader from "@/src/components/common/BackHeader";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import { useCreateQuoteMutation } from "@/src/services/tradeApi";
+import { useCreateQuoteMutation } from "@/src/features/trades/api/tradeApi";
 import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
 import { useGetWalletQuery } from "@/src/services/walletApi"; // 💳 Linked your live wallet query hooks
 import { AssetSymbol, TradeType } from "@/src/types/trade";

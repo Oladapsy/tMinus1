@@ -1,13 +1,13 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "../store/store";
-import { logOut, updateTokens } from "../store/authSlice"; // 🟢 Import your exact slice actions
+import { RootState } from "../../../store/store";
+import { logOut, updateTokens } from "../../../store/authSlice"; // 🟢 Import your exact slice actions
 import {
   CreateQuoteRequest,
   CreateQuoteResponse,
   TradeQuote,
   ExecuteTradeRequest,
   ExecuteTradeResponse,
-} from "../types/trade";
+} from "../../../types/trade";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 

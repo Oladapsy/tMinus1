@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Colors } from "@/src/constants/colors";
-import { useGetQuoteDetailsQuery } from "@/src/services/tradeApi";
+import { useGetQuoteDetailsQuery } from "@/src/features/trades/api/tradeApi";
 import CountdownBadge from "./shared/CountdownBadge";
 import QuoteSummaryRow from "./shared/QuoteSummaryRow";
 

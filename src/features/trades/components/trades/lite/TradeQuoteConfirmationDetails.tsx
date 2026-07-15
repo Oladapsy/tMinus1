@@ -5,7 +5,7 @@ import ExpiredQuoteState from "./chunks/ExpiredQuoteState";
 import ConfirmTradePinView from "./chunks/ConfirmTradePinView";
 import TradeFailedView from "./chunks/TradeFailedView";
 import TradeSuccessReceiptView from "./chunks/TradeSuccessReceiptView"; 
-import { useExecuteTradeMutation } from "@/src/services/tradeApi";
+import { useExecuteTradeMutation } from "@/src/features/trades/api/tradeApi";
 
 interface TradeQuoteConfirmationDetailsProps {
   quoteId: string;

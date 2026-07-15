@@ -4,7 +4,7 @@ import { authApi } from "@/src/features/auth/api/authApi";
 import { profileApi } from "@/src/features/profile/api/profileApi";
 import { walletApi } from "@/src/services/walletApi";
 import { marketApi } from "@/src/features/market/api/marketApi";
-import { tradeApi } from "@/src/services/tradeApi";
+import { tradeApi } from "@/src/features/trades/api/tradeApi";
 
 export const store = configureStore({
   reducer: {
