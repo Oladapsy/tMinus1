@@ -1,18 +1,18 @@
 import { StyleSheet, TextInput, View } from "react-native";
 import React, { useState } from "react";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
-import NavigateIconText from "@/src/components/common/NavigateIconText";
 import { router } from "expo-router";
-import Title from "@/src/components/common/Title";
 import { FontFamily } from "@/src/constants/fonts";
-import Paragraph from "@/src/components/common/Paragraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import NavigateIconText from "@/src/features/shared/components/NavigateIconText";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 export default function SignUpMobile() {
   const [phone, setPhone] = useState("");
   const onSubmit = () => {
-    router.push("/(auth)/otp")
+    router.push("/(auth)/otp");
   };
 
   return (
@@ -60,12 +60,12 @@ export default function SignUpMobile() {
         />
       </View>
 
-        <PrimaryButton
-          text="Send OTP"
-          onPress={onSubmit}
-          Bgcolor={Colors.green}
-          textColor={Colors.darkText}
-        />
+      <PrimaryButton
+        text="Send OTP"
+        onPress={onSubmit}
+        Bgcolor={Colors.green}
+        textColor={Colors.darkText}
+      />
     </MySafeAreaView>
   );
 }
