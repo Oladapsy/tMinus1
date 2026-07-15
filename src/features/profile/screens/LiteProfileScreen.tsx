@@ -1,7 +1,3 @@
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
-import ProfileOptionRow from "@/src/components/profile/ProfileOptionRow";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
@@ -18,13 +14,17 @@ import {
 // 🌟 TEST IMPORTS ADDED
 import { useDispatch } from "react-redux";
 import { setSessionExpired, logOut } from "@/src/store/authSlice";
-import BackHeader from "@/src/components/common/BackHeader";
 import {
   useGetProfileQuery,
   useGetNotificationsQuery,
   useGetPriceAlertsQuery,
 } from "@/src/services/profileApi";
 import { PriceAlertItem } from "@/src/types/alert";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import BackHeader from "@/src/features/shared/components/BackHeader";
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
+import ProfileOptionRow from "@/src/features/profile/components/ProfileOptionRow";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 export default function LiteProfileScreen() {
   const router = useRouter();
