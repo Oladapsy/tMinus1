@@ -1,13 +1,13 @@
 import { View, StyleSheet, ImageBackground } from "react-native";
 import React from "react";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { router } from "expo-router";
-import Title from "@/src/components/common/Title";
 import { FontFamily } from "@/src/constants/fonts";
 import SuccessIcon from "@/assets/icons/auth/success.svg";
 import { LinearGradient } from "expo-linear-gradient";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import Title from "@/src/features/shared/components/Title";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 export default function SuccessScreen() {
   const onSubmit = () => {
