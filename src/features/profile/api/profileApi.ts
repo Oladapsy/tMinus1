@@ -5,7 +5,7 @@ import {
   UpdatePinRequest,
   UpdatePinResponse,
   UpdateProfileRequest,
-} from "../../../types/profile";
+} from "../utils/types/profile";
 import {
   PriceAlertsResponse,
   PriceAlertItem,
