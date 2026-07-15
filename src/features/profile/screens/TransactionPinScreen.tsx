@@ -16,7 +16,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 // 🌟 Hook up imports to bind data interactions to the network
-import { useUpdatePinMutation } from "@/src/services/profileApi";
+import { useUpdatePinMutation } from "@/src/features/profile/api/profileApi";
 import { useToast } from "@/src/context/ToastContext";
 
 export default function TransactionPinScreen() {

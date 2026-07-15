@@ -20,7 +20,7 @@ import {
   useGetProfileQuery,
   useUploadKycFileMutation,
   useSubmitKycPayloadMutation,
-} from "@/src/services/profileApi";
+} from "@/src/features/profile/api/profileApi";
 import { Colors } from "@/src/constants/colors";
 
 interface KycCollectedData {

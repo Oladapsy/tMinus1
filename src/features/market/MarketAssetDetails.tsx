@@ -18,7 +18,7 @@ import {
   useGetWatchlistAssetsQuery,
   useAddToWatchlistMutation,
   useRemoveFromWatchlistMutation,
-} from "@/src/services/profileApi";
+} from "@/src/features/profile/api/profileApi";
 import { useDispatch } from "react-redux";
 import { setSessionExpired } from "@/src/store/authSlice";
 

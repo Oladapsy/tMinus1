@@ -23,7 +23,7 @@ import Paragraph from "@/src/components/common/Paragraph";
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
-} from "@/src/services/profileApi";
+} from "@/src/features/profile/api/profileApi";
 import { useToast } from "@/src/context/ToastContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 // 1. Zod Form Validation Rules matching our allowed fields

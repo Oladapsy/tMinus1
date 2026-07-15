@@ -9,7 +9,7 @@ import {
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useGetWalletQuery } from "@/src/services/walletApi";
-import { useGetProfileQuery } from "@/src/services/profileApi";
+import { useGetProfileQuery } from "@/src/features/profile/api/profileApi";
 
 interface TotalBalanceCardProps {
   onDepositPress?: () => void;

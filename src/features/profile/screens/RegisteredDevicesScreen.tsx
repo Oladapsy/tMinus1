@@ -21,7 +21,7 @@ import {
   useGetRegisteredDevicesQuery,
   useRemoveDeviceMutation,
   DeviceItem,
-} from "@/src/services/profileApi";
+} from "@/src/features/profile/api/profileApi";
 
 export default function RegisteredDevicesScreen() {
   const router = useRouter();

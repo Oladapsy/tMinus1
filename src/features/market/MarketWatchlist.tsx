@@ -11,7 +11,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../common/BackHeader";
 import MarketAssetRow from "@/src/components/market/component/MarketAssetRow";
-import { useGetWatchlistAssetsQuery } from "@/src/services/profileApi";
+import { useGetWatchlistAssetsQuery } from "@/src/features/profile/api/profileApi";
 
 interface MarketWatchlistProps {
   onGoBack: () => void;

@@ -15,7 +15,7 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import BackHeader from "../../common/BackHeader";
 import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
-import { useCreatePriceAlertMutation } from "@/src/services/profileApi";
+import { useCreatePriceAlertMutation } from "@/src/features/profile/api/profileApi";
 import { MarketAsset } from "@/src/types/alert";
 
 import { useDispatch } from "react-redux";

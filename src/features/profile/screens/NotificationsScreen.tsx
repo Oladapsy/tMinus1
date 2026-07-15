@@ -16,7 +16,7 @@ import {
   useGetNotificationsQuery, 
   useMarkNotificationReadMutation, 
   useMarkAllNotificationsReadMutation 
-} from "@/src/services/profileApi";
+} from "@/src/features/profile/api/profileApi";
 import { NotificationItem } from "@/src/types/alert";
 
 export default function NotificationsScreen() {

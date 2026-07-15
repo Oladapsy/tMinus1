@@ -18,7 +18,7 @@ import {
   useGetProfileQuery,
   useGetNotificationsQuery,
   useGetPriceAlertsQuery,
-} from "@/src/services/profileApi";
+} from "@/src/features/profile/api/profileApi";
 import { PriceAlertItem } from "@/src/types/alert";
 import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
 import BackHeader from "@/src/features/shared/components/BackHeader";

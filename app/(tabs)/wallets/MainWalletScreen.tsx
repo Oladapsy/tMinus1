@@ -4,7 +4,7 @@ import OldWalletScreen from "@/src/features/wallets/screens/OldWalletScreen";
 import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from "@/src/constants/colors";
-import { useGetProfileQuery } from "@/src/services/profileApi";
+import { useGetProfileQuery } from "@/src/features/profile/api/profileApi";
 import { useGetWalletQuery } from "@/src/services/walletApi";
 import { useLocalSearchParams } from "expo-router";
 
