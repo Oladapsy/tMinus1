@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, ImageBackground } from "react-native";
 import { Colors } from "@/src/constants/colors";
-
-// Components
-
-
 // route the create alert
 import { useRouter } from "expo-router";
 import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
