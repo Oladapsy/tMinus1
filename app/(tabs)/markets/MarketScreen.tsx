@@ -1,20 +1,21 @@
 import React, { useState } from "react";
 import { StyleSheet, ImageBackground } from "react-native";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
 import { Colors } from "@/src/constants/colors";
 
 // Components
-import MarketDashboardView from "@/src/components/market/MarketDashboardView";
-import MarketOrderBook from "@/src/components/market/MarketOrderBook";
-import RecentTrades from "@/src/components/market/RescentTrades";
-import MarketWatchlist from "@/src/components/market/MarketWatchlist";
-import AlertSuccessView from "@/src/components/market/component/AlertSuccessView";
-import CreatePriceAlert from "@/src/components/market/component/CreatePriceAlert";
-import MarketTrendingView from "@/src/components/market/MarketTrendingView";
-import MarketAssetDetails from "@/src/components/market/MarketAssetDetails";
+
 
 // route the create alert
 import { useRouter } from "expo-router";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import MarketDashboardView from "@/src/features/market/MarketDashboardView";
+import MarketTrendingView from "@/src/features/market/MarketTrendingView";
+import MarketAssetDetails from "@/src/features/market/MarketAssetDetails";
+import MarketOrderBook from "@/src/features/market/MarketOrderBook";
+import RecentTrades from "@/src/features/market/RescentTrades";
+import MarketWatchlist from "@/src/features/market/MarketWatchlist";
+import CreatePriceAlert from "@/src/features/market/component/CreatePriceAlert";
+import AlertSuccessView from "@/src/features/market/component/AlertSuccessView";
 
 type MarketWorkflowMode =
   | "dashboard"
