@@ -1,9 +1,10 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
+
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import Title from "./Title";
+import Paragraph from "./Paragraph";
 
 interface WalletFallbackStateProps {
   icon: string;

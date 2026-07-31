@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import BackHeader from "../common/BackHeader";
 import RecentTradeCard from "./component/RecentTradeCard";
 import { useGetRecentTradesQuery } from "@/src/features/market/api/marketApi";
+import BackHeader from "../shared/components/BackHeader";
 
 interface RecentTradesProps {
   symbol: string; // 🌟 Passed down from parent context

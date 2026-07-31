@@ -13,14 +13,15 @@ import {
 import { CandlestickChart } from "react-native-wagmi-charts";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
 import TradeActionCard from "./TradeActionCard";
-import Title from "@/src/components/common/Title";
-import Paragraph from "@/src/components/common/Paragraph";
+
 
 // 📡 Import live RTK Query Hook and standard types matching your clean marketApi.ts
 import { useGetAssetCandlesQuery } from "@/src/features/market/api/marketApi";
 import { AssetSymbol } from "@/src/features/trades/utils/types/trade";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 type CandleInterval = "1m" | "5m" | "15m" | "1h" | "1d";

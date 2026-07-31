@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { QrCodeSvg, plainRenderer } from "react-native-qr-svg";
-import Paragraph from "../common/Paragraph";
-import Title from "../common/Title";
-import PrimaryButton from "../common/PrimaryButton";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 import SmallCameraIcon from "@/assets/icons/qr/smallCamera.svg";
 import CopyIcon from "@/assets/icons/qr/copy2.svg";
 import { Colors } from "@/src/constants/colors";
 import * as Clipboard from "expo-clipboard";
 import { FontFamily } from "@/src/constants/fonts";
 import { LinearGradient } from "expo-linear-gradient";
+import Title from "@/src/features/shared/components/Title";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 interface Props {
   btcAddress: string;

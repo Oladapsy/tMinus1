@@ -10,13 +10,15 @@ import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 
 // Atom and Core Imports
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
+
 import PortfolioValueCard from "./PortfolioValueCard";
 import WalletAssetRow from "./WalletAssetRow";
 import { AssetData } from "@/src/features/wallets/screens/NewWalletScreen";
 import { Transaction } from "@/src/features/wallets/utils/types/wallet";
-import Paragraph from "../../common/Paragraph";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+
 // 🟢 Import your explicit layout interface structure
 
 interface WalletDashboardViewProps {

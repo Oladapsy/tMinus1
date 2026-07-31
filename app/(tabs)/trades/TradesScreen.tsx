@@ -2,15 +2,14 @@ import React, { useState } from "react";
 import { StyleSheet, ImageBackground } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import KycGateGuard from "@/src/components/kyc/KycGateGuard";
 import { Colors } from "@/src/constants/colors";
 
-// Component imports...
-import TradeDashboardView from "@/src/components/trades/lite/TradeDashboardView";
-import TradeQuoteFormView from "@/src/components/trades/lite/TradeQuoteFormView";
-import TradeQuoteConfirmationDetails from "@/src/components/trades/lite/TradeQuoteConfirmationDetails";
 import { useRouter } from "expo-router";
+import KycGateGuard from "@/src/features/kyc/components/kyc/KycGateGuard";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import TradeDashboardView from "@/src/features/trades/components/trades/lite/TradeDashboardView";
+import TradeQuoteFormView from "@/src/features/trades/components/trades/lite/TradeQuoteFormView";
+import TradeQuoteConfirmationDetails from "@/src/features/trades/components/trades/lite/TradeQuoteConfirmationDetails";
 
 type TradeWorkflowMode =
   | "dashboard"

@@ -10,13 +10,13 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import BackHeader from "@/src/components/common/BackHeader";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useCreateQuoteMutation } from "@/src/features/trades/api/tradeApi";
 import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
 import { useGetWalletQuery } from "@/src/features/wallets/api/walletApi"; // 💳 Linked your live wallet query hooks
 import { AssetSymbol, TradeType } from "@/src/features/trades/utils/types/trade";
+import BackHeader from "@/src/features/shared/components/BackHeader";
 
 interface TradeQuoteFormViewProps {
   initialMode: "Buy" | "Sell" | "Swap";

@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import BackHeader from "../common/BackHeader";
-import MarketAssetRow from "@/src/components/market/component/MarketAssetRow";
+import BackHeader from "../shared/components/BackHeader";
 import { useGetWatchlistAssetsQuery } from "@/src/features/profile/api/profileApi";
+import MarketAssetRow from "./component/MarketAssetRow";
 
 interface MarketWatchlistProps {
   onGoBack: () => void;

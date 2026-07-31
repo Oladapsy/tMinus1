@@ -6,14 +6,14 @@ import {
   Text,
 } from "react-native";
 import React, { useState } from "react";
-import Title from "@/src/components/common/Title";
 import { FontFamily } from "@/src/constants/fonts";
-import Paragraph from "../../common/Paragraph";
 import { Colors } from "@/src/constants/colors";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { router } from "expo-router";
 import { useValidateSignupMutation } from "@/src/features/auth/api/authApi";
 import SocialLoginButton from "../SocialLoginButton";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 export default function SignUpForm() {
   const [email, setEmail] = useState("");

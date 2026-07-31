@@ -1,4 +1,4 @@
-import RegisteredDevicesScreen from "@/src/screens/profile/RegisteredDevicesScreen";
+import RegisteredDevicesScreen from "@/src/features/profile/screens/RegisteredDevicesScreen";
 import React from "react";
 
 export default function RegisteredDevicesRoute() {

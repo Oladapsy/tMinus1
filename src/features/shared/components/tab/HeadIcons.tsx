@@ -1,12 +1,12 @@
 import { View, StyleSheet } from "react-native";
 import React from "react";
-import IconAndText from "@/src/components/common/tab/IconAndText";
 import ProfileIcon from "@/assets/icons/profile/profileImage.svg";
 import SearchIcon from "@/assets/icons/main/search.svg";
 import ScannerIcon from "@/assets/icons/main/scanner.svg";
 import NotificationIcon from "@/assets/icons/main/notification.svg";
 import { Colors } from "@/src/constants/colors";
 import { router } from "expo-router";
+import IconAndText from "./IconAndText";
 
 export default function HeadIcons() {
   const handleSearchPress = () => {

@@ -11,7 +11,6 @@ import {
 import { LineChart } from "react-native-wagmi-charts";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import BackHeader from "../common/BackHeader";
 import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
 import { Star } from "lucide-react-native";
 import {
@@ -21,6 +20,7 @@ import {
 } from "@/src/features/profile/api/profileApi";
 import { useDispatch } from "react-redux";
 import { setSessionExpired } from "@/src/store/authSlice";
+import BackHeader from "../shared/components/BackHeader";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const EXPANDED_CHART_WIDTH = Math.floor(SCREEN_WIDTH - 24 * 2 - 20 * 2);

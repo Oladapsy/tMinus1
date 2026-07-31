@@ -6,14 +6,15 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import EyeIcon from "@/assets/icons/wallet/eye-slash.svg";
 import EyeOpenIcon from "@/assets/icons/wallet/eye-open.svg";
-import Paragraph from "@/src/components/common/Paragraph";
-import Title from "@/src/components/common/Title";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
+
 
 interface WelcomeBackProps {
   savedName: string;

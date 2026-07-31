@@ -1,11 +1,13 @@
 import { StyleSheet } from "react-native";
 import React, { useState, useEffect } from "react";
-import HeadIcons from "@/src/components/common/tab/HeadIcons";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
+
 import { Colors } from "@/src/constants/colors";
 import { useCameraPermissions } from "expo-camera";
-import ScanView from "@/src/components/wallet/ScanView";
-import { MyQRView } from "@/src/components/wallet/MyQRView";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import HeadIcons from "@/src/features/shared/components/tab/HeadIcons";
+import ScanView from "@/src/features/wallets/components/wallet/ScanView";
+import { MyQRView } from "@/src/features/wallets/components/wallet/MyQRView";
+
 
 const WalletScreen = () => {
   const [mode, setMode] = useState<"scan" | "myqr">("scan");

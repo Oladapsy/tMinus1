@@ -1,4 +1,3 @@
-import KycGateGuard from "@/src/components/kyc/KycGateGuard";
 import NewWalletScreen from "@/src/features/wallets/screens/NewWalletScreen";
 import OldWalletScreen from "@/src/features/wallets/screens/OldWalletScreen";
 import React from "react";
@@ -7,6 +6,7 @@ import { Colors } from "@/src/constants/colors";
 import { useGetProfileQuery } from "@/src/features/profile/api/profileApi";
 import { useGetWalletQuery } from "@/src/features/wallets/api/walletApi";
 import { useLocalSearchParams } from "expo-router";
+import KycGateGuard from "@/src/features/kyc/components/kyc/KycGateGuard";
 
 export type KycStatus = "NOT_STARTED" | "PENDING" | "APPROVED";
 

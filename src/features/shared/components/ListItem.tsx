@@ -1,7 +1,7 @@
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import Paragraph from "@/src/components/common/Paragraph";
 import ArrowRight from "@/assets/icons/main/foward.svg";
 import { Colors } from "@/src/constants/colors";
+import Paragraph from "./Paragraph";
 
 interface Props {
   icon?: React.ReactNode;

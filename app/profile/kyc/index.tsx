@@ -7,21 +7,22 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import KycHeader, { KycScreenIndex } from "@/src/components/kyc/KycHeader";
-import KycScreen1 from "@/src/components/kyc/screen/KycScreen1";
-import KycScreen2 from "@/src/components/kyc/screen/KycScreen2";
-import KycScreen3 from "@/src/components/kyc/screen/KycScreen3";
-import KycScreen4 from "@/src/components/kyc/screen/KycScreen4";
-import KycScreen5 from "@/src/components/kyc/screen/KycScreen5";
-import KycScreen6 from "@/src/components/kyc/screen/KycScreen6";
-import KycStatusScreen from "@/src/components/kyc/screen/KycStatusScreen";
+
 import {
   useGetProfileQuery,
   useUploadKycFileMutation,
   useSubmitKycPayloadMutation,
 } from "@/src/features/profile/api/profileApi";
 import { Colors } from "@/src/constants/colors";
+import KycHeader, { KycScreenIndex } from "@/src/features/kyc/components/kyc/KycHeader";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import KycScreen1 from "@/src/features/kyc/components/kyc/screen/KycScreen1";
+import KycScreen2 from "@/src/features/kyc/components/kyc/screen/KycScreen2";
+import KycScreen3 from "@/src/features/kyc/components/kyc/screen/KycScreen3";
+import KycScreen4 from "@/src/features/kyc/components/kyc/screen/KycScreen4";
+import KycScreen5 from "@/src/features/kyc/components/kyc/screen/KycScreen5";
+import KycScreen6 from "@/src/features/kyc/components/kyc/screen/KycScreen6";
+import KycStatusScreen from "@/src/features/kyc/components/kyc/screen/KycStatusScreen";
 
 interface KycCollectedData {
   legalName: string;

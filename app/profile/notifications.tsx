@@ -1,4 +1,4 @@
-import NotificationsScreen from "@/src/screens/profile/NotificationsScreen";
+import NotificationsScreen from "@/src/features/profile/screens/NotificationsScreen";
 import React from "react";
 
 export default function NotificationsRoute() {

@@ -1,6 +1,3 @@
-import BackHeader from "@/src/components/common/BackHeader";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useToast } from "@/src/context/ToastContext";
@@ -15,6 +12,9 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useGet2FaStatusQuery } from "@/src/features/auth/api/authApi";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import BackHeader from "@/src/features/shared/components/BackHeader";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 export default function RecoveryCodesVaultScreen() {
   const router = useRouter();

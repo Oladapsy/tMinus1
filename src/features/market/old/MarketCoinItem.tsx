@@ -1,11 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import React, { ComponentType } from "react";
-import Paragraph from "@/src/components/common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import Graph from "@/assets/icons/market/greenGraph.svg";
 import RedGraph from "@/assets/icons/market/redGraph.svg";
 import { SvgProps } from "react-native-svg";
+import Paragraph from "../../shared/components/Paragraph";
 
 type Props = {
   icon: ComponentType<SvgProps>;

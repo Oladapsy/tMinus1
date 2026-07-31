@@ -1,7 +1,8 @@
 import { View, StyleSheet } from "react-native";
 import React from "react";
 import { Colors } from "@/src/constants/colors";
-import Paragraph from "../common/Paragraph";
+import Paragraph from "../shared/components/Paragraph";
+
 
 interface NotificationCardProp {
   title: string;

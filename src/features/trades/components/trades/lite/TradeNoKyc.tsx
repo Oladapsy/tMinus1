@@ -1,13 +1,15 @@
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import Paragraph from "@/src/components/common/Paragraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
+
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ImageBackground, StyleSheet, Text, View } from "react-native";
-import Title from "../../common/Title";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
+
 
 export default function TradeNoKyc() {
   const router = useRouter();

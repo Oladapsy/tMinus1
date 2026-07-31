@@ -1,8 +1,9 @@
 import { View, FlatList, StyleSheet } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import RecentCoinCard from "@/src/components/common/RecentCoinCard";
-import Title from "../common/Title";
+import Title from "../shared/components/Title";
+import RecentCoinCard from "../shared/components/RecentCoinCard";
+
 
 export interface CoinItem {
   icon: React.ReactNode;

@@ -1,10 +1,10 @@
 import { View, StyleSheet } from "react-native";
 import React from "react";
-import Paragraph from "../common/Paragraph";
 import { Colors } from "@/src/constants/colors";
-import Title from "../common/Title";
 import ForwardIcon from "@/assets/icons/activity/pointFoward.svg";
 import { FontFamily } from "@/src/constants/fonts";
+import Paragraph from "../shared/components/Paragraph";
+import Title from "../shared/components/Title";
 
 interface Props {
   pair: string;
@@ -27,25 +27,20 @@ export default function ActivityCard({
     status === "Filled"
       ? Colors.green
       : status === "Pending"
-      ? Colors.yellow
-      : Colors.red;
+        ? Colors.yellow
+        : Colors.red;
 
   const statusBg =
     status === "Filled"
       ? Colors.thinGreen
       : status === "Pending"
-      ? Colors.thinYellow
-      : Colors.thinRed;
+        ? Colors.thinYellow
+        : Colors.thinRed;
 
   return (
     <View style={Style.card}>
       {/* Logo */}
-      <View
-        style={[
-          Style.logo,
-          { backgroundColor: statusBg },
-        ]}
-      >
+      <View style={[Style.logo, { backgroundColor: statusBg }]}>
         <Paragraph
           text={status === "Filled" ? "L/B" : "L/S"}
           color={statusColor}
@@ -55,11 +50,7 @@ export default function ActivityCard({
       <View style={{ flex: 1 }}>
         {/* First line */}
         <View style={Style.row}>
-          <Title
-            text={pair}
-            size={14}
-            fontFamily={FontFamily.bold}
-          />
+          <Title text={pair} size={14} fontFamily={FontFamily.bold} />
 
           <View style={[Style.row, { gap: 8 }]}>
             <Paragraph text={date} size={12} />
@@ -72,11 +63,7 @@ export default function ActivityCard({
           <Paragraph text="Amount" size={14} />
 
           <View style={Style.row}>
-            <Paragraph
-              text={amount1}
-              size={14}
-              color={Colors.green}
-            />
+            <Paragraph text={amount1} size={14} color={Colors.green} />
             <Paragraph text="/" size={14} />
             <Paragraph text={amount2} size={14} />
           </View>
@@ -92,11 +79,7 @@ export default function ActivityCard({
         <View style={Style.row}>
           <Paragraph text="Status" size={14} />
 
-          <Paragraph
-            text={status}
-            size={14}
-            color={statusColor}
-          />
+          <Paragraph text={status} size={14} color={statusColor} />
         </View>
       </View>
     </View>

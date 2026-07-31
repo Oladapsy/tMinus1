@@ -6,13 +6,13 @@ import {
   ScrollView,
 } from "react-native";
 import React, { useState } from "react";
-import Title from "@/src/components/common/Title";
 import { FontFamily } from "@/src/constants/fonts";
 import SocialLoginButton from "../SocialLoginButton";
 import FingerprintButton from "../FingerprintButton";
 import AuthForm from "./AuthForm";
-import Paragraph from "../../common/Paragraph";
 import { Colors } from "@/src/constants/colors";
+import Title from "@/src/features/shared/components/Title";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 
 export default function SignInForm() {
   const [useEmail, setUseEmail] = useState(true);

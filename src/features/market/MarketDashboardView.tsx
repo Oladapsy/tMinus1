@@ -10,9 +10,9 @@ import {
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
 import MarketAssetRow from "./component/MarketAssetRow";
 import { useGetMarketAssetsQuery } from "@/src/features/market/api/marketApi";
+import TitleAndParagraph from "../shared/components/TitleAndParagraph";
 
 interface MarketDashboardViewProps {
   onSelectAsset: (symbol: string) => void;

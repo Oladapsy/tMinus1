@@ -1,5 +1,4 @@
 // src/components/home/QuickActions.tsx
-import IconGrid, { IconGridItem } from "@/src/components/common/tab/IconGrid";
 import { Colors } from "@/src/constants/colors";
 import { StyleSheet, View } from "react-native";
 
@@ -11,6 +10,7 @@ import ConvertIcon from "@/assets/icons/home/menu/convert.svg";
 import SpotIcon from "@/assets/icons/home/menu/Spot.svg";
 import KycIcon from "@/assets/icons/profile/kyc/kyc.svg";
 import { useRouter } from "expo-router";
+import IconGrid, { IconGridItem } from "../shared/components/tab/IconGrid";
 
 export default function TradeActions() {
   const nativeRouter = useRouter();

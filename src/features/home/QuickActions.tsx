@@ -1,6 +1,5 @@
 // src/components/home/QuickActions.tsx
 import { View, StyleSheet } from "react-native";
-import IconGrid, { IconGridItem } from "@/src/components/common/tab/IconGrid";
 import { Colors } from "@/src/constants/colors";
 
 // import your SVG icons
@@ -13,6 +12,7 @@ import SavingsIcon from "@/assets/icons/home/savings.svg";
 import LiquidSwapIcon from "@/assets/icons/home/liquidSwap.svg";
 import MoreIcon from "@/assets/icons/home/more.svg";
 import { router } from "expo-router";
+import IconGrid, { IconGridItem } from "../shared/components/tab/IconGrid";
 
 const ACTIONS: IconGridItem[] = [
   {

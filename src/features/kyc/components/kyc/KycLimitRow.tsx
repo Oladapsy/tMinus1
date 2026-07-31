@@ -1,8 +1,8 @@
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Paragraph from "../common/Paragraph";
 
 interface KycLimitRowProps {
   label: string;

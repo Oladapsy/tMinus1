@@ -1,5 +1,6 @@
-import LiteProfileScreen from "@/src/screens/profile/LiteProfileScreen";
-import ProfileScreen from "@/src/screens/profile/ProfileScreen";
+
+import LiteProfileScreen from "@/src/features/profile/screens/LiteProfileScreen";
+import ProfileScreen from "@/src/features/profile/screens/ProfileScreen";
 import React from "react";
 
 export default function Index() {

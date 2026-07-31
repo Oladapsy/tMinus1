@@ -1,9 +1,9 @@
 import { View, StyleSheet } from "react-native";
 import React from "react";
-import Title from "../common/Title";
 import { FontFamily } from "@/src/constants/fonts";
 import EmptyNotificationIcon from "@/assets/icons/notification/notificationIconRain.svg";
 import { Colors } from "@/src/constants/colors";
+import Title from "../shared/components/Title";
 
 export default function EmptyNotification() {
   return (

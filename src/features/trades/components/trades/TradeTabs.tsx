@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Colors } from "@/src/constants/colors";
-import Paragraph from "../common/Paragraph";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 
 const TABS: ("Convert" | "Spot" | "Margin" | "Fiat")[] = [
   "Convert",

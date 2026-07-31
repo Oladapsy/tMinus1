@@ -3,8 +3,9 @@ import React from "react";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
 import Copy from "@/assets/icons/home/copy.svg";
-import Title from "../common/Title";
-import Paragraph from "../common/Paragraph";
+import Title from "../shared/components/Title";
+import Paragraph from "../shared/components/Paragraph";
+
 
 interface ProfileHeaderProps {
   avatar: any; // image source

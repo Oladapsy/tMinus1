@@ -16,16 +16,17 @@ import * as z from "zod";
 import { useRouter } from "expo-router";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import BackHeader from "@/src/components/common/BackHeader";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
-import Paragraph from "@/src/components/common/Paragraph";
+
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
 } from "@/src/features/profile/api/profileApi";
 import { useToast } from "@/src/context/ToastContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import BackHeader from "@/src/features/shared/components/BackHeader";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 // 1. Zod Form Validation Rules matching our allowed fields
 const editProfileSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),

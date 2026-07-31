@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import Paragraph from "../common/Paragraph";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 
 interface KycTierCardProps {
   tierNumber: string;

@@ -1,7 +1,8 @@
 import { GlobalKycStatus } from "@/src/features/kyc/utils/types/kycGate";
+import TradeNoKyc from "@/src/features/trades/components/trades/lite/TradeNoKyc";
+import WalletPendingKyc from "@/src/features/wallets/components/wallet/lite/WalletPendingKyc";
 import React from "react";
-import TradeNoKyc from "../trades/lite/TradeNoKyc";
-import WalletPendingKyc from "../wallet/lite/WalletPendingKyc";
+
 
 interface KycGateGuardProps {
   status: GlobalKycStatus;

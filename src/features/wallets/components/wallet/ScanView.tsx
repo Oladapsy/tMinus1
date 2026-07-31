@@ -1,14 +1,14 @@
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import Title from "@/src/components/common/Title";
 import CameraIcon from "@/assets/icons/qr/smallCamera.svg";
-import Paragraph from "../common/Paragraph";
-import PrimaryButton from "../common/PrimaryButton";
+import Paragraph from "@/src/features/shared/components/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import ScanIcon from "@/assets/icons/qr/qr-code1.svg";
 import BigCameraIcon from "@/assets/icons/qr/largeCamera1.svg";
 import { CameraView } from "expo-camera";
 import { router } from "expo-router";
+import Title from "@/src/features/shared/components/Title";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
 
 interface Props {
   permission: any;

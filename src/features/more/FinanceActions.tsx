@@ -1,6 +1,5 @@
 // src/components/home/QuickActions.tsx
 import { View, StyleSheet } from "react-native";
-import IconGrid, { IconGridItem } from "@/src/components/common/tab/IconGrid";
 import { Colors } from "@/src/constants/colors";
 
 // import your SVG icons
@@ -11,6 +10,7 @@ import CryptoLoanIcon from "@/assets/icons/home/menu/cryptoLoans.svg";
 import PoolIcon from "@/assets/icons/home/menu/pool.svg";
 import ETHIcon from "@/assets/icons/home/menu/eth.svg";
 import LaunchPadIcon from "@/assets/icons/home/launchPad.svg";
+import IconGrid, { IconGridItem } from "../shared/components/tab/IconGrid";
 
 const ACTIONS: IconGridItem[] = [
   {

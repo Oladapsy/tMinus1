@@ -1,4 +1,4 @@
-import PriceAlertsScreen from "@/src/screens/profile/PriceAlertsScreen";
+import PriceAlertsScreen from "@/src/features/profile/screens/PriceAlertsScreen";
 import React from "react";
 
 export default function PriceAlertsRoute() {

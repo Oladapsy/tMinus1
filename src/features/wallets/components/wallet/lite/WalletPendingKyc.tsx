@@ -1,13 +1,15 @@
 import { StyleSheet, View, Text, ImageBackground } from "react-native";
 import React from "react";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
-import MySafeAreaView from "@/src/components/common/MySafeAreaView";
-import Paragraph from "@/src/components/common/Paragraph";
+
 import { useRouter } from "expo-router";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
-import MockFormInputCard from "@/src/components/common/MockFormInputCard";
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
+import MySafeAreaView from "@/src/features/shared/components/MySafeAreaView";
+import MockFormInputCard from "@/src/features/shared/components/MockFormInputCard";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
+import Paragraph from "@/src/features/shared/components/Paragraph";
+
 
 export default function WalletPendingKyc() {
   const router = useRouter();

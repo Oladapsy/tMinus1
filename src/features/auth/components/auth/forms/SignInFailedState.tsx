@@ -1,10 +1,11 @@
 import React from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import TitleAndParagraph from "@/src/components/common/TitleAndParagraph";
-import PrimaryButton from "@/src/components/common/PrimaryButton";
+import TitleAndParagraph from "@/src/features/shared/components/TitleAndParagraph";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import CalloutBox from "@/src/components/common/CalloutBox";
+import CalloutBox from "@/src/features/shared/components/CalloutBox";
+import PrimaryButton from "@/src/features/shared/components/PrimaryButton";
+
 
 interface SignInFailedProps {
   savedEmail: string;

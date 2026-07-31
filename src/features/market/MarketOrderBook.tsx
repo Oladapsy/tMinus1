@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Colors } from "@/src/constants/colors";
 import { FontFamily } from "@/src/constants/fonts";
-import BackHeader from "../common/BackHeader";
+import BackHeader from "../shared/components/BackHeader";
 import OrderBookRow, { OrderLevel } from "./component/OrderBookRow";
 import { useGetMarketOrderBookQuery } from "@/src/features/market/api/marketApi";
 

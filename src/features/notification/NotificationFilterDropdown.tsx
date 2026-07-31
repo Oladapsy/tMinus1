@@ -1,8 +1,8 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import Paragraph from "../common/Paragraph";
 import { Colors } from "@/src/constants/colors";
 import { NOTIFICATION_FILTERS, NotificationFilterType } from "@/src/features/notification/utils/data/notificationFilters";
+import Paragraph from "../shared/components/Paragraph";
 
 interface Props {
   selected: NotificationFilterType;
