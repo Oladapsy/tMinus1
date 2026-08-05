@@ -71,11 +71,11 @@
       }
     },
     "owner": "cryptotechcoder",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
-      "url": "https://u.expo.dev/884112e2-247e-41ef-8a08-80cfb3485b5f"
+      "url": "https://u.expo.dev/884112e2-247e-41ef-8a08-80cfb3485b5f",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
     }
   }
 }
