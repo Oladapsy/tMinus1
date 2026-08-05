@@ -2,7 +2,7 @@ name: EAS Preview Build
 on:
   push:
     branches:
-      - dev # This triggers the build whenever you push to your dev branch
+      - dev # This triggers the build whenever pushed to your dev branch
 
 jobs:
   build:
