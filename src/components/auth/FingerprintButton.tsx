@@ -60,7 +60,7 @@ const FingerprintButton = () => {
   return (
     <TouchableOpacity style={styles.container} onPress={handleFingerPrint}>
       <FingerPrintIcon color={Colors.green} width={40} height={40} />
-      <Text style={styles.text}>Use fingerprint instead?</Text>
+      <Text style={styles.text}>Use fingerprint instead? OTA update</Text>
     </TouchableOpacity>
   );
 };
